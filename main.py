@@ -49,14 +49,21 @@ def main():
         
         # 2b. Analyser la vidéo avec Gemini
         try:
-            analysis_results = gemini_analyzer.analyze_video(local_video_path)
+            analysis_report_text = gemini_analyzer.analyze_video(
+                video_path=local_video_path,
+                ad_data=ad
+            )
             
-            report_path = f"reports/{ad.id}.json"
+            # Sauvegarder le rapport texte dans un fichier markdown
+            report_path = f"reports/{ad.id}.md"
             with open(report_path, "w", encoding="utf-8") as f:
-                json.dump(analysis_results, f, ensure_ascii=False, indent=4)
+                f.write(f"# Analyse Marketing de la Publicité: {ad.name} (ID: {ad.id})\\n\\n")
+                f.write(analysis_report_text)
             
             print(f"  ✅ Analyse terminée et sauvegardée dans '{report_path}'.")
-            pprint.pprint(analysis_results)
+            print("\\n--- DÉBUT DU RAPPORT ---")
+            print(analysis_report_text)
+            print("--- FIN DU RAPPORT ---\\n")
 
         except Exception as e:
             print(f"❌ Erreur lors de l'analyse Gemini pour la vidéo {local_video_path}: {e}")
