@@ -20,14 +20,14 @@ def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
     
     insights = ad_data.insights
     metrics = [
-        f"- Inversión total (Spend): {getattr(insights, 'spend', 'N/A'):.2f} €",
-        f"- Costo por Compra (CPA): {getattr(insights, 'cpa', 'N/A'):.2f} €",
+        f"- Inversión total (Spend): {getattr(insights, 'spend', 'N/A'):.2f} $",
+        f"- Costo por Compra (CPA): {getattr(insights, 'cpa', 'N/A'):.2f} $",
     ]
     # Añadimos las métricas adicionales si existen, sin causar errores.
     if hasattr(insights, 'ctr'):
         metrics.append(f"- Porcentaje de Clics (CTR): {insights.ctr:.2f}%")
     if hasattr(insights, 'cpm'):
-        metrics.append(f"- Costo por 1000 Impresiones (CPM): {insights.cpm:.2f} €")
+        metrics.append(f"- Costo por 1000 Impresiones (CPM): {insights.cpm:.2f} $")
         
     return "\\n".join(metrics)
 

@@ -10,6 +10,7 @@ webdriver-manager
 blinker==1.7.0
 setuptools
 google-generativeai
+Markdown
 
 # --- Outils de Développement et Linters ---
 black

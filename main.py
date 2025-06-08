@@ -4,6 +4,7 @@ import facebook_client
 from video_downloader import VideoDownloader
 from config import config
 import gemini_analyzer
+import markdown
 
 def generate_html_report(analyzed_ads):
     """Genera un informe HTML autónomo para una lista de anuncios analizados."""
@@ -22,7 +23,7 @@ def generate_html_report(analyzed_ads):
         th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
         th { background-color: #e9ecef; font-weight: 600; }
         .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-        .analysis { margin-top: 20px; line-height: 1.6; white-space: pre-wrap; }
+        .analysis { margin-top: 20px; line-height: 1.6; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
@@ -31,7 +32,7 @@ def generate_html_report(analyzed_ads):
     ad_sections_html = ""
     for item in analyzed_ads:
         ad = item['ad']
-        analysis_text = item['analysis_text']
+        analysis_text = markdown.markdown(item['analysis_text'])
         video_path = item['video_path']
         
         try:
@@ -46,12 +47,12 @@ def generate_html_report(analyzed_ads):
         kpi_table = f"""
         <table>
             <tr><th>Métrica</th><th class="kpi-value">Valor</th></tr>
-            <tr><td>Inversión (Spend)</td><td class="kpi-value">{insights.spend:,.2f} €</td></tr>
-            <tr><td>Costo por Compra (CPA)</td><td class="kpi-value">{insights.cpa:,.2f} €</td></tr>
+            <tr><td>Inversión (Spend)</td><td class="kpi-value">{insights.spend:,.2f} $</td></tr>
+            <tr><td>Costo por Compra (CPA)</td><td class="kpi-value">{insights.cpa:,.2f} $</td></tr>
             <tr><td>Número de Compras</td><td class="kpi-value">{insights.website_purchases}</td></tr>
-            <tr><td>Valor de las Compras</td><td class="kpi-value">{insights.website_purchases_value:,.2f} €</td></tr>
+            <tr><td>Valor de las Compras</td><td class="kpi-value">{insights.website_purchases_value:,.2f} $</td></tr>
             <tr><td>ROAS</td><td class="kpi-value">{insights.roas:.2f}x</td></tr>
-            <tr><td>CPM</td><td class="kpi-value">{insights.cpm:,.2f} €</td></tr>
+            <tr><td>CPM</td><td class="kpi-value">{insights.cpm:,.2f} $</td></tr>
             <tr><td>CTR (único)</td><td class="kpi-value">{insights.unique_ctr:.2f} %</td></tr>
             <tr><td>Frecuencia</td><td class="kpi-value">{insights.frequency:.2f}</td></tr>
             <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{insights.hook_rate:.2f} %</b></td></tr>
