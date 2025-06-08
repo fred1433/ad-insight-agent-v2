@@ -1,20 +1,135 @@
 [
     {
+        "id": "120234270140950386",
+        "name": "Imagen 7",
+        "creative_id": "1223785789263327",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/502825174_613983120989272_7333337925861650459_n.png?stp=dst-jpg_tt6&_nc_cat=109&ccb=1-7&_nc_sid=890911&_nc_ohc=yNlvMIJBdUoQ7kNvwEz04qQ&_nc_oc=AdnE8qikR5fWASBoPmNERHokBmh2AezqUSMH1hYvN3ieVY47A4MXiTLena1allb4S6gR8Zz8pp5eZAYzMW5Cb6cx&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=R05eg44hZ7ANucewZpaFqg&oh=00_AfOuU6Uboi7W5tGrzWiVlNyqvvGuRVtFZmh7mOyVmDzLKA&oe=684C0703",
+        "insights": {
+            "spend": 386.34,
+            "cpa": 193.17,
+            "website_purchases": 2,
+            "website_purchases_value": 2937.0,
+            "roas": 7.602112,
+            "cpm": 258.941019,
+            "unique_ctr": 1.526032,
+            "frequency": 1.339318,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234270131860386",
+        "name": "Imagen 6",
+        "creative_id": "9859992517455696",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 349.92,
+            "cpa": 349.92,
+            "website_purchases": 1,
+            "website_purchases_value": 1347.0,
+            "roas": 3.849451,
+            "cpm": 176.905966,
+            "unique_ctr": 1.655172,
+            "frequency": 1.364138,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234270101060386",
+        "name": "Imagen 3",
+        "creative_id": "1243923807250614",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 668.03,
+            "cpa": 668.03,
+            "website_purchases": 1,
+            "website_purchases_value": 1347.0,
+            "roas": 2.016377,
+            "cpm": 213.496325,
+            "unique_ctr": 1.266417,
+            "frequency": 1.467636,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234270086590386",
+        "name": "Imagen 2",
+        "creative_id": "4042327646035601",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 870.13,
+            "cpa": 145.021667,
+            "website_purchases": 6,
+            "website_purchases_value": 7862.0,
+            "roas": 9.035431,
+            "cpm": 244.418539,
+            "unique_ctr": 1.262916,
+            "frequency": 1.362419,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234183511890386",
+        "name": "VIDEO 3",
+        "creative_id": "1267206744824867",
+        "video_id": "1166133911935970",
+        "image_url": null,
+        "insights": {
+            "spend": 164.04,
+            "cpa": 82.02,
+            "website_purchases": 2,
+            "website_purchases_value": 2488.0,
+            "roas": 15.167032,
+            "cpm": 290.336283,
+            "unique_ctr": 1.794872,
+            "frequency": 1.448718,
+            "hook_rate": 83.53982300884955,
+            "hold_rate": 6.3559322033898304
+        }
+    },
+    {
         "id": "120234183511920386",
         "name": "VIDEO 2",
         "creative_id": "2277689829333326",
         "video_id": "966049978939442",
+        "image_url": null,
         "insights": {
-            "spend": 7644.92,
-            "cpa": 449.701176,
-            "website_purchases": 17,
-            "website_purchases_value": 19509.55,
-            "roas": 2.551963,
-            "cpm": 177.236519,
-            "unique_ctr": 3.325644,
-            "frequency": 2.763937,
-            "hook_rate": 81.23290211897807,
-            "hold_rate": 7.100659265389994
+            "spend": 7832.41,
+            "cpa": 435.133889,
+            "website_purchases": 18,
+            "website_purchases_value": 20849.55,
+            "roas": 2.661958,
+            "cpm": 177.09967,
+            "unique_ctr": 3.347834,
+            "frequency": 2.788349,
+            "hook_rate": 81.37747026635915,
+            "hold_rate": 7.068630175048625
+        }
+    },
+    {
+        "id": "120234119202620386",
+        "name": "VIDEO 2",
+        "creative_id": "2656463047880407",
+        "video_id": "1257398302682454",
+        "image_url": null,
+        "insights": {
+            "spend": 516.87,
+            "cpa": 172.29,
+            "website_purchases": 3,
+            "website_purchases_value": 3379.0,
+            "roas": 6.537427,
+            "cpm": 303.327465,
+            "unique_ctr": 1.239669,
+            "frequency": 1.173554,
+            "hook_rate": 91.90140845070422,
+            "hold_rate": 5.555555555555555
         }
     },
     {
@@ -22,6 +137,7 @@
         "name": "Sin stock",
         "creative_id": "699130175852251",
         "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/501450087_1416108116256047_3535051804197813041_n.png?stp=dst-jpg_tt6&_nc_cat=104&ccb=1-7&_nc_sid=890911&_nc_ohc=3oWzXJ06vLcQ7kNvwGhyV2M&_nc_oc=Adne25KDnLtGNU0-cwVxPETHfagRDXxZJMNApEtj0H9MPBAxh3AEy4aLCy7NZEwcHjAlR975gxeosK0mW_ro_BWC&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=R05eg44hZ7ANucewZpaFqg&oh=00_AfPjruJeQUum6Hnbpt6b_ACrb7QRBcrBPmGfdybHqy_I3w&oe=684BDA95",
         "insights": {
             "spend": 4187.32,
             "cpa": 322.101538,
@@ -36,10 +152,30 @@
         }
     },
     {
+        "id": "120234038278790386",
+        "name": "Imagenes 2x1",
+        "creative_id": "1888808485298131",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501491604_24171564092450464_4728647614325202514_n.png?stp=dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=890911&_nc_ohc=VZLoOWxizKwQ7kNvwHqdZ6e&_nc_oc=Adk9wM3KRw5bczeg1WPU56uNhkw2MYGSwBJEU62PtTMPaKeSBXlXJyTXCj4kpjNMgwKm1aL00vC2NCql0QWwMWSl&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=O78YUhFLXEoS5e5mBMcY2w&oh=00_AfP6n4tvKFkiybRnPX1In-T7JBC5-Ah5neZwINWbD9F-tA&oe=684BF717",
+        "insights": {
+            "spend": 1736.44,
+            "cpa": 1736.44,
+            "website_purchases": 1,
+            "website_purchases_value": 699.0,
+            "roas": 0.402548,
+            "cpm": 265.267339,
+            "unique_ctr": 3.047158,
+            "frequency": 1.583071,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120234021087280386",
         "name": "Imagenes 2x1",
         "creative_id": "1797853084132045",
         "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501491604_24171564092450464_4728647614325202514_n.png?stp=dst-jpg_tt6&_nc_cat=107&ccb=1-7&_nc_sid=890911&_nc_ohc=VZLoOWxizKwQ7kNvwHqdZ6e&_nc_oc=Adk9wM3KRw5bczeg1WPU56uNhkw2MYGSwBJEU62PtTMPaKeSBXlXJyTXCj4kpjNMgwKm1aL00vC2NCql0QWwMWSl&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=O78YUhFLXEoS5e5mBMcY2w&oh=00_AfP6n4tvKFkiybRnPX1In-T7JBC5-Ah5neZwINWbD9F-tA&oe=684BF717",
         "insights": {
             "spend": 19915.52,
             "cpa": 382.990769,
@@ -54,10 +190,30 @@
         }
     },
     {
+        "id": "120234016042650386",
+        "name": "Imagenes 2x1",
+        "creative_id": "1211349384116340",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/502198466_1516646485967762_7991612569545417648_n.png?stp=dst-jpg_tt6&_nc_cat=109&ccb=1-7&_nc_sid=890911&_nc_ohc=Jtig9jEulV0Q7kNvwEOc0Yz&_nc_oc=AdmIhvOXPM0T5AY1YqycDDfJfeuLLSyEOoGZQNy42UHc7VCvji0q9RKIGc9wvyIQADWajjYa3Na0OQUH4TbfrgwH&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=O78YUhFLXEoS5e5mBMcY2w&oh=00_AfMZcvLH_opiKQcr-h9QvwlKvikvf7-AClUl1vteZDKozw&oe=684C0801",
+        "insights": {
+            "spend": 666.14,
+            "cpa": 666.14,
+            "website_purchases": 1,
+            "website_purchases_value": 699.0,
+            "roas": 1.049329,
+            "cpm": 288.497185,
+            "unique_ctr": 0.801974,
+            "frequency": 1.424429,
+            "hook_rate": 0.043308791684711995,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120234016085580386",
         "name": "Imagenes 2x1  v2",
         "creative_id": "1047781920238240",
         "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/501439236_1231077431745613_8358368747671299460_n.png?stp=dst-jpg_tt6&_nc_cat=103&ccb=1-7&_nc_sid=890911&_nc_ohc=QaX4KkJBxzcQ7kNvwFbnLBH&_nc_oc=AdloG-zzir15iAwuAKOOGk9SS8tK0UCH1x8M8CObWfwqF5cz-21zwDG7Qfh3hOj8YQR8JzsailTNlP_jBXkdHMPN&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=O78YUhFLXEoS5e5mBMcY2w&oh=00_AfPnk9vb6eLbQTcw4Vgee2_DMgePb6V5O7fmdTHGXJXcZw&oe=684BE969",
         "insights": {
             "spend": 3046.51,
             "cpa": 380.81375,
@@ -72,10 +228,30 @@
         }
     },
     {
+        "id": "120234013302040386",
+        "name": "VIDEO 2X1",
+        "creative_id": "1233182564878699",
+        "video_id": "721533230301006",
+        "image_url": null,
+        "insights": {
+            "spend": 570.98,
+            "cpa": 570.98,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 2.346842,
+            "cpm": 390.547196,
+            "unique_ctr": 1.076233,
+            "frequency": 1.311211,
+            "hook_rate": 78.24897400820794,
+            "hold_rate": 6.206293706293707
+        }
+    },
+    {
         "id": "120233979687900386",
         "name": "VIDEO 2X1",
         "creative_id": "1871276336998143",
         "video_id": "1225267766050411",
+        "image_url": null,
         "insights": {
             "spend": 8773.73,
             "cpa": 381.466522,
@@ -90,10 +266,163 @@
         }
     },
     {
+        "id": "120233978194460386",
+        "name": "Video 4",
+        "creative_id": "746817037786587",
+        "video_id": "608323771572087",
+        "image_url": null,
+        "insights": {
+            "spend": 610.51,
+            "cpa": 610.51,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 2.194886,
+            "cpm": 271.337778,
+            "unique_ctr": 1.969697,
+            "frequency": 1.136364,
+            "hook_rate": 90.97777777777777,
+            "hold_rate": 4.982901807523205
+        }
+    },
+    {
+        "id": "120233931143090386",
+        "name": "Imagen 6",
+        "creative_id": "680645317929662",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501354474_24552741224314811_4164949999256205841_n.png?stp=dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=890911&_nc_ohc=xchdmMYaB9kQ7kNvwFOAj6B&_nc_oc=AdlAwDyInKlbwxt6iZxORy34KO5FCuhIp0AdeYgiPDMVHgPBGz6G5CKlhddtPFtHTrxWCFlAZQ2hVnPNGDjJ3ky0&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=O78YUhFLXEoS5e5mBMcY2w&oh=00_AfNxd3a-OHopsGDVdG2JP-SEtMnIMkJUMzC3CpY59Zs0Rg&oe=684BEC1D",
+        "insights": {
+            "spend": 192.55,
+            "cpa": 192.55,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 6.959231,
+            "cpm": 194.888664,
+            "unique_ctr": 1.423027,
+            "frequency": 1.278137,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233931143160386",
+        "name": "Video 3",
+        "creative_id": "546801474976362",
+        "video_id": "1220926186353126",
+        "image_url": null,
+        "insights": {
+            "spend": 533.87,
+            "cpa": 266.935,
+            "website_purchases": 2,
+            "website_purchases_value": 2687.0,
+            "roas": 5.03306,
+            "cpm": 170.18489,
+            "unique_ctr": 1.264322,
+            "frequency": 1.239431,
+            "hook_rate": 91.7118265859101,
+            "hold_rate": 3.40632603406326
+        }
+    },
+    {
+        "id": "120233931143000386",
+        "name": "Imagen 3",
+        "creative_id": "1432230167971640",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500531457_2103387670157523_2144187209753111856_n.png?stp=dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=-7Kt-p0Nm2gQ7kNvwGPO3J7&_nc_oc=AdnQfv81PD_FL2BLf2bIdLSqMMnvarsL0TQ2mX2qHZChUZ6gXDZGTf0YZ0XiIqoPcOhst4_Di3KIfxLX6gO3c3qO&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=w7KDjIUv_rN8rfZzGeZR_g&oh=00_AfPAqaQbyBoadICMHIkfJ0a1xd-ic6mGdfgVEKDvP4FItw&oe=684BEE66",
+        "insights": {
+            "spend": 90.14,
+            "cpa": 90.14,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 14.865764,
+            "cpm": 191.380042,
+            "unique_ctr": 0.522193,
+            "frequency": 1.229765,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233915749210386",
+        "name": "Video 2",
+        "creative_id": "1350228432933090",
+        "video_id": "560123960196987",
+        "image_url": null,
+        "insights": {
+            "spend": 1926.11,
+            "cpa": 963.055,
+            "website_purchases": 2,
+            "website_purchases_value": 2046.0,
+            "roas": 1.062245,
+            "cpm": 311.567454,
+            "unique_ctr": 2.622951,
+            "frequency": 1.689071,
+            "hook_rate": 85.4577806535102,
+            "hold_rate": 10.99753927692599
+        }
+    },
+    {
+        "id": "120233915749180386",
+        "name": "Video 6",
+        "creative_id": "1227494899019314",
+        "video_id": "1899592694110349",
+        "image_url": null,
+        "insights": {
+            "spend": 10384.46,
+            "cpa": 610.850588,
+            "website_purchases": 17,
+            "website_purchases_value": 21649.0,
+            "roas": 2.08475,
+            "cpm": 350.459316,
+            "unique_ctr": 2.783621,
+            "frequency": 2.077619,
+            "hook_rate": 83.53076170227128,
+            "hold_rate": 9.967274049533351
+        }
+    },
+    {
+        "id": "120233915749200386",
+        "name": "Video 4",
+        "creative_id": "1229876705817288",
+        "video_id": "672810635543508",
+        "image_url": null,
+        "insights": {
+            "spend": 1236.57,
+            "cpa": 1236.57,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 1.083643,
+            "cpm": 282.257475,
+            "unique_ctr": 1.923704,
+            "frequency": 1.428432,
+            "hook_rate": 89.86532755078748,
+            "hold_rate": 7.9756159512319025
+        }
+    },
+    {
+        "id": "120233842024390386",
+        "name": "Imagen 4",
+        "creative_id": "606147181811872",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/500761568_676796321836068_8570854331552469601_n.png?stp=dst-jpg_tt6&_nc_cat=100&ccb=1-7&_nc_sid=890911&_nc_ohc=gu86llGGLHQQ7kNvwGQ1Ye3&_nc_oc=Adkf1gjRBe79pC7U-XigRlTA6J15Pj1d_QdiezXUV-l0cA4hP310n0GM0BbJ2aDtHga6s1DQAhl942QkhCitEl8f&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=w7KDjIUv_rN8rfZzGeZR_g&oh=00_AfNCni19XL_tiWFBqb7EaO8-Wv_Ot6T1VrIhziKsvPS_lQ&oe=684C0018",
+        "insights": {
+            "spend": 801.01,
+            "cpa": 400.505,
+            "website_purchases": 2,
+            "website_purchases_value": 1588.0,
+            "roas": 1.982497,
+            "cpm": 232.176812,
+            "unique_ctr": 2.059621,
+            "frequency": 1.869919,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120233842024420386",
         "name": "Imagen 2",
         "creative_id": "580115974685337",
         "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501175655_2184215528736283_3437897955046245880_n.png?stp=dst-jpg_tt6&_nc_cat=108&ccb=1-7&_nc_sid=890911&_nc_ohc=TMpPkqVgzK8Q7kNvwHMb_H2&_nc_oc=Adm5seYlkdxo-9ItfxXAWpscn0DhZwkkxtfWnwAJ4GPnTAxbvF4DymXZuvcnlbwj-5r04ElKuLQLPGlv9x78Ub3j&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfNvQvAbu01SdlxfVwblWTMV3ptl9H1qB6sKUM7HhyAsig&oe=684BE0C6",
         "insights": {
             "spend": 8063.84,
             "cpa": 383.992381,
@@ -112,6 +441,7 @@
         "name": "Imagen 6",
         "creative_id": "680645317929662",
         "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501354474_24552741224314811_4164949999256205841_n.png?stp=dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=890911&_nc_ohc=xchdmMYaB9kQ7kNvwFOAj6B&_nc_oc=AdlAwDyInKlbwxt6iZxORy34KO5FCuhIp0AdeYgiPDMVHgPBGz6G5CKlhddtPFtHTrxWCFlAZQ2hVnPNGDjJ3ky0&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfProdPcbgbXimpKfLo7AmMQxN6dBg_r21G9bLoaxgblgw&oe=684BEC1D",
         "insights": {
             "spend": 13589.41,
             "cpa": 308.850227,
@@ -126,10 +456,30 @@
         }
     },
     {
+        "id": "120233842024350386",
+        "name": "Imagen 5",
+        "creative_id": "1025456243057365",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500653085_1270021901799540_7026299238283095548_n.png?stp=dst-jpg_tt6&_nc_cat=109&ccb=1-7&_nc_sid=890911&_nc_ohc=B_uqHLvRcocQ7kNvwFIo6xu&_nc_oc=Adm4jZ1M0-SgFbofTygoLutVIWPU9fmVpL14jD_IkbjHLhI2E6L3E4fH87l4gw_T1vqJRqkRl3aG2lQmyMbno5bH&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfNt4YlcVtg9ba3e-UhGatU-hBsXC9fpYQJSdIRHsREJgg&oe=684BF540",
+        "insights": {
+            "spend": 217.02,
+            "cpa": 108.51,
+            "website_purchases": 2,
+            "website_purchases_value": 2039.0,
+            "roas": 9.395447,
+            "cpm": 124.79586,
+            "unique_ctr": 1.093439,
+            "frequency": 1.728628,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120233842024400386",
         "name": "Imagen 3",
         "creative_id": "1815389255990099",
         "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/501170914_1333275634423920_3450529822493864061_n.png?stp=dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=M3alO292a2YQ7kNvwFuS7HV&_nc_oc=AdkHHXQLtQTXFvjTJGuHCvvWZJ0__y7Fqtr1QX-XBYdI95T76goH1P-MS00HyAswK64N0xUfDQxtwp6MCJbtyBuG&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfPhKgpR-Q6apBqzbga4PdMoqzD3LIE5qLqFfVS1unZxlA&oe=684BDA90",
         "insights": {
             "spend": 10628.23,
             "cpa": 442.842917,
@@ -144,10 +494,106 @@
         }
     },
     {
+        "id": "120233797393080386",
+        "name": "Imagen 8",
+        "creative_id": "729252149570422",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500614863_588377420949124_3378633824072774583_n.png?stp=dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=890911&_nc_ohc=1nxLhaR5RFYQ7kNvwFUC7EG&_nc_oc=AdkL8Xhaazv5xnf_8FNsGsxDxSbht11muwbi8RV0RTjzLzMo74332q26sZ_Y1m6zrSTaFLexytHuTPN9jKhKmQAC&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfNmYK7HsIVQ2vi7YjhGmUo2MMg0WsHhUm23V9oB-sbbSQ&oe=684BF01B",
+        "insights": {
+            "spend": 99.36,
+            "cpa": 99.36,
+            "website_purchases": 1,
+            "website_purchases_value": 699.0,
+            "roas": 7.035024,
+            "cpm": 193.684211,
+            "unique_ctr": 1.27551,
+            "frequency": 1.308673,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233797343170386",
+        "name": "Imagen 3",
+        "creative_id": "1432230167971640",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500531457_2103387670157523_2144187209753111856_n.png?stp=dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=-7Kt-p0Nm2gQ7kNvwGPO3J7&_nc_oc=AdnQfv81PD_FL2BLf2bIdLSqMMnvarsL0TQ2mX2qHZChUZ6gXDZGTf0YZ0XiIqoPcOhst4_Di3KIfxLX6gO3c3qO&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfMH3hyPhKAAeyfI9YWGZfVX8SmbkZB2P7xtzbCf9vqIpA&oe=684BEE66",
+        "insights": {
+            "spend": 2233.3,
+            "cpa": 279.1625,
+            "website_purchases": 8,
+            "website_purchases_value": 10151.0,
+            "roas": 4.545292,
+            "cpm": 270.604629,
+            "unique_ctr": 1.849346,
+            "frequency": 1.861299,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233797366900386",
+        "name": "Imagen 5",
+        "creative_id": "1718199078783685",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 348.67,
+            "cpa": 348.67,
+            "website_purchases": 1,
+            "website_purchases_value": 699.0,
+            "roas": 2.004761,
+            "cpm": 400.770115,
+            "unique_ctr": 1.52439,
+            "frequency": 1.32622,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233797375020386",
+        "name": "Imagen 6",
+        "creative_id": "722778630096849",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500795092_691369646949485_3102874190170163467_n.png?stp=dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=Z-iUPaxmGMAQ7kNvwGX_w5U&_nc_oc=AdkBlufEOZ_8U4qqgCwJJgFpdqsLsB-mRJoZkBxUtRnK6-hUmclXGWrp6OIk-qWhyy8a8ZWmjeeSTyDocBcok4nG&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfOe-QBvWZDA5_IVtCe9U0mLLFWHHmONwH7aNOeNvHStJQ&oe=684BD215",
+        "insights": {
+            "spend": 397.21,
+            "cpa": 397.21,
+            "website_purchases": 1,
+            "website_purchases_value": 1018.0,
+            "roas": 2.562876,
+            "cpm": 180.304131,
+            "unique_ctr": 1.060606,
+            "frequency": 1.668939,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233797859150386",
+        "name": "Video 6",
+        "creative_id": "654509430923147",
+        "video_id": "1445108403571437",
+        "image_url": null,
+        "insights": {
+            "spend": 1634.43,
+            "cpa": 204.30375,
+            "website_purchases": 8,
+            "website_purchases_value": 8811.0,
+            "roas": 5.39087,
+            "cpm": 292.384615,
+            "unique_ctr": 2.135865,
+            "frequency": 1.658262,
+            "hook_rate": 87.54919499105546,
+            "hold_rate": 11.442582754393134
+        }
+    },
+    {
         "id": "120233801745280386",
         "name": "Video 4",
         "creative_id": "999385128849186",
         "video_id": "2229064907527497",
+        "image_url": null,
         "insights": {
             "spend": 16029.96,
             "cpa": 552.757241,
@@ -162,10 +608,49 @@
         }
     },
     {
+        "id": "120233797381650386",
+        "name": "Imagen 7",
+        "creative_id": "1036545095249352",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/500800994_1430448068142089_3363283239880714746_n.png?stp=dst-jpg_tt6&_nc_cat=111&ccb=1-7&_nc_sid=890911&_nc_ohc=60MP92ctwW4Q7kNvwFxWIMq&_nc_oc=AdlBQOcoYKT3L5GwdipXSYhGTSCa_kBOacmln9O_T2AGY5DskZWwvned_4uV-w1vGprCrprnhe4ErrnJ0pctLFew&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=dbR-9RocVpsFcXY3LNKz-Q&oh=00_AfNz5u1oqwZYaguvSaLrZxhfTm3YlE6fp4pJ9hzeSN_yrQ&oe=684BDDDA",
+        "insights": {
+            "spend": 267.06,
+            "cpa": 267.06,
+            "website_purchases": 1,
+            "website_purchases_value": 699.0,
+            "roas": 2.617389,
+            "cpm": 212.627389,
+            "unique_ctr": 1.994302,
+            "frequency": 1.789174,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233797503720386",
+        "name": "Video 2",
+        "creative_id": "1008031338185065",
+        "video_id": "599481175880552",
+        "image_url": null,
+        "insights": {
+            "spend": 23.9,
+            "cpa": 23.9,
+            "website_purchases": 1,
+            "website_purchases_value": 1347.0,
+            "roas": 56.359833,
+            "cpm": 281.176471,
+            "unique_ctr": 1.333333,
+            "frequency": 1.133333,
+            "hook_rate": 82.35294117647058,
+            "hold_rate": 5.714285714285714
+        }
+    },
+    {
         "id": "120233801727990386",
         "name": "Video 3",
         "creative_id": "546801474976362",
         "video_id": "1220926186353126",
+        "image_url": null,
         "insights": {
             "spend": 6496.96,
             "cpa": 499.766154,
@@ -180,10 +665,30 @@
         }
     },
     {
+        "id": "120233801694840386",
+        "name": "Video 2",
+        "creative_id": "695593043053082",
+        "video_id": "698904749397155",
+        "image_url": null,
+        "insights": {
+            "spend": 1643.23,
+            "cpa": 328.646,
+            "website_purchases": 5,
+            "website_purchases_value": 6057.55,
+            "roas": 3.686368,
+            "cpm": 235.453503,
+            "unique_ctr": 2.257721,
+            "frequency": 1.486475,
+            "hook_rate": 88.90958590055882,
+            "hold_rate": 6.720386784850926
+        }
+    },
+    {
         "id": "120233800405940386",
         "name": "Video 1",
         "creative_id": "2747074215483565",
         "video_id": "1406875790637966",
+        "image_url": null,
         "insights": {
             "spend": 11562.45,
             "cpa": 330.355714,
@@ -198,10 +703,106 @@
         }
     },
     {
+        "id": "120233650501450386",
+        "name": "ia video",
+        "creative_id": "9897357443673775",
+        "video_id": "1372378027370684",
+        "image_url": null,
+        "insights": {
+            "spend": 2623.65,
+            "cpa": 374.807143,
+            "website_purchases": 7,
+            "website_purchases_value": 6755.75,
+            "roas": 2.574943,
+            "cpm": 229.66124,
+            "unique_ctr": 2.1569,
+            "frequency": 2.180569,
+            "hook_rate": 79.74439775910365,
+            "hold_rate": 7.255762897914379
+        }
+    },
+    {
+        "id": "120233648174280386",
+        "name": "Hook 1",
+        "creative_id": "1767608230496286",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/499890441_1411730316623868_4999093952107348942_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=890911&_nc_ohc=r7NU9u5lRwgQ7kNvwHVRpzo&_nc_oc=AdnG9E_K969E9Ru0SFzNcx9fPk6BAEbE0vsTr7AYanyD8pjovqBTgr9mxrW7eG8b1xdwykXzVE2nt55wnsz1Or2P&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfP2TmdnIp5tN9dGjptR2y64T4ro3XvD27X9EVJD8scDMw&oe=684BE6B4",
+        "insights": {
+            "spend": 385.64,
+            "cpa": 385.64,
+            "website_purchases": 1,
+            "website_purchases_value": 928.2,
+            "roas": 2.406908,
+            "cpm": 190.910891,
+            "unique_ctr": 1.094891,
+            "frequency": 1.474453,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233648363540386",
+        "name": "Hook 1",
+        "creative_id": "3925658017749772",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/500453713_1437831307221307_5737873394910686433_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=890911&_nc_ohc=msAw04Wlr_8Q7kNvwFljDPr&_nc_oc=AdkTymWrvC3_GqQLM43k7PE8l2wzjPWfgJ-6sRnpGGXGBPxPpzdtHJFniB49zLSPIEX4LOC299yqEdIPhazRyhqj&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfNS5fVbeYljzcrTMdRMwMcMdj9Y4H29vJPOCWpUvmXfXw&oe=684BD33A",
+        "insights": {
+            "spend": 1370.71,
+            "cpa": 1370.71,
+            "website_purchases": 1,
+            "website_purchases_value": 1139.0,
+            "roas": 0.830956,
+            "cpm": 205.59622,
+            "unique_ctr": 1.900826,
+            "frequency": 1.836639,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233646238310386",
+        "name": "Hook 3",
+        "creative_id": "1914228616046253",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/500772437_1235266644600932_7707668119655657079_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=890911&_nc_ohc=dIVb-mCMAKUQ7kNvwFXclt_&_nc_oc=AdliJwU5_DC2epT2YH_CHK-EaaiTiTkXQfctmI5JNyVwZmNneCaP8hGe-CfVuP5tHM_YecZuUgyWWKz6e587QRii&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfOr7Zbyc_2IatjKED35p93YtTvlcwN9ow-Ga3ayUG9CcA&oe=684BE1FE",
+        "insights": {
+            "spend": 554.92,
+            "cpa": 554.92,
+            "website_purchases": 1,
+            "website_purchases_value": 1728.65,
+            "roas": 3.115134,
+            "cpm": 203.565664,
+            "unique_ctr": 1.24805,
+            "frequency": 1.417577,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233027266660386",
+        "name": "Imagen 2",
+        "creative_id": "1196989805213950",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 2221.43,
+            "cpa": 444.286,
+            "website_purchases": 5,
+            "website_purchases_value": 5523.5,
+            "roas": 2.486461,
+            "cpm": 169.393778,
+            "unique_ctr": 2.138264,
+            "frequency": 2.10836,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120233027266650386",
         "name": "Imagen 3",
         "creative_id": "1076434550969288",
         "video_id": null,
+        "image_url": null,
         "insights": {
             "spend": 3402.41,
             "cpa": 425.30125,
@@ -216,10 +817,106 @@
         }
     },
     {
+        "id": "120233027218970386",
+        "name": "Imagen 3",
+        "creative_id": "685625137394420",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 857.99,
+            "cpa": 857.99,
+            "website_purchases": 1,
+            "website_purchases_value": 1340.0,
+            "roas": 1.56179,
+            "cpm": 139.397238,
+            "unique_ctr": 1.335312,
+            "frequency": 1.82641,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233027218980386",
+        "name": "Imagen 1",
+        "creative_id": "1902140227201480",
+        "video_id": null,
+        "image_url": null,
+        "insights": {
+            "spend": 723.73,
+            "cpa": 723.73,
+            "website_purchases": 1,
+            "website_purchases_value": 1796.0,
+            "roas": 2.481588,
+            "cpm": 137.591255,
+            "unique_ctr": 1.869465,
+            "frequency": 1.725156,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233027404570386",
+        "name": "Imagen 3",
+        "creative_id": "1441642160330307",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/497288177_1644285912911472_1416553814473335635_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=890911&_nc_ohc=ScGIJShVAC4Q7kNvwF3lDMS&_nc_oc=AdnjDRH0lrAWvQGbTtKn70IAAMWWzs6RM8oyN8WiaXJ-EXQNafFsUm9qyuHVgN1cdqoxdlg5zlOnNQQWGtX23yuo&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfNBtNaSTvBOKi89ouuAGiN5iioK30Mg7UNqELiFrk4eAg&oe=684BDA97",
+        "insights": {
+            "spend": 621.15,
+            "cpa": 310.575,
+            "website_purchases": 2,
+            "website_purchases_value": 2201.55,
+            "roas": 3.544313,
+            "cpm": 108.516771,
+            "unique_ctr": 1.260946,
+            "frequency": 2.004904,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233027266680386",
+        "name": "Imagen 1",
+        "creative_id": "1056146299753342",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/497886104_713391227778545_1779270958053268153_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=890911&_nc_ohc=smfi3oMJZ5EQ7kNvwECL5Ug&_nc_oc=AdnPdLmVTHtKQQ0-T8g3G4cWjBGafzGX4dwIgKACZbKSsGB_VKKQaGhNe7Y17ReTkIiKmbVAeh-qWqjNChigbDD0&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfO3_lypU_YK70i_lf8WCud_mwbsqvPaD1OfieSxLOXBug&oe=684BEE9F",
+        "insights": {
+            "spend": 896.5,
+            "cpa": 896.5,
+            "website_purchases": 1,
+            "website_purchases_value": 1139.0,
+            "roas": 1.270496,
+            "cpm": 115.752098,
+            "unique_ctr": 0.986547,
+            "frequency": 2.315396,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233026943960386",
+        "name": "Imagen 1",
+        "creative_id": "1081075263844518",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/497472314_1036613181728427_7671112502421581466_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=znO38yCp-9YQ7kNvwGqxQGf&_nc_oc=Adk6m9mx0buL-FEova5jXlc2-PxkH4FBBaK-0GisD8i6sJ6sue93DNJlDPLyiNhUOGzIssfqE1cLZOmT2tHuBu6l&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=JEP1vRy96xGe-09n5biaog&oh=00_AfPcKcYvK9JOklYA2YAoXYpH4dRKbmPVjRxarbMvtNZJmA&oe=684BDD5F",
+        "insights": {
+            "spend": 496.42,
+            "cpa": 496.42,
+            "website_purchases": 1,
+            "website_purchases_value": 524.1,
+            "roas": 1.055759,
+            "cpm": 162.547479,
+            "unique_ctr": 1.388889,
+            "frequency": 1.285354,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
         "id": "120233001088630386",
         "name": "Hook 1,2,3",
         "creative_id": "1021743370154306",
         "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/491689380_1340703757188468_4149248099264119539_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=CyCgkHhLhOMQ7kNvwGfiR2Z&_nc_oc=AdnyCIlapDKOd3Ryjo_41X43Ra51g_In17TUxYZZqMpEHiJp1ShTwqm-0dYdrhI8-tfiIjycZRkV7M-o3nyJac49&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfMwOaIMrSdfNKnX-J6Nur2SoVPFyFTZm1ZE7gamPs2qjg&oe=684BD177",
         "insights": {
             "spend": 15258.7,
             "cpa": 462.384848,
@@ -234,21 +931,269 @@
         }
     },
     {
+        "id": "120233001059990386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1601608053862773",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/496690431_1671825793705862_8339904922727081190_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=890911&_nc_ohc=tnCrujqdyV0Q7kNvwHbxozZ&_nc_oc=AdkSR_LP9ft9gs70zDLXft6rUljVtbt6Eh4dHG6NWJTNUb55YLd8pOr2Zq5bv69BdO3ni4smP6d_qLm1_OacvbFL&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfNdxTsUFIxm_2hnwtVPp1CTIS_xTWWB9Ly2XEbvzduaGQ&oe=684BDF3D",
+        "insights": {
+            "spend": 17917.77,
+            "cpa": 746.57375,
+            "website_purchases": 24,
+            "website_purchases_value": 29529.4,
+            "roas": 1.648051,
+            "cpm": 160.926972,
+            "unique_ctr": 3.370971,
+            "frequency": 3.665306,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120232287495810386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1254637469386376",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/496690431_1671825793705862_8339904922727081190_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=890911&_nc_ohc=tnCrujqdyV0Q7kNvwHbxozZ&_nc_oc=AdkSR_LP9ft9gs70zDLXft6rUljVtbt6Eh4dHG6NWJTNUb55YLd8pOr2Zq5bv69BdO3ni4smP6d_qLm1_OacvbFL&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfNdxTsUFIxm_2hnwtVPp1CTIS_xTWWB9Ly2XEbvzduaGQ&oe=684BDF3D",
+        "insights": {
+            "spend": 9124.33,
+            "cpa": 829.484545,
+            "website_purchases": 11,
+            "website_purchases_value": 12631.85,
+            "roas": 1.384414,
+            "cpm": 150.670927,
+            "unique_ctr": 2.541661,
+            "frequency": 2.676833,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120232287180080386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1007630508170690",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-1.xx.fbcdn.net/v/t45.1600-4/496041391_1328736044901022_6580075985788237875_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=890911&_nc_ohc=Vqa3WOoNIhQQ7kNvwGEXq-j&_nc_oc=AdlfInLEvLHjhOlNWLSVfjq1GDuWiCpJtb55vP8-HMQcEmxI58wn9Zdn6txC1MwXjVMsf3tyaMM9YVyKPAThlzM5&_nc_zt=1&_nc_ht=scontent-bog2-1.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfN3uuDKKVxBemIHvtpPetdryiFAK77cgi4ksBld932oUA&oe=684BEDB6",
+        "insights": {
+            "spend": 1443.36,
+            "cpa": 721.68,
+            "website_purchases": 2,
+            "website_purchases_value": 2201.55,
+            "roas": 1.525295,
+            "cpm": 152.639594,
+            "unique_ctr": 2.113883,
+            "frequency": 1.8008,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120232133023410386",
+        "name": "Hook 1,2,3",
+        "creative_id": "668777005908373",
+        "video_id": "9882117318581724",
+        "image_url": null,
+        "insights": {
+            "spend": 1854.97,
+            "cpa": 370.994,
+            "website_purchases": 5,
+            "website_purchases_value": 6979.2,
+            "roas": 3.762433,
+            "cpm": 197.127524,
+            "unique_ctr": 4.358553,
+            "frequency": 2.579496,
+            "hook_rate": 66.9500531349628,
+            "hold_rate": 10.492063492063492
+        }
+    },
+    {
+        "id": "120232132518440386",
+        "name": "Hook 1,2,3",
+        "creative_id": "680134754962635",
+        "video_id": "2025373364539309",
+        "image_url": null,
+        "insights": {
+            "spend": 33851.05,
+            "cpa": 1301.963462,
+            "website_purchases": 26,
+            "website_purchases_value": 35872.95,
+            "roas": 1.059729,
+            "cpm": 146.623858,
+            "unique_ctr": 3.33873,
+            "frequency": 2.577969,
+            "hook_rate": 90.80911335383549,
+            "hold_rate": 5.254923658842553
+        }
+    },
+    {
+        "id": "120231249356320386",
+        "name": "Hook 1,2,3",
+        "creative_id": "711586078209629",
+        "video_id": "534232759743179",
+        "image_url": null,
+        "insights": {
+            "spend": 9850.56,
+            "cpa": 1231.32,
+            "website_purchases": 8,
+            "website_purchases_value": 9556.1,
+            "roas": 0.970107,
+            "cpm": 185.36299,
+            "unique_ctr": 4.026342,
+            "frequency": 3.06984,
+            "hook_rate": 80.71581799706446,
+            "hold_rate": 3.193919895556488
+        }
+    },
+    {
+        "id": "120230605978510386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1347194606515208",
+        "video_id": "1197643965476035",
+        "image_url": null,
+        "insights": {
+            "spend": 650.43,
+            "cpa": 650.43,
+            "website_purchases": 1,
+            "website_purchases_value": 546.55,
+            "roas": 0.84029,
+            "cpm": 188.148684,
+            "unique_ctr": 2.051506,
+            "frequency": 1.508948,
+            "hook_rate": 75.67254845241538,
+            "hold_rate": 3.325688073394496
+        }
+    },
+    {
+        "id": "120230504268510386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1230225582223320",
+        "video_id": "3048538631975776",
+        "image_url": null,
+        "insights": {
+            "spend": 6622.17,
+            "cpa": 1655.5425,
+            "website_purchases": 4,
+            "website_purchases_value": 3884.65,
+            "roas": 0.586613,
+            "cpm": 147.523224,
+            "unique_ctr": 1.909976,
+            "frequency": 1.365237,
+            "hook_rate": 91.03566575330258,
+            "hold_rate": 6.4382723602104495
+        }
+    },
+    {
+        "id": "120230203770850386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1197568768744551",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/491689380_1340703757188468_4149248099264119539_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=890911&_nc_ohc=CyCgkHhLhOMQ7kNvwGfiR2Z&_nc_oc=AdnyCIlapDKOd3Ryjo_41X43Ra51g_In17TUxYZZqMpEHiJp1ShTwqm-0dYdrhI8-tfiIjycZRkV7M-o3nyJac49&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfMwOaIMrSdfNKnX-J6Nur2SoVPFyFTZm1ZE7gamPs2qjg&oe=684BD177",
+        "insights": {
+            "spend": 6776.41,
+            "cpa": 968.058571,
+            "website_purchases": 7,
+            "website_purchases_value": 9509.1,
+            "roas": 1.403265,
+            "cpm": 109.767875,
+            "unique_ctr": 1.995761,
+            "frequency": 2.180643,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120230203247260386",
+        "name": "Hook 1,2,3",
+        "creative_id": "896802309200273",
+        "video_id": null,
+        "image_url": "https://scontent-bog2-2.xx.fbcdn.net/v/t45.1600-4/491775509_690726750205171_8387452343429790959_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=890911&_nc_ohc=6X8_vGgCdTkQ7kNvwEo9u1p&_nc_oc=AdnrdMAgNKF2mqa281HsMbjZFZa9e3FX45EE9SDGMecwVt-QluTxzE7BQXM7HqeYuXJj2cj81uCIVUAH6ynLaqnv&_nc_zt=1&_nc_ht=scontent-bog2-2.xx&edm=AOgd6ZUEAAAA&_nc_gid=fOXW2AbdsBPOB_P9c702Gw&oh=00_AfOqDDAxg1B3Zt4eEjPE3TotsvVFxIHpNEaUDqg4b7IFgw&oe=684BFE09",
+        "insights": {
+            "spend": 2798.69,
+            "cpa": 559.738,
+            "website_purchases": 5,
+            "website_purchases_value": 5385.3,
+            "roas": 1.924222,
+            "cpm": 150.1121,
+            "unique_ctr": 1.567825,
+            "frequency": 1.815561,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120228500599630386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1084484963561997",
+        "video_id": "1277136707159540",
+        "image_url": null,
+        "insights": {
+            "spend": 1568.69,
+            "cpa": 1568.69,
+            "website_purchases": 1,
+            "website_purchases_value": 546.55,
+            "roas": 0.348412,
+            "cpm": 129.869194,
+            "unique_ctr": 3.968167,
+            "frequency": 1.316799,
+            "hook_rate": 78.4750393244474,
+            "hold_rate": 9.737314062664838
+        }
+    },
+    {
         "id": "120227745673620386",
         "name": "Hook 1,2,3",
         "creative_id": "1234979728223860",
         "video_id": "741762151538261",
+        "image_url": null,
         "insights": {
-            "spend": 25904.22,
-            "cpa": 528.657551,
+            "spend": 26204.2,
+            "cpa": 534.779592,
             "website_purchases": 49,
             "website_purchases_value": 52841.85,
-            "roas": 2.039894,
-            "cpm": 182.317519,
-            "unique_ctr": 4.556382,
-            "frequency": 2.689591,
-            "hook_rate": 86.6599100525749,
-            "hold_rate": 4.241080492816477
+            "roas": 2.016541,
+            "cpm": 181.871309,
+            "unique_ctr": 4.584479,
+            "frequency": 2.712675,
+            "hook_rate": 86.67277434221027,
+            "hold_rate": 4.233698219876841
+        }
+    },
+    {
+        "id": "120225502472430386",
+        "name": "Hook 1,2,3",
+        "creative_id": "9810858828945669",
+        "video_id": "1546917872646672",
+        "image_url": null,
+        "insights": {
+            "spend": 3017.3,
+            "cpa": 1005.766667,
+            "website_purchases": 3,
+            "website_purchases_value": 2402.95,
+            "roas": 0.796391,
+            "cpm": 160.315605,
+            "unique_ctr": 3.059273,
+            "frequency": 1.160859,
+            "hook_rate": 83.42808564900909,
+            "hold_rate": 7.737867787542989
+        }
+    },
+    {
+        "id": "120225502472370386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1291141092181584",
+        "video_id": "3495253394102492",
+        "image_url": null,
+        "insights": {
+            "spend": 61491.9,
+            "cpa": 723.434118,
+            "website_purchases": 85,
+            "website_purchases_value": 91182.54,
+            "roas": 1.482838,
+            "cpm": 161.559318,
+            "unique_ctr": 4.269789,
+            "frequency": 2.882486,
+            "hook_rate": 83.23844304612273,
+            "hold_rate": 4.422412867955735
         }
     }
 ]

@@ -25,13 +25,40 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from config import config
 
-class VideoDownloader:
-    """Télécharge des vidéos en utilisant une stratégie Selenium + fallback requests."""
+class MediaDownloader:
+    """Télécharge des médias (vidéos, images) en utilisant des stratégies adaptées."""
 
     def __init__(self):
-        # On n'a plus besoin de GCS, mais on prépare un dossier local
-        self.download_folder = "tmp/videos"
+        self.download_folder = "tmp/media"
         os.makedirs(self.download_folder, exist_ok=True)
+
+    def download_image_locally(self, image_url: str, ad_id: str) -> Optional[str]:
+        """
+        Télécharge une image depuis son URL et la sauvegarde localement.
+        Retourne le chemin du fichier local ou None si échec.
+        """
+        print(f"Démarrage du téléchargement de l'image pour la pub {ad_id}")
+        try:
+            response = requests.get(image_url, stream=True, timeout=60)
+            response.raise_for_status()
+
+            # Détecter l'extension du fichier à partir de l'URL
+            file_extension = os.path.splitext(image_url.split('?')[0])[-1]
+            if not file_extension:
+                # Fallback sur .jpg si aucune extension n'est trouvée
+                file_extension = '.jpg'
+            
+            local_path = os.path.join(self.download_folder, f"{ad_id}{file_extension}")
+            with open(local_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            print(f"✅ Image sauvegardée localement : {local_path}")
+            return local_path
+
+        except requests.RequestException as e:
+            print(f"Erreur lors du téléchargement de l'image : {e}")
+            return None
 
     def download_video_locally(self, video_id: str, ad_id: str) -> Optional[str]:
         """

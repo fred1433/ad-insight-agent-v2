@@ -1,7 +1,7 @@
 import os
 import base64
 import facebook_client
-from video_downloader import VideoDownloader
+from media_downloader import MediaDownloader
 from config import config
 import gemini_analyzer
 import markdown
@@ -33,15 +33,24 @@ def generate_html_report(analyzed_ads):
     for item in analyzed_ads:
         ad = item['ad']
         analysis_text = markdown.markdown(item['analysis_text'])
-        video_path = item['video_path']
+        media_path = item['media_path']
+        media_type = item['media_type']
         
+        media_html = ""
         try:
-            with open(video_path, "rb") as video_file:
-                video_b64 = base64.b64encode(video_file.read()).decode('utf-8')
-            video_html = f'<video controls width="100%"><source src="data:video/mp4;base64,{video_b64}" type="video/mp4">Tu navegador no soporta la etiqueta de video.</video>'
+            with open(media_path, "rb") as media_file:
+                media_b64 = base64.b64encode(media_file.read()).decode('utf-8')
+            
+            if media_type == 'video':
+                media_html = f'<video controls width="100%"><source src="data:video/mp4;base64,{media_b64}" type="video/mp4">Tu navegador no soporta la etiqueta de video.</video>'
+            elif media_type == 'image':
+                # Détecter le format de l'image pour le data URI
+                ext = os.path.splitext(media_path)[1].lower().replace('.', '')
+                media_html = f'<img src="data:image/{ext};base64,{media_b64}" alt="Anuncio" style="width:100%; height:auto; border-radius: 4px;">'
+
         except Exception as e:
-            print(f"Advertencia: No se pudo incrustar el video para {ad.id}. {e}")
-            video_html = "<p><i>Error al incrustar el video.</i></p>"
+            print(f"Advertencia: No se pudo incrustar el medio para {ad.id}. {e}")
+            media_html = "<p><i>Error al incrustar el medio.</i></p>"
 
         insights = ad.insights
         kpi_table = f"""
@@ -65,8 +74,8 @@ def generate_html_report(analyzed_ads):
             <h2>{ad.name} (ID: {ad.id})</h2>
             <div class="grid-container">
                 <div>
-                    <h3>Video del Anuncio</h3>
-                    {video_html}
+                    <h3>Creatividad del Anuncio</h3>
+                    {media_html}
                 </div>
                 <div>
                     <h3>Indicadores Clave (KPIs)</h3>
@@ -117,36 +126,57 @@ def main():
         print("✅ No se encontraron anuncios ganadores. El script finaliza.")
         return
     
-    video_ads = [ad for ad in winning_ads if ad.video_id]
-    if not video_ads:
-        print("✅ No se encontraron anuncios de video ganadores. El script finaliza.")
-        return
+    # On filtre les publicités qui ont une créative (image ou vidéo) et on prend la première
+    ads_with_media = [ad for ad in winning_ads if ad.video_id or ad.image_url]
+    ads_to_process = ads_with_media[:1]
 
-    ads_to_process = video_ads[:1]
-    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores.")
+    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores (imágenes o videos).")
 
-    downloader = VideoDownloader()
+    downloader = MediaDownloader()
     analyzed_ads_data = []
     
     for ad in ads_to_process:
-        local_video_path = None
+        local_media_path = None
+        analysis_report_text = None
+        media_type = None
+
         try:
             print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
-            local_video_path = downloader.download_video_locally(
-                video_id=ad.video_id, ad_id=ad.id
-            )
-            if not local_video_path:
-                raise Exception("Fallo en la descarga del video.")
+            
+            if ad.video_id:
+                media_type = 'video'
+                print(f"  ▶️ Es un anuncio de video (ID: {ad.video_id}).")
+                local_media_path = downloader.download_video_locally(
+                    video_id=ad.video_id, ad_id=ad.id
+                )
+            elif ad.image_url:
+                media_type = 'image'
+                print(f"  ▶️ Es un anuncio de imagen (URL: {ad.image_url[:60]}...).")
+                local_media_path = downloader.download_image_locally(
+                    image_url=ad.image_url, ad_id=ad.id
+                )
+            else:
+                print("  ⚠️ La publicidad no contiene ni video_id ni image_url. Omitiendo.")
+                continue
 
-            analysis_report_text = gemini_analyzer.analyze_video(
-                video_path=local_video_path,
-                ad_data=ad
-            )
+            if not local_media_path:
+                raise Exception("Fallo en la descarga del medio.")
+
+            # Appeler l'analyseur approprié
+            if media_type == 'video':
+                analysis_report_text = gemini_analyzer.analyze_video(
+                    video_path=local_media_path, ad_data=ad
+                )
+            elif media_type == 'image':
+                 analysis_report_text = gemini_analyzer.analyze_image(
+                    image_path=local_media_path, ad_data=ad
+                )
             
             analyzed_ads_data.append({
                 "ad": ad,
                 "analysis_text": analysis_report_text,
-                "video_path": local_video_path
+                "media_path": local_media_path,
+                "media_type": media_type
             })
 
         except Exception as e:
@@ -162,9 +192,9 @@ def main():
     except Exception as e:
         print(f"❌ Ocurrió un error al generar el informe HTML: {e}")
     finally:
-        print("\\n--- Limpieza de archivos de video temporales ---")
+        print("\\n--- Limpieza de archivos de medios temporales ---")
         for item in analyzed_ads_data:
-            path_to_clean = item.get('video_path')
+            path_to_clean = item.get('media_path')
             if path_to_clean and os.path.exists(path_to_clean):
                 print(f"  🗑️ Eliminando '{path_to_clean}'...")
                 os.remove(path_to_clean)

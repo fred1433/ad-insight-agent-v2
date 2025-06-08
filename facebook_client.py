@@ -33,6 +33,7 @@ class Ad(BaseModel):
     name: str
     creative_id: Optional[str] = None
     video_id: Optional[str] = None
+    image_url: Optional[str] = None
     insights: Optional[AdInsights] = None
 
 # --- Configuration du Cache ---
@@ -55,10 +56,10 @@ def init_facebook_api():
     FacebookAdsApi.init(**init_params)
 
 
-def _fetch_video_and_creative_ids_batch(ad_ids: List[str]) -> Dict[str, Dict[str, str]]:
+def _fetch_creatives_batch(ad_ids: List[str]) -> Dict[str, Dict[str, str]]:
     """
-    Récupère video_id et creative_id pour une liste d'ad_ids en utilisant
-    des appels API par lots pour plus d'efficacité.
+    Récupère creative_id, video_id et image_url pour une liste d'ad_ids
+    en utilisant un appel API groupé efficace.
     """
     results_map = {}
     api = FacebookAdsApi.get_default_api()
@@ -66,30 +67,24 @@ def _fetch_video_and_creative_ids_batch(ad_ids: List[str]) -> Dict[str, Dict[str
     # Découpe la liste d'IDs en morceaux de 50 pour le traitement par lots
     for i in range(0, len(ad_ids), 50):
         chunk = ad_ids[i:i+50]
-        batch_api = api.new_batch()
         
-        def success_callback(response, ad_id_param):
-            creatives = response.json().get('data', [])
-            if creatives:
-                creative = creatives[0]
-                results_map[ad_id_param] = {
+        # Récupération en une seule fois
+        ads = AdAccount(config.facebook.ad_account_id).get_ads(
+            fields=[
+                'id', 
+                'creative{id,name,image_url,video_id}'
+            ], 
+            params={'ad_id__in': chunk}
+        )
+
+        for ad in ads:
+            if 'creative' in ad:
+                creative = ad['creative']
+                results_map[ad['id']] = {
+                    'creative_id': creative.get('id'),
                     'video_id': creative.get('video_id'),
-                    'creative_id': creative.get('id')
+                    'image_url': creative.get('image_url')
                 }
-
-        def failure_callback(response, ad_id_param):
-            print(f"Échec de la récupération du creative pour l'ad_id {ad_id_param} dans le lot : {response.error()}")
-
-        for ad_id in chunk:
-            request = FBAd(ad_id).get_ad_creatives(fields=['video_id', 'id'], pending=True)
-            batch_api.add_request(
-                request,
-                success=lambda response, ad_id_param=ad_id: success_callback(response, ad_id_param),
-                failure=lambda response, ad_id_param=ad_id: failure_callback(response, ad_id_param)
-            )
-        
-        print(f"Exécution de la requête par lot pour {len(chunk)} ad creatives...")
-        batch_api.execute()
         
     return results_map
 
@@ -169,17 +164,17 @@ def get_winning_ads() -> List[Ad]:
         ad_ids = list(ad_data_map.keys())
         print(f"{len(ad_ids)} publicités actives trouvées.")
 
-        print("\nRécupération groupée des créatives (video_id)...")
-        creatives_map = _fetch_video_and_creative_ids_batch(ad_ids)
+        print("\nRécupération groupée des créatives (vidéo et image)...")
+        creatives_map = _fetch_creatives_batch(ad_ids)
         
-        video_ad_ids = list(creatives_map.keys())
-        if not video_ad_ids:
-            print("Aucune publicité avec vidéo trouvée.")
+        ad_ids_with_creatives = list(creatives_map.keys())
+        if not ad_ids_with_creatives:
+            print("Aucune publicité avec une créative (vidéo ou image) trouvée.")
             return []
-        print(f"{len(video_ad_ids)} publicités avec vidéo trouvées.")
+        print(f"{len(ad_ids_with_creatives)} publicités avec une créative trouvées.")
         
         print("\nRécupération groupée des métriques (insights)...")
-        insights_map = _fetch_insights_batch(account, video_ad_ids)
+        insights_map = _fetch_insights_batch(account, ad_ids_with_creatives)
         print(f"{len(insights_map)} insights récupérés.")
 
         # --- Étape 3: Combinaison des données et filtrage ---
@@ -247,7 +242,8 @@ def get_winning_ads() -> List[Ad]:
                     id=ad_id,
                     name=ad_data['name'],
                     creative_id=creative_info['creative_id'],
-                    video_id=creative_info['video_id'],
+                    video_id=creative_info.get('video_id'),
+                    image_url=creative_info.get('image_url'),
                     insights=AdInsights(
                         spend=spend, 
                         cpa=cpa,
