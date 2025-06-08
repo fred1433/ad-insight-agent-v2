@@ -1,9 +1,10 @@
 import os
 import facebook_client
-import google_analyzer
+import gvi_analyzer
 import pprint
 from video_downloader import VideoDownloader
 from config import config
+from google.cloud import storage
 
 def main():
     """
@@ -38,34 +39,44 @@ def main():
 
     # Initialiser les clients nécessaires
     downloader = VideoDownloader()
-    # La logique d'analyse sera ajoutée ici plus tard
-    # analyzer = google_client.VideoAnalyzer()
+    gcs_client = storage.Client()
+    bucket = gcs_client.bucket(config.google.gcs_bucket_name)
 
     # 2. Traiter chaque publicité gagnante
     print("\n--- Étape 2: Traitement de chaque publicité ---")
     for ad in ads_to_process:
         print(f"\n{'*' * 40}")
         print(f"✨ Traitement de la publicité : {ad.id} ({ad.name})")
+        print(f"  - 📺 URL Facebook : https://www.facebook.com/watch/?v={ad.video_id}")
         print(f"{'*' * 40}")
 
-        # 2a. Télécharger la vidéo et la téléverser sur GCS
-        print(f"  📥 Téléchargement de la vidéo (ID: {ad.video_id})...")
-        video_gcs_uri = downloader.download_and_upload_video(video_id=ad.video_id, ad_id=ad.id)
+        gcs_object_name = f"{ad.id}.mp4"
+        gcs_uri = f"gs://{config.google.gcs_bucket_name}/{gcs_object_name}"
+        blob = bucket.blob(gcs_object_name)
+
+        # 2a. Vérifier si la vidéo est déjà sur GCS, sinon la télécharger
+        if blob.exists():
+            print(f"  ✅ Vidéo déjà présente sur GCS : {gcs_uri}. Saut de l'étape de téléchargement.")
+            video_gcs_uri = gcs_uri
+        else:
+            print(f"  📥 Téléchargement de la vidéo (ID: {ad.video_id})...")
+            video_gcs_uri = downloader.download_and_upload_video(video_id=ad.video_id, ad_id=ad.id)
         
         if not video_gcs_uri:
-            print(f"❌ Échec du téléchargement pour la publicité {ad.id}. Passage à la suivante.")
+            print(f"❌ Échec de la récupération de la vidéo pour la publicité {ad.id}. Passage à la suivante.")
             continue
-        # Le message de succès est déjà dans le downloader, pas besoin de le dupliquer ici.
-
+        
         # 2b. Analyser la vidéo avec les services Google Cloud
-        print("\n  🧠 Lancement de l'analyse vidéo avec Google AI...")
+        print("\n  🧠 Lancement de l'analyse visuelle avec GVI...")
         try:
-            analysis_results = google_analyzer.extract_video_annotations(video_gcs_uri)
-            print("  ✅ Analyse GVI terminée.")
-            print("  Résultats de l'analyse :")
+            analysis_results = gvi_analyzer.extract_annotations(
+                gcs_uri=video_gcs_uri
+            )
+            print("  ✅ Analyse visuelle GVI terminée.")
+            print("  Résultats de l'analyse visuelle :")
             pprint.pprint(analysis_results)
         except Exception as e:
-            print(f"❌ Erreur lors de l'analyse de la vidéo {video_gcs_uri}: {e}")
+            print(f"❌ Erreur lors de l'analyse visuelle de la vidéo {video_gcs_uri}: {e}")
 
     print("\n🎉 Pipeline terminé.")
 

@@ -26,6 +26,7 @@ class FacebookConfig(BaseSettings):
 class GoogleConfig(BaseModel):
     project_id: str = os.getenv("GOOGLE_PROJECT_ID")
     gcs_bucket_name: str = os.getenv("GCS_BUCKET_NAME")
+    gvi_language_code: str = "es-MX" # Code langue pour l'analyse GVI
 
 class ScriptConfig(BaseModel):
     """Configuration générale du script."""
