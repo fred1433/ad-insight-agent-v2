@@ -1,14 +1,14 @@
+from __future__ import annotations
 import os
 import time
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Import pour le typage, géré de manière souple
-try:
+# Utilisation de TYPE_CHECKING pour éviter une importation circulaire à l'exécution
+# tout en fournissant les types au linter. C'est la méthode la plus robuste.
+if TYPE_CHECKING:
     from facebook_client import Ad
-except ImportError:
-    Ad = Dict
 
 # Charger les variables d'environnement
 load_dotenv()

@@ -1,3 +1,9 @@
+# Fichiers générés par le projet
+reports/
+tmp/
+facebook_cache.json
+*.html
+
 .venv/
 __pycache__/
 *.pyc
