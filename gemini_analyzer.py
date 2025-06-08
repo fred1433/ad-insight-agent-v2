@@ -61,19 +61,22 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
         **Métricas del Anuncio Ganador:**
         {metrics_text}
 
-        **Tu Misión:**
-        Analiza la imagen proporcionada a la luz de su rendimiento. Redacta un análisis conciso y perspicaz que explique **POR QUÉ** este anuncio ha funcionado. Tu respuesta debe ser directamente útil para un profesional del marketing.
+        **Tu Doble Misión:**
 
-        **Puntos a cubrir en tu análisis:**
-        - **Impacto Visual:** ¿Qué elementos visuales captan la atención inmediatamente? (Colores, composición, sujeto principal).
-        - **Claridad del Mensaje:** ¿La propuesta de valor es obvia a simple vista? ¿El texto en la imagen es legible y efectivo?
-        - **Audiencia Objetivo:** ¿A quién parece dirigirse esta imagen? ¿La estética y el mensaje son coherentes con esa audiencia?
-        - **Branding:** ¿La marca es reconocible? ¿Está bien integrada?
-        - **Llamada a la Acción (CTA):** Si hay un CTA, ¿es claro e incitativo?
-        - **Correlación:** Vincula elementos específicos de la imagen con las buenas métricas (ej: "La composición simple y directa probablemente explica el buen CTR", "La claridad de la oferta justifica el bajo CPA").
+        **Parte 1: Análisis de Rendimiento**
+        Analiza la imagen proporcionada a la luz de su rendimiento. Redacta un análisis conciso y perspicaz que explique **POR QUÉ** este anuncio ha funcionado. Tu respuesta debe ser directamente útil para un profesional del marketing. Cubre puntos como el impacto visual, la claridad del mensaje, la audiencia, el branding y la correlación con las métricas.
 
-        **Formato de Respuesta Esperado:**
-        Un texto fluido, bien redactado y profesional. Sin JSON. Comienza directamente con tu análisis.
+        **Parte 2: Propuestas de Nuevos Guiones para Video**
+        Inspirado por el éxito de esta imagen, genera **3 nuevas ideas de guiones para anuncios de VIDEO**. El objetivo es traducir el éxito de un formato estático a un formato de video dinámico.
+
+        **Formato OBLIGATORIO para la Parte 2:**
+        Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
+        - Para cada uno de los 3 Hooks, detalla al menos 3 escenas.
+
+        **Formato de Respuesta Final:**
+        1. Comienza directamente con tu análisis de rendimiento (Parte 1).
+        2. Después del análisis, inserta una línea separadora: `---`
+        3. Inmediatamente después del separador, inserta la tabla Markdown con los guiones (Parte 2). No añadas ningún texto introductorio antes de la tabla.
         """
         
         print("    ▶️ Enviando prompt en español e imagen al modelo...")
@@ -130,19 +133,22 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
         **Métricas del Anuncio Ganador:**
         {metrics_text}
 
-        **Tu Misión:**
-        Analiza el video proporcionado a la luz de su rendimiento. Redacta un análisis conciso y perspicaz que explique **POR QUÉ** este anuncio ha funcionado. Tu respuesta debe ser directamente útil para un profesional del marketing.
+        **Tu Doble Misión:**
 
-        **Puntos a cubrir en tu análisis (sin seguir necesariamente esta estructura):**
-        - **El Gancho (Hook):** ¿Cómo captan la atención los primeros 3 segundos?
-        - **La Narrativa:** ¿Qué historia se cuenta? ¿Es clara y convincente?
-        - **Elementos Visuales y Ritmo:** ¿El estilo visual y el montaje apoyan el mensaje?
-        - **Propuesta de Valor:** ¿El beneficio para el cliente es evidente?
-        - **Llamada a la Acción (CTA):** ¿Es el CTA claro e incitativo?
-        - **Correlación:** Vincula elementos específicos del video con las buenas métricas (ej: "El gancho impactante probablemente explica el buen CTR", "La claridad de la oferta justifica el bajo CPA").
+        **Parte 1: Análisis de Rendimiento**
+        Analiza el video proporcionado a la luz de su rendimiento. Redacta un análisis conciso y perspicaz que explique **POR QUÉ** este anuncio ha funcionado. Tu respuesta debe ser directamente útil para un profesional del marketing. Cubre puntos como el gancho, la narrativa, los visuales, la propuesta de valor y la correlación con las métricas.
 
-        **Formato de Respuesta Esperado:**
-        Un texto fluido, bien redactado y profesional. Sin JSON. Comienza directamente con tu análisis.
+        **Parte 2: Propuestas de Nuevos Guiones Creativos**
+        Basándote en tu análisis y en los datos de rendimiento, genera **3 nuevas ideas de guiones** para futuras publicidades.
+
+        **Formato OBLIGATORIO para la Parte 2:**
+        Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
+        - Para cada uno de los 3 Hooks, detalla al menos 8 escenas.
+
+        **Formato de Respuesta Final:**
+        1. Comienza directamente con tu análisis de rendimiento (Parte 1).
+        2. Después del análisis, inserta una línea separadora: `---`
+        3. Inmediatamente después del separador, inserta la tabla Markdown con los guiones (Parte 2). No añadas ningún texto introductorio antes de la tabla.
         """
 
         print("    ▶️ Enviando prompt en español y video al modelo...")

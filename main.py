@@ -32,7 +32,8 @@ def generate_html_report(analyzed_ads):
     ad_sections_html = ""
     for item in analyzed_ads:
         ad = item['ad']
-        analysis_text = markdown.markdown(item['analysis_text'])
+        analysis_html = markdown.markdown(item['analysis_text'], extensions=['tables'])
+        script_html = markdown.markdown(item['script_text'], extensions=['tables'])
         media_path = item['media_path']
         media_type = item['media_type']
         
@@ -84,7 +85,11 @@ def generate_html_report(analyzed_ads):
             </div>
             <div>
                 <h3>Análisis Cualitativo del Experto IA</h3>
-                <div class="analysis">{analysis_text}</div>
+                <div class="analysis">{analysis_html}</div>
+            </div>
+            <div>
+                <h3>Propuestas de Nuevos Guiones</h3>
+                <div class="analysis">{script_html}</div>
             </div>
         </div>
         """
@@ -162,19 +167,31 @@ def main():
             if not local_media_path:
                 raise Exception("Fallo en la descarga del medio.")
 
-            # Appeler l'analyseur approprié
+            # La réponse du LLM contient maintenant l'analyse ET les scripts
+            full_response = ""
             if media_type == 'video':
-                analysis_report_text = gemini_analyzer.analyze_video(
+                full_response = gemini_analyzer.analyze_video(
                     video_path=local_media_path, ad_data=ad
                 )
             elif media_type == 'image':
-                 analysis_report_text = gemini_analyzer.analyze_image(
+                 full_response = gemini_analyzer.analyze_image(
                     image_path=local_media_path, ad_data=ad
                 )
             
+            # On sépare l'analyse et les scripts
+            analysis_part = ""
+            script_part = ""
+            if "---" in full_response:
+                parts = full_response.split("---", 1)
+                analysis_part = parts[0].strip()
+                script_part = parts[1].strip()
+            else:
+                analysis_part = full_response # Fallback
+
             analyzed_ads_data.append({
                 "ad": ad,
-                "analysis_text": analysis_report_text,
+                "analysis_text": analysis_part,
+                "script_text": script_part,
                 "media_path": local_media_path,
                 "media_type": media_type
             })
