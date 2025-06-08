@@ -1,5 +1,7 @@
 import os
 import facebook_client
+import google_analyzer
+import pprint
 from video_downloader import VideoDownloader
 from config import config
 
@@ -42,7 +44,9 @@ def main():
     # 2. Traiter chaque publicité gagnante
     print("\n--- Étape 2: Traitement de chaque publicité ---")
     for ad in ads_to_process:
-        print(f"\n✨ Traitement de la publicité : {ad.id} ({ad.name})")
+        print(f"\n{'*' * 40}")
+        print(f"✨ Traitement de la publicité : {ad.id} ({ad.name})")
+        print(f"{'*' * 40}")
 
         # 2a. Télécharger la vidéo et la téléverser sur GCS
         print(f"  📥 Téléchargement de la vidéo (ID: {ad.video_id})...")
@@ -51,20 +55,17 @@ def main():
         if not video_gcs_uri:
             print(f"❌ Échec du téléchargement pour la publicité {ad.id}. Passage à la suivante.")
             continue
-        print(f"  ✅ Vidéo téléversée sur GCS : {video_gcs_uri}")
+        # Le message de succès est déjà dans le downloader, pas besoin de le dupliquer ici.
 
         # 2b. Analyser la vidéo avec les services Google Cloud
-        print("  🧠 Lancement de l'analyse vidéo avec Google AI...")
-        print("     (Logique d'analyse à implémenter)")
-        # try:
-        #     analysis_results = analyzer.analyze_video(video_gcs_uri)
-        #     print("  ✅ Analyse vidéo terminée.")
-        #     # Ici, vous pourriez sauvegarder les `analysis_results`
-        #     # dans une base de données ou un fichier.
-        #     print("  Résultats de l'analyse :")
-        #     print(analysis_results)
-        # except Exception as e:
-        #     print(f"❌ Erreur lors de l'analyse de la vidéo {video_gcs_uri}: {e}")
+        print("\n  🧠 Lancement de l'analyse vidéo avec Google AI...")
+        try:
+            analysis_results = google_analyzer.extract_video_annotations(video_gcs_uri)
+            print("  ✅ Analyse GVI terminée.")
+            print("  Résultats de l'analyse :")
+            pprint.pprint(analysis_results)
+        except Exception as e:
+            print(f"❌ Erreur lors de l'analyse de la vidéo {video_gcs_uri}: {e}")
 
     print("\n🎉 Pipeline terminé.")
 
