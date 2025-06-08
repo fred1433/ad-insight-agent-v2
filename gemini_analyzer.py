@@ -71,7 +71,7 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
 
         **Formato OBLIGATORIO para la Parte 2:**
         Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
-        - Para cada uno de los 3 Hooks, detalla al menos 3 escenas.
+        - Para cada uno de los 3 Hooks, detalla al menos 8 escenas.
 
         **Formato de Respuesta Final:**
         1. Comienza directamente con tu análisis de rendimiento (Parte 1).
