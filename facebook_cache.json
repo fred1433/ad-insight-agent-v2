@@ -1,0 +1,254 @@
+[
+    {
+        "id": "120234183511920386",
+        "name": "VIDEO 2",
+        "creative_id": "2277689829333326",
+        "video_id": "966049978939442",
+        "insights": {
+            "spend": 7368.28,
+            "cpa": 433.428235,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234038963050386",
+        "name": "Sin stock",
+        "creative_id": "699130175852251",
+        "video_id": null,
+        "insights": {
+            "spend": 4187.32,
+            "cpa": 322.101538,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234021087280386",
+        "name": "Imagenes 2x1",
+        "creative_id": "1797853084132045",
+        "video_id": null,
+        "insights": {
+            "spend": 19915.52,
+            "cpa": 382.990769,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120234016085580386",
+        "name": "Imagenes 2x1  v2",
+        "creative_id": "1047781920238240",
+        "video_id": null,
+        "insights": {
+            "spend": 3046.51,
+            "cpa": 380.81375,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233979687900386",
+        "name": "VIDEO 2X1",
+        "creative_id": "1871276336998143",
+        "video_id": "1225267766050411",
+        "insights": {
+            "spend": 8773.73,
+            "cpa": 381.466522,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233842024420386",
+        "name": "Imagen 2",
+        "creative_id": "580115974685337",
+        "video_id": null,
+        "insights": {
+            "spend": 8063.84,
+            "cpa": 383.992381,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233842311510386",
+        "name": "Imagen 6",
+        "creative_id": "680645317929662",
+        "video_id": null,
+        "insights": {
+            "spend": 13589.41,
+            "cpa": 308.850227,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233842024400386",
+        "name": "Imagen 3",
+        "creative_id": "1815389255990099",
+        "video_id": null,
+        "insights": {
+            "spend": 10628.23,
+            "cpa": 442.842917,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233801745280386",
+        "name": "Video 4",
+        "creative_id": "999385128849186",
+        "video_id": "2229064907527497",
+        "insights": {
+            "spend": 16029.96,
+            "cpa": 552.757241,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233801727990386",
+        "name": "Video 3",
+        "creative_id": "546801474976362",
+        "video_id": "1220926186353126",
+        "insights": {
+            "spend": 6496.96,
+            "cpa": 499.766154,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233800405940386",
+        "name": "Video 1",
+        "creative_id": "2747074215483565",
+        "video_id": "1406875790637966",
+        "insights": {
+            "spend": 11562.45,
+            "cpa": 330.355714,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233027266650386",
+        "name": "Imagen 3",
+        "creative_id": "1076434550969288",
+        "video_id": null,
+        "insights": {
+            "spend": 3402.41,
+            "cpa": 425.30125,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120233001088630386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1021743370154306",
+        "video_id": null,
+        "insights": {
+            "spend": 15258.7,
+            "cpa": 462.384848,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    },
+    {
+        "id": "120227745673620386",
+        "name": "Hook 1,2,3",
+        "creative_id": "1234979728223860",
+        "video_id": "741762151538261",
+        "insights": {
+            "spend": 25486.02,
+            "cpa": 542.255745,
+            "website_purchases": 0,
+            "website_purchases_value": 0.0,
+            "roas": 0.0,
+            "cpm": 0.0,
+            "unique_ctr": 0.0,
+            "frequency": 0.0,
+            "hook_rate": 0.0,
+            "hold_rate": 0.0
+        }
+    }
+]

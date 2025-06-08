@@ -9,4 +9,10 @@ google-cloud-videointelligence==2.13.0
 google-generativeai==0.5.4
 gspread==5.12.4
 oauth2client==4.1.3
-pandas 
+pandas
+selenium
+selenium-wire
+webdriver-manager
+requests
+beautifulsoup4
+pydantic-settings 

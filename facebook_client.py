@@ -1,154 +1,189 @@
+import os
+import json
+from datetime import datetime, timedelta
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.ad import Ad as FBAd
-from facebook_business.adobjects.advideo import AdVideo
-from typing import List, Optional
+from typing import List, Dict
 
 from config import config
 from schemas import Ad, AdInsights
+
+# --- Configuration du Cache ---
+CACHE_FILE = "facebook_cache.json"
+CACHE_DURATION_HOURS = 24
+# -----------------------------
 
 # Constantes pour les règles métier
 WINNING_ADS_SPEND_THRESHOLD = 3000.0
 WINNING_ADS_CPA_THRESHOLD = 600.0
 
+
 def init_facebook_api():
     """Initialise l'API Facebook avec les identifiants de configuration."""
     init_params = {
         'access_token': config.facebook.access_token,
-        'crash_log': False
     }
-    if config.facebook.app_id:
-        init_params['app_id'] = config.facebook.app_id
     if config.facebook.app_secret:
         init_params['app_secret'] = config.facebook.app_secret
-
     FacebookAdsApi.init(**init_params)
 
-def get_video_download_url(video_id: str) -> Optional[str]:
-    """Récupère l'URL de téléchargement direct pour une vidéo donnée."""
-    try:
-        # On utilise api_get() pour demander directement le champ 'source' de l'objet vidéo.
-        # C'est une approche plus directe et robuste que get_previews().
-        video = AdVideo(video_id).api_get(fields=['source'])
-        return video.get('source')
-    except Exception as e:
-        print(f"Erreur lors de la récupération de l'URL de la vidéo {video_id}: {e}")
-        # On log l'erreur pour voir si c'est encore un problème de permission
-        # ou autre chose.
-        return None
+
+def _fetch_video_and_creative_ids_batch(ad_ids: List[str]) -> Dict[str, Dict[str, str]]:
+    """
+    Récupère video_id et creative_id pour une liste d'ad_ids en utilisant
+    des appels API par lots pour plus d'efficacité.
+    """
+    results_map = {}
+    api = FacebookAdsApi.get_default_api()
+    
+    # Découpe la liste d'IDs en morceaux de 50 pour le traitement par lots
+    for i in range(0, len(ad_ids), 50):
+        chunk = ad_ids[i:i+50]
+        batch_api = api.new_batch()
+        
+        def success_callback(response, ad_id_param):
+            creatives = response.json().get('data', [])
+            if creatives:
+                creative = creatives[0]
+                results_map[ad_id_param] = {
+                    'video_id': creative.get('video_id'),
+                    'creative_id': creative.get('id')
+                }
+
+        def failure_callback(response, ad_id_param):
+            print(f"Échec de la récupération du creative pour l'ad_id {ad_id_param} dans le lot : {response.error()}")
+
+        for ad_id in chunk:
+            request = FBAd(ad_id).get_ad_creatives(fields=['video_id', 'id'], pending=True)
+            batch_api.add_request(
+                request,
+                success=lambda response, ad_id_param=ad_id: success_callback(response, ad_id_param),
+                failure=lambda response, ad_id_param=ad_id: failure_callback(response, ad_id_param)
+            )
+        
+        print(f"Exécution de la requête par lot pour {len(chunk)} ad creatives...")
+        batch_api.execute()
+        
+    return results_map
+
+
+def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Dict]:
+    """
+    Récupère les insights pour une liste d'ad_ids en utilisant un filtre
+    sur le compte publicitaire, ce qui est une forme de batching efficace.
+    """
+    insights_map = {}
+    insight_fields = ['ad_id', 'spend', 'cost_per_action_type']
+
+    # Découpe les IDs en morceaux de 100 pour le filtre 'IN'
+    for i in range(0, len(ad_ids), 100):
+        chunk = ad_ids[i:i+100]
+        params = {
+            'level': 'ad',
+            'fields': insight_fields,
+            'filtering': [{'field': 'ad.id', 'operator': 'IN', 'value': chunk}],
+            'time_range': {'since': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'), 'until': datetime.now().strftime('%Y-%m-%d')},
+            'limit': 500
+        }
+        print(f"Exécution de la requête d'insights pour {len(chunk)} publicités...")
+        insights_cursor = account.get_insights(params=params)
+        for insight in insights_cursor:
+            insights_map[insight['ad_id']] = insight
+    
+    return insights_map
+
 
 def get_winning_ads() -> List[Ad]:
     """
-    Récupère les publicités, leurs métriques, les filtre pour ne garder
-    que les "gagnantes" et retourne une liste complète.
+    Récupère les publicités gagnantes en utilisant des appels par lots pour
+    une meilleure performance et un système de cache pour éviter les appels répétés.
     """
+    # --- Étape 1: Vérification du cache ---
+    if os.path.exists(CACHE_FILE):
+        file_mod_time = datetime.fromtimestamp(os.path.getmtime(CACHE_FILE))
+        if datetime.now() - file_mod_time < timedelta(hours=CACHE_DURATION_HOURS):
+            print(f"✅ Chargement des données depuis le cache récent : {CACHE_FILE}")
+            with open(CACHE_FILE, 'r') as f:
+                cached_data = json.load(f)
+            # Reconstruit les objets Pydantic depuis le dictionnaire en cache
+            return [Ad(**ad) for ad in cached_data]
+
+    print("ℹ️ Cache non trouvé ou expiré. Récupération des données depuis l'API Facebook...")
+    
+    winning_ads = []
     try:
         init_facebook_api()
-        ad_account = AdAccount(config.facebook.ad_account_id)
+        account = AdAccount(config.facebook.ad_account_id)
+
+        # --- Étape 2: Récupération des données par lots ---
+        print("Récupération de toutes les publicités actives...")
+        ad_fields = ['id', 'name']
+        params = {'ad_state': 'ACTIVE', 'limit': 1000}
+        all_ads_raw = list(account.get_ads(fields=ad_fields, params=params))
         
-        # 1. Récupérer les publicités de base
-        base_ads = ad_account.get_ads(
-            fields=['id', 'name', 'creative{video_id}'],
-            params={'effective_status': ['ACTIVE']}
-        )
+        if not all_ads_raw:
+            print("Aucune publicité active trouvée.")
+            return []
+            
+        ad_data_map = {ad['id']: ad for ad in all_ads_raw}
+        ad_ids = list(ad_data_map.keys())
+        print(f"{len(ad_ids)} publicités actives trouvées.")
+
+        print("\nRécupération groupée des créatives (video_id)...")
+        creatives_map = _fetch_video_and_creative_ids_batch(ad_ids)
         
-        winning_ads = []
-        for ad_data in base_ads:
-            ad_id = ad_data['id']
-            fb_ad = FBAd(ad_id)
+        video_ad_ids = list(creatives_map.keys())
+        if not video_ad_ids:
+            print("Aucune publicité avec vidéo trouvée.")
+            return []
+        print(f"{len(video_ad_ids)} publicités avec vidéo trouvées.")
+        
+        print("\nRécupération groupée des métriques (insights)...")
+        insights_map = _fetch_insights_batch(account, video_ad_ids)
+        print(f"{len(insights_map)} insights récupérés.")
 
-            # 2. Pour chaque pub, récupérer ses métriques (insights)
-            insights_data = fb_ad.get_insights(
-                fields=[
-                    'spend',
-                    'cpm',
-                    'unique_ctr',
-                    'frequency',
-                    'purchase_roas',
-                    'cost_per_action_type',
-                    'actions',
-                    'action_values',
-                    'video_play_actions', # Pour le Hold Rate
-                    'video_p100_watched_actions', # Pour le Hold Rate
-                    'video_thruplay_watched_actions', # Base alternative pour le Hook Rate
-                    'impressions' # Pour le Hook Rate
-                ]
-            )
+        # --- Étape 3: Combinaison des données et filtrage ---
+        print("\nFiltrage des publicités gagnantes...")
+        
+        for ad_id, ad_data in ad_data_map.items():
+            creative_info = creatives_map.get(ad_id)
+            insight_data = insights_map.get(ad_id)
 
-            if not insights_data:
-                continue # Passer si pas de métriques
+            if not creative_info or not insight_data:
+                continue
 
-            insights = insights_data[0] # Les insights sont une liste
-
-            # Extraire le coût par achat et la valeur des achats
+            spend = float(insight_data.get('spend', 0))
             cpa = 0.0
-            for item in insights.get('cost_per_action_type', []):
-                if item['action_type'] == 'purchase':
-                    cpa = float(item['value'])
-                    break
             
-            purchases = 0
-            for item in insights.get('actions', []):
-                if item['action_type'] == 'purchase':
-                    purchases = int(item['value'])
-                    break
-
-            purchases_value = 0.0
-            for item in insights.get('action_values', []):
-                if item['action_type'] == 'purchase':
-                    purchases_value = float(item['value'])
-                    break
+            if 'cost_per_action_type' in insight_data:
+                for action in insight_data['cost_per_action_type']:
+                    if action['action_type'] == 'purchase':
+                        cpa = float(action['value'])
+                        break
             
-            # Calculer les métriques personnalisées
-            impressions = float(insights.get('impressions', 0))
-            video_plays = 0
-            for item in insights.get('video_play_actions', []):
-                if item['action_type'] == 'video_view':
-                    video_plays = float(item['value'])
-                    break
-            
-            video_p100 = 0
-            for item in insights.get('video_p100_watched_actions', []):
-                if item['action_type'] == 'video_view':
-                    video_p100 = float(item['value'])
-                    break
-
-            video_thruplay = 0
-            for item in insights.get('video_thruplay_watched_actions', []):
-                if item['action_type'] == 'video_view':
-                    video_thruplay = float(item['value'])
-                    break
-            
-            hook_rate = (video_thruplay / impressions) if impressions > 0 else 0.0
-            hold_rate = (video_p100 / video_plays) if video_plays > 0 else 0.0
-
-            # 3. Appliquer le filtre "gagnante"
-            spend = float(insights.get('spend', 0.0))
-            if spend >= WINNING_ADS_SPEND_THRESHOLD and cpa <= WINNING_ADS_CPA_THRESHOLD:
-                
-                creative = ad_data.get('creative')
-                ad_pydantic = Ad(
-                    id=ad_data['id'],
+            if spend >= WINNING_ADS_SPEND_THRESHOLD and cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0:
+                ad_obj = Ad(
+                    id=ad_id,
                     name=ad_data['name'],
-                    creative_id=creative.get('id') if creative else None,
-                    video_id=creative.get('video_id') if creative else None,
-                    insights=AdInsights(
-                        spend=spend,
-                        cpa=cpa,
-                        website_purchases=purchases,
-                        website_purchases_value=purchases_value,
-                        roas=float(insights.get('purchase_roas', [{}])[0].get('value', 0.0)),
-                        cpm=float(insights.get('cpm', 0.0)),
-                        unique_ctr=float(insights.get('unique_ctr', 0.0)),
-                        frequency=float(insights.get('frequency', 0.0)),
-                        hook_rate=hook_rate,
-                        hold_rate=hold_rate
-                    )
+                    creative_id=creative_info['creative_id'],
+                    video_id=creative_info['video_id'],
+                    insights=AdInsights(spend=spend, cpa=cpa)
                 )
-                winning_ads.append(ad_pydantic)
-                
-        return winning_ads
-
+                winning_ads.append(ad_obj)
+        
     except Exception as e:
-        print(f"Erreur lors de la récupération des publicités Facebook : {e}")
-        return [] 
+        print(f"❌ Erreur lors de la récupération des publicités Facebook : {e}")
+    
+    finally:
+        # --- Étape 4: Sauvegarde dans le cache QUOI QU'IL ARRIVE ---
+        if winning_ads:
+            try:
+                ads_to_cache = [ad.dict() for ad in winning_ads]
+                with open(CACHE_FILE, 'w') as f:
+                    json.dump(ads_to_cache, f, indent=4)
+                print(f"💾 Données sauvegardées dans le cache : {CACHE_FILE}")
+            except Exception as cache_e:
+                print(f"⚠️ Erreur lors de la sauvegarde du cache : {cache_e}")
+
+    return winning_ads 

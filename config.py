@@ -1,47 +1,40 @@
 import os
-import sys
+from pydantic_settings import BaseSettings
 from typing import Optional
 from dotenv import load_dotenv
-from pydantic import BaseModel, ValidationError, Field
 
-# Charger les variables d'environnement du fichier .env
-load_dotenv()
+# Charger les variables d'environnement depuis .env à la racine du projet
+project_root = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(project_root, '.env'))
 
-class FacebookConfig(BaseModel):
-    app_id: Optional[str] = None
-    app_secret: Optional[str] = None
+# Définir le chemin vers le fichier de clés et l'assigner à la variable d'environnement
+credentials_path = os.path.join(project_root, 'google-cloud-credentials.json')
+if os.path.exists(credentials_path):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+else:
+    print("⚠️  AVERTISSEMENT: Le fichier 'google-cloud-credentials.json' n'a pas été trouvé.")
+
+class FacebookConfig(BaseSettings):
     access_token: str
+    app_secret: Optional[str] = None # Rendu optionnel pour plus de flexibilité
     ad_account_id: str
 
-class GoogleConfig(BaseModel):
-    gcs_bucket_name: str = Field(alias="GCS_BUCKET_NAME")
+    class Config:
+        env_prefix = 'FACEBOOK_'
 
-class AppConfig(BaseModel):
-    facebook: FacebookConfig
-    google: GoogleConfig
+class GoogleConfig(BaseSettings):
+    gcs_bucket_name: str # Pas de préfixe, Pydantic cherchera GCS_BUCKET_NAME
 
-def load_config() -> AppConfig:
-    """
-    Charge la configuration depuis les variables d'environnement
-    et la valide avec Pydantic.
-    """
-    try:
-        return AppConfig(
-            facebook=FacebookConfig(
-                app_id=os.getenv("FACEBOOK_APP_ID"),
-                app_secret=os.getenv("FACEBOOK_APP_SECRET"),
-                access_token=os.getenv("FACEBOOK_ACCESS_TOKEN"),
-                ad_account_id=os.getenv("FACEBOOK_AD_ACCOUNT_ID"),
-            ),
-            google=GoogleConfig(
-                GCS_BUCKET_NAME=os.getenv("GCS_BUCKET_NAME")
-            )
-        )
-    except ValidationError as e:
-        print("Erreur de configuration : des variables d'environnement sont manquantes ou invalides.")
-        print("Veuillez vérifier votre fichier .env. Variables requises : FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID, GCS_BUCKET_NAME")
-        print(f"\nDétails de l'erreur Pydantic:\n{e}")
-        sys.exit(1) # Quitte le script si la configuration est mauvaise
+# Classe principale pour contenir toutes les configurations
+# Pydantic-settings est assez intelligent pour router les variables
+# en se basant sur les préfixes définis dans chaque sous-classe.
+class AppSettings(BaseSettings):
+    # Les champs ici peuvent être utilisés pour des variables sans préfixe
+    # ex: DEBUG: bool = False
+    
+    # On compose la configuration avec nos classes spécifiques
+    facebook: FacebookConfig = FacebookConfig()
+    google: GoogleConfig = GoogleConfig()
 
-# Instance globale de la configuration
-config = load_config() 
+# Instance globale unique de la configuration
+config = AppSettings() 

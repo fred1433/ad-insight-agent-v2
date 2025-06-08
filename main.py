@@ -1,57 +1,64 @@
-import pprint
+import os
 import facebook_client
-import video_analyzer
-import database
+from video_downloader import VideoDownloader
+from config import config
 
 def main():
     """
-    Fonction principale du script.
+    Point d'entrée principal du script.
+    Orchestre le processus de récupération des publicités, de téléchargement des vidéos
+    et d'analyse.
     """
-    # S'assurer que la base de données est prête
-    database.init_db()
-    
-    print("Récupération et filtrage des publicités 'gagnantes' depuis l'API Facebook...")
+    print("🚀 Démarrage du pipeline d'analyse des publicités...")
+
+    # 1. Récupérer les publicités gagnantes depuis Facebook
+    print("\n--- Étape 1: Récupération des publicités gagnantes ---")
     winning_ads = facebook_client.get_winning_ads()
-    
     if not winning_ads:
-        print("\nℹ️ Aucune nouvelle publicité 'gagnante' à analyser.")
+        print("✅ Aucune publicité gagnante trouvée. Le script se termine.")
         return
-
-    print(f"\n✅ {len(winning_ads)} publicité(s) gagnante(s) trouvée(s). Début de l'analyse...")
-    print("-" * 30)
-
+    print(f"📊 {len(winning_ads)} publicité(s) gagnante(s) trouvée(s).")
     for ad in winning_ads:
-        print(f"\nTraitement de la publicité : {ad.name} ({ad.id})")
+        print(f"  - Ad ID: {ad.id}, Name: {ad.name}, Video ID: {ad.video_id}")
 
-        # 1. Vérifier si l'analyse est récente
-        if database.is_recently_analyzed(ad.id):
-            print(f"↪️ Analyse récente déjà trouvée dans la base de données. On passe.")
-            continue
+    # Initialiser les clients nécessaires
+    downloader = VideoDownloader()
+    # La logique d'analyse sera ajoutée ici plus tard
+    # analyzer = google_client.VideoAnalyzer()
 
+    # 2. Traiter chaque publicité gagnante
+    print("\n--- Étape 2: Traitement de chaque publicité ---")
+    for ad in winning_ads:
+        print(f"\n✨ Traitement de la publicité : {ad.id} ({ad.name})")
+
+        # Vérifier si un video_id est présent
         if not ad.video_id:
-            print("⚠️ Cette publicité n'a pas de vidéo associée. On passe.")
+            print(f"⚠️ Pas de video_id pour la publicité {ad.id}. Passage à la suivante.")
             continue
 
-        # 2. Récupérer l'URL de la vidéo
-        print("Récupération de l'URL de la vidéo...")
-        video_url = facebook_client.get_video_download_url(ad.video_id)
-        if not video_url:
-            print("❌ Impossible de récupérer l'URL de la vidéo. On passe.")
-            continue
+        # 2a. Télécharger la vidéo et la téléverser sur GCS
+        print(f"  📥 Téléchargement de la vidéo (ID: {ad.video_id})...")
+        video_gcs_uri = downloader.download_and_upload_video(video_id=ad.video_id, ad_id=ad.id)
         
-        # 3. Téléverser la vidéo sur GCS
-        print("Téléversement de la vidéo sur Google Cloud Storage...")
-        gcs_uri = video_analyzer.upload_video_to_gcs(video_url, ad.id)
-        if not gcs_uri:
-            print("❌ Échec du téléversement sur GCS. On passe à la suivante.")
+        if not video_gcs_uri:
+            print(f"❌ Échec du téléchargement pour la publicité {ad.id}. Passage à la suivante.")
             continue
+        print(f"  ✅ Vidéo téléversée sur GCS : {video_gcs_uri}")
 
-        # 4. Sauvegarder les métriques et l'URI GCS dans la BDD
-        print("Sauvegarde des résultats dans la base de données...")
-        database.save_analysis(ad, gcs_uri)
-        print(f"✅ Analyse de la publicité {ad.id} terminée et sauvegardée.")
+        # 2b. Analyser la vidéo avec les services Google Cloud
+        print("  🧠 Lancement de l'analyse vidéo avec Google AI...")
+        print("     (Logique d'analyse à implémenter)")
+        # try:
+        #     analysis_results = analyzer.analyze_video(video_gcs_uri)
+        #     print("  ✅ Analyse vidéo terminée.")
+        #     # Ici, vous pourriez sauvegarder les `analysis_results`
+        #     # dans une base de données ou un fichier.
+        #     print("  Résultats de l'analyse :")
+        #     print(analysis_results)
+        # except Exception as e:
+        #     print(f"❌ Erreur lors de l'analyse de la vidéo {video_gcs_uri}: {e}")
 
-    print("\n🎉 Toutes les publicités ont été traitées.")
+    print("\n🎉 Pipeline terminé.")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main() 

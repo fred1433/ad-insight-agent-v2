@@ -23,4 +23,16 @@ class Ad(BaseModel):
     name: str
     creative_id: Optional[str] = None
     video_id: Optional[str] = None
-    insights: Optional[AdInsights] = None 
+    insights: AdInsights
+
+class AnalysisResult(BaseModel):
+    ad_id: str
+    ad_name: str
+    analysis_date: str
+    gcs_video_uri: str
+    qualitative_analysis: Optional[str] = None
+    spend: float
+    cpa: float
+    roas: float
+    hook_rate: float
+    hold_rate: float 
