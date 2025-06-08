@@ -1,13 +1,25 @@
 import os
 import json
 from datetime import datetime, timedelta
+from typing import List, Dict, Optional
+from pydantic import BaseModel
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.ad import Ad as FBAd
-from typing import List, Dict
 
 from config import config
-from schemas import Ad, AdInsights
+
+# --- Définition des schémas de données (anciennement dans schemas.py) ---
+class AdInsights(BaseModel):
+    spend: float
+    cpa: float
+
+class Ad(BaseModel):
+    id: str
+    name: str
+    creative_id: Optional[str] = None
+    video_id: Optional[str] = None
+    insights: Optional[AdInsights] = None
 
 # --- Configuration du Cache ---
 CACHE_FILE = "facebook_cache.json"
@@ -179,7 +191,7 @@ def get_winning_ads() -> List[Ad]:
         # --- Étape 4: Sauvegarde dans le cache QUOI QU'IL ARRIVE ---
         if winning_ads:
             try:
-                ads_to_cache = [ad.dict() for ad in winning_ads]
+                ads_to_cache = [ad.model_dump() for ad in winning_ads]
                 with open(CACHE_FILE, 'w') as f:
                     json.dump(ads_to_cache, f, indent=4)
                 print(f"💾 Données sauvegardées dans le cache : {CACHE_FILE}")

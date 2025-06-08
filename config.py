@@ -8,13 +8,6 @@ from pydantic import BaseModel
 project_root = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(project_root, '.env'))
 
-# Définir le chemin vers le fichier de clés et l'assigner à la variable d'environnement
-credentials_path = os.path.join(project_root, 'google-cloud-credentials.json')
-if os.path.exists(credentials_path):
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
-else:
-    print("⚠️  AVERTISSEMENT: Le fichier 'google-cloud-credentials.json' n'a pas été trouvé.")
-
 class FacebookConfig(BaseSettings):
     access_token: str
     app_secret: Optional[str] = None # Rendu optionnel pour plus de flexibilité
