@@ -29,18 +29,16 @@ class VideoDownloader:
     """Télécharge des vidéos en utilisant une stratégie Selenium + fallback requests."""
 
     def __init__(self):
-        self.storage_client = storage.Client()
-        self.bucket = self.storage_client.bucket(config.google.gcs_bucket_name)
+        # On n'a plus besoin de GCS, mais on prépare un dossier local
+        self.download_folder = "tmp/videos"
+        os.makedirs(self.download_folder, exist_ok=True)
 
-    def download_and_upload_video(self, video_id: str, ad_id: str) -> Optional[str]:
+    def download_video_locally(self, video_id: str, ad_id: str) -> Optional[str]:
         """
-        Orchestre le téléchargement et le téléversement d'une vidéo.
-        Retourne l'URI GCS ou None si échec.
+        Orchestre le téléchargement et la sauvegarde LOCALE d'une vidéo.
+        Retourne le chemin du fichier local ou None si échec.
         """
-        print(f"Démarrage du téléchargement et de l'upload pour la pub {ad_id}")
-        
-        # Construire l'URL de la page à scraper
-        watch_url = f"https://www.facebook.com/watch/?v={video_id}"
+        print(f"Démarrage du téléchargement local pour la pub {ad_id}")
         
         # Tenter d'extraire l'URL directe du .mp4
         mp4_url = self._extract_mp4_url(video_id)
@@ -48,28 +46,23 @@ class VideoDownloader:
             print(f"❌ Impossible d'extraire l'URL du MP4 pour la pub {ad_id}.")
             return None
 
-        # Télécharger le contenu de la vidéo en mémoire
+        # Télécharger le contenu de la vidéo
         try:
             print(f"Téléchargement du contenu de la vidéo depuis : {mp4_url[:100]}...")
             response = requests.get(mp4_url, stream=True, timeout=60)
             response.raise_for_status()
-            video_content = response.content
+            
+            # Sauvegarder le fichier localement
+            local_path = os.path.join(self.download_folder, f"{ad_id}.mp4")
+            with open(local_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+
+            print(f"✅ Vidéo sauvegardée localement : {local_path}")
+            return local_path
+            
         except requests.RequestException as e:
             print(f"Erreur lors du téléchargement du fichier MP4 : {e}")
-            return None
-
-        # Téléverser sur GCS
-        destination_blob_name = f"{ad_id}.mp4"
-        blob = self.bucket.blob(destination_blob_name)
-        
-        try:
-            print(f"Téléversement de {len(video_content) / 1024 / 1024:.2f} MB sur GCS...")
-            blob.upload_from_string(video_content, content_type='video/mp4')
-            gcs_uri = f"gs://{config.google.gcs_bucket_name}/{destination_blob_name}"
-            print(f"✅ Vidéo téléversée avec succès sur GCS : {gcs_uri}")
-            return gcs_uri
-        except Exception as e:
-            print(f"Erreur lors du téléversement sur GCS : {e}")
             return None
 
     def _extract_mp4_url(self, video_id: str) -> Optional[str]:

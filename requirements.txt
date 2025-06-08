@@ -1,4 +1,4 @@
-# --- Dépendances Principales ---
+# --- Core Application Dependencies ---
 facebook-business
 pydantic
 pydantic-settings
@@ -9,8 +9,7 @@ selenium
 webdriver-manager
 blinker==1.7.0
 setuptools
-google-cloud-storage
-google-cloud-videointelligence
+google-generativeai
 
 # --- Outils de Développement et Linters ---
 black

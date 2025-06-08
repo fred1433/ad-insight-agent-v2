@@ -1,35 +1,30 @@
 import os
-import facebook_client
-import gvi_analyzer
 import pprint
+import json
+
+import facebook_client
 from video_downloader import VideoDownloader
 from config import config
-from google.cloud import storage
+import gemini_analyzer
 
 def main():
     """
     Point d'entrée principal du script.
-    Orchestre le processus de récupération des publicités, de téléchargement des vidéos
-    et d'analyse.
+    Orchestre le processus de récupération des publicités, de téléchargement et d'analyse.
     """
     print("🚀 Démarrage du pipeline d'analyse des publicités...")
 
-    # 1. Récupérer les publicités gagnantes depuis Facebook
-    print("\n--- Étape 1: Récupération des publicités gagnantes ---")
+    # 1. Récupérer les publicités depuis Facebook
+    print("\n--- Étape 1: Récupération des publicités ---")
     winning_ads = facebook_client.get_winning_ads()
     if not winning_ads:
-        print("✅ Aucune publicité gagnante trouvée. Le script se termine.")
+        print("✅ Aucune publicité trouvée. Le script se termine.")
         return
-    print(f"📊 {len(winning_ads)} publicité(s) gagnante(s) trouvée(s).")
-
-    # Filtrer pour ne garder que les publicités avec une vidéo
+    
     video_ads = [ad for ad in winning_ads if ad.video_id]
     if not video_ads:
-        print("✅ Aucune publicité vidéo parmi les gagnantes. Le script se termine.")
+        print("✅ Aucune publicité vidéo trouvée. Le script se termine.")
         return
-        
-    for ad in winning_ads:
-        print(f"  - Ad ID: {ad.id}, Name: {ad.name}, Video ID: {ad.video_id}")
 
     # Limiter le nombre de vidéos à traiter pour les tests
     ads_to_process = video_ads
@@ -37,46 +32,40 @@ def main():
         print(f"\n🔬 Mode test : Traitement limité à {config.script.max_ads_per_run} vidéo(s).")
         ads_to_process = video_ads[:config.script.max_ads_per_run]
 
-    # Initialiser les clients nécessaires
     downloader = VideoDownloader()
-    gcs_client = storage.Client()
-    bucket = gcs_client.bucket(config.google.gcs_bucket_name)
+    os.makedirs("reports", exist_ok=True)
 
-    # 2. Traiter chaque publicité gagnante
+    # 2. Traiter chaque publicité
     print("\n--- Étape 2: Traitement de chaque publicité ---")
     for ad in ads_to_process:
-        print(f"\n{'*' * 40}")
-        print(f"✨ Traitement de la publicité : {ad.id} ({ad.name})")
-        print(f"  - 📺 URL Facebook : https://www.facebook.com/watch/?v={ad.video_id}")
-        print(f"{'*' * 40}")
+        print(f"\n{'*' * 20} Traitement de la publicité {ad.id} {'*' * 20}")
 
-        gcs_object_name = f"{ad.id}.mp4"
-        gcs_uri = f"gs://{config.google.gcs_bucket_name}/{gcs_object_name}"
-        blob = bucket.blob(gcs_object_name)
-
-        # 2a. Vérifier si la vidéo est déjà sur GCS, sinon la télécharger
-        if blob.exists():
-            print(f"  ✅ Vidéo déjà présente sur GCS : {gcs_uri}. Saut de l'étape de téléchargement.")
-            video_gcs_uri = gcs_uri
-        else:
-            print(f"  📥 Téléchargement de la vidéo (ID: {ad.video_id})...")
-            video_gcs_uri = downloader.download_and_upload_video(video_id=ad.video_id, ad_id=ad.id)
+        # 2a. Télécharger la vidéo en local
+        local_video_path = downloader.download_video_locally(video_id=ad.video_id, ad_id=ad.id)
         
-        if not video_gcs_uri:
-            print(f"❌ Échec de la récupération de la vidéo pour la publicité {ad.id}. Passage à la suivante.")
+        if not local_video_path:
+            print(f"❌ Échec du téléchargement pour la publicité {ad.id}. Passage à la suivante.")
             continue
         
-        # 2b. Analyser la vidéo avec les services Google Cloud
-        print("\n  🧠 Lancement de l'analyse visuelle avec GVI...")
+        # 2b. Analyser la vidéo avec Gemini
         try:
-            analysis_results = gvi_analyzer.extract_annotations(
-                gcs_uri=video_gcs_uri
-            )
-            print("  ✅ Analyse visuelle GVI terminée.")
-            print("  Résultats de l'analyse visuelle :")
+            analysis_results = gemini_analyzer.analyze_video(local_video_path)
+            
+            report_path = f"reports/{ad.id}.json"
+            with open(report_path, "w", encoding="utf-8") as f:
+                json.dump(analysis_results, f, ensure_ascii=False, indent=4)
+            
+            print(f"  ✅ Analyse terminée et sauvegardée dans '{report_path}'.")
             pprint.pprint(analysis_results)
+
         except Exception as e:
-            print(f"❌ Erreur lors de l'analyse visuelle de la vidéo {video_gcs_uri}: {e}")
+            print(f"❌ Erreur lors de l'analyse Gemini pour la vidéo {local_video_path}: {e}")
+        
+        finally:
+            # 2c. Nettoyer le fichier vidéo local
+            print(f"  🗑️ Nettoyage du fichier local '{local_video_path}'...")
+            os.remove(local_video_path)
+            print("  ✅ Fichier local supprimé.")
 
     print("\n🎉 Pipeline terminé.")
 
