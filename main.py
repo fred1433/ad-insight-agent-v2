@@ -6,9 +6,9 @@ from config import config
 import gemini_analyzer
 
 def generate_html_report(analyzed_ads):
-    """Génère un rapport HTML autonome pour une liste de publicités analysées."""
+    """Genera un informe HTML autónomo para una lista de anuncios analizados."""
     
-    # CSS pour un style professionnel
+    # CSS para un estilo profesional
     css_style = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
@@ -105,23 +105,23 @@ def generate_html_report(analyzed_ads):
 
 def main():
     """
-    Point d'entrée principal du script.
-    Orchestre le processus de récupération, analyse et génération de rapport.
+    Punto de entrada principal del script.
+    Orquesta el proceso de recuperación, análisis y generación de informes.
     """
     print("🚀 Iniciando el pipeline de análisis de anuncios...")
 
     print("\\n--- Paso 1: Recuperando Anuncios ---")
     winning_ads = facebook_client.get_winning_ads()
     if not winning_ads:
-        print("✅ No se encontraron anuncios. El script finaliza.")
+        print("✅ No se encontraron anuncios ganadores. El script finaliza.")
         return
     
     video_ads = [ad for ad in winning_ads if ad.video_id]
     if not video_ads:
-        print("✅ No se encontraron anuncios de video. El script finaliza.")
+        print("✅ No se encontraron anuncios de video ganadores. El script finaliza.")
         return
 
-    ads_to_process = video_ads[:5]
+    ads_to_process = video_ads[:1]
     print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores.")
 
     downloader = VideoDownloader()

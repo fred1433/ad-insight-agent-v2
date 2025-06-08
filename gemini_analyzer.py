@@ -5,16 +5,16 @@ from typing import TYPE_CHECKING, Dict
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Utilisation de TYPE_CHECKING pour éviter une importation circulaire à l'exécution
-# tout en fournissant les types au linter. C'est la méthode la plus robuste.
+# Uso de TYPE_CHECKING para evitar una importación circular en tiempo de ejecución,
+# al tiempo que se proporcionan los tipos al linter. Este es el método más robusto.
 if TYPE_CHECKING:
     from facebook_client import Ad
 
-# Charger les variables d'environnement
+# Cargar las variables de entorno
 load_dotenv()
 
 def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
-    """Met en forme les métriques de la publicité pour une injection propre dans le prompt."""
+    """Formatea las métricas del anuncio para una inyección limpia en el prompt."""
     if not ad_data or not ad_data.insights:
         return "No se proporcionaron datos de rendimiento."
     
@@ -23,7 +23,7 @@ def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
         f"- Inversión total (Spend): {getattr(insights, 'spend', 'N/A'):.2f} €",
         f"- Costo por Compra (CPA): {getattr(insights, 'cpa', 'N/A'):.2f} €",
     ]
-    # Ajoutons les métriques supplémentaires si elles existent, sans causer d'erreur
+    # Añadimos las métricas adicionales si existen, sin causar errores.
     if hasattr(insights, 'ctr'):
         metrics.append(f"- Porcentaje de Clics (CTR): {insights.ctr:.2f}%")
     if hasattr(insights, 'cpm'):
@@ -34,14 +34,14 @@ def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
 
 def analyze_video(video_path: str, ad_data: Ad) -> str:
     """
-    Analyse une vidéo et ses métriques pour fournir une explication textuelle de sa performance.
+    Analiza un video y sus métricas para proporcionar una explicación textual de su rendimiento.
 
     Args:
-        video_path: Le chemin local vers le fichier vidéo.
-        ad_data: L'objet contenant les données de la publicité (nom, insights, etc.).
+        video_path: La ruta local al archivo de video.
+        ad_data: El objeto que contiene los datos del anuncio (nombre, insights, etc.).
 
     Returns:
-        Une chaîne de caractères contenant l'analyse marketing, ou un message d'erreur.
+        Una cadena de caracteres que contiene el análisis de marketing, o un mensaje de error.
     """
     print(f"  🧠 Iniciando análisis de marketing para el anuncio '{ad_data.name}'...")
     video_file = None
@@ -64,7 +64,7 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
         if video_file.state.name == "FAILED":
              raise ValueError(f"El procesamiento del video {video_file.name} ha fallado.")
 
-        # --- Construction du Prompt en Espagnol ---
+        # --- Construction du Prompt en Español ---
         metrics_text = _format_ad_metrics_for_prompt(ad_data)
         
         prompt = f"""
