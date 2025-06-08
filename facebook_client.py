@@ -11,8 +11,21 @@ from config import config
 
 # --- Définition des schémas de données (anciennement dans schemas.py) ---
 class AdInsights(BaseModel):
+    # Métriques existantes
     spend: float
     cpa: float
+    
+    # Nouvelles métriques de Pablo
+    website_purchases: Optional[int] = 0
+    website_purchases_value: Optional[float] = 0.0
+    roas: Optional[float] = 0.0
+    cpm: Optional[float] = 0.0
+    unique_ctr: Optional[float] = 0.0
+    frequency: Optional[float] = 0.0
+    
+    # Métriques calculées
+    hook_rate: Optional[float] = 0.0 # (3s views / impressions)
+    hold_rate: Optional[float] = 0.0 # (thru_plays / 3s views)
 
 class Ad(BaseModel):
     id: str
@@ -86,7 +99,20 @@ def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Di
     sur le compte publicitaire, ce qui est une forme de batching efficace.
     """
     insights_map = {}
-    insight_fields = ['ad_id', 'spend', 'cost_per_action_type']
+    insight_fields = [
+        'ad_id', 
+        'spend', 
+        'cost_per_action_type',
+        'impressions',
+        'cpm',
+        'unique_ctr',
+        'frequency',
+        'purchase_roas',
+        'actions',
+        'action_values',
+        'video_play_actions', # Base pour le "Hook Rate" (vues de 3s)
+        'video_thruplay_watched_actions' # Base pour le "Hold Rate"
+    ]
 
     # Découpe les IDs en morceaux de 100 pour le filtre 'IN'
     for i in range(0, len(ad_ids), 100):
@@ -165,22 +191,74 @@ def get_winning_ads() -> List[Ad]:
             if not creative_info or not insight_data:
                 continue
 
+            # --- Extraction des métriques de base ---
             spend = float(insight_data.get('spend', 0))
+            cpm = float(insight_data.get('cpm', 0))
+            unique_ctr = float(insight_data.get('unique_ctr', 0))
+            frequency = float(insight_data.get('frequency', 0))
+            roas = float(insight_data.get('purchase_roas', [{}])[0].get('value', 0.0))
+            impressions = float(insight_data.get('impressions', 0))
+
+            # --- Extraction des actions spécifiques ---
             cpa = 0.0
+            website_purchases = 0
+            website_purchases_value = 0.0
             
             if 'cost_per_action_type' in insight_data:
                 for action in insight_data['cost_per_action_type']:
                     if action['action_type'] == 'purchase':
                         cpa = float(action['value'])
+                        break # On a trouvé le CPA, on sort de la boucle
+            
+            if 'actions' in insight_data:
+                for action in insight_data['actions']:
+                    if action['action_type'] == 'purchase':
+                        website_purchases = int(action['value'])
                         break
             
+            if 'action_values' in insight_data:
+                for action in insight_data['action_values']:
+                    if action['action_type'] == 'purchase':
+                        website_purchases_value = float(action['value'])
+                        break
+            
+            # --- Calcul des métriques vidéo personnalisées ---
+            video_3s_views = 0
+            if 'video_play_actions' in insight_data:
+                 for action in insight_data['video_play_actions']:
+                    if action['action_type'] == 'video_view':
+                        video_3s_views = int(action['value'])
+                        break
+            
+            thru_plays = 0
+            if 'video_thruplay_watched_actions' in insight_data:
+                for action in insight_data['video_thruplay_watched_actions']:
+                    if action['action_type'] == 'video_view':
+                        thru_plays = int(action['value'])
+                        break
+
+            hook_rate = (video_3s_views / impressions * 100) if impressions > 0 else 0
+            hold_rate = (thru_plays / video_3s_views * 100) if video_3s_views > 0 else 0
+
+
             if spend >= WINNING_ADS_SPEND_THRESHOLD and cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0:
                 ad_obj = Ad(
                     id=ad_id,
                     name=ad_data['name'],
                     creative_id=creative_info['creative_id'],
                     video_id=creative_info['video_id'],
-                    insights=AdInsights(spend=spend, cpa=cpa)
+                    insights=AdInsights(
+                        spend=spend, 
+                        cpa=cpa,
+                        website_purchases=website_purchases,
+                        website_purchases_value=website_purchases_value,
+                        roas=roas,
+                        cpm=cpm,
+                        unique_ctr=unique_ctr,
+                        frequency=frequency,
+                        hook_rate=hook_rate,
+                        hold_rate=hold_rate
+                    )
                 )
                 winning_ads.append(ad_obj)
         
