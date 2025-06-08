@@ -2,6 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 from typing import Optional
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 # Charger les variables d'environnement depuis .env à la racine du projet
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -22,8 +23,13 @@ class FacebookConfig(BaseSettings):
     class Config:
         env_prefix = 'FACEBOOK_'
 
-class GoogleConfig(BaseSettings):
-    gcs_bucket_name: str # Pas de préfixe, Pydantic cherchera GCS_BUCKET_NAME
+class GoogleConfig(BaseModel):
+    project_id: str = os.getenv("GOOGLE_PROJECT_ID")
+    gcs_bucket_name: str = os.getenv("GCS_BUCKET_NAME")
+
+class ScriptConfig(BaseModel):
+    """Configuration générale du script."""
+    max_ads_per_run: int = 1 # Limite le nombre de pubs à traiter, -1 pour infini
 
 # Classe principale pour contenir toutes les configurations
 # Pydantic-settings est assez intelligent pour router les variables
@@ -35,6 +41,7 @@ class AppSettings(BaseSettings):
     # On compose la configuration avec nos classes spécifiques
     facebook: FacebookConfig = FacebookConfig()
     google: GoogleConfig = GoogleConfig()
+    script: ScriptConfig = ScriptConfig()
 
 # Instance globale unique de la configuration
 config = AppSettings() 
