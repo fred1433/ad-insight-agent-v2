@@ -1,9 +1,11 @@
 import os
 import base64
+import re
 import facebook_client
 from media_downloader import MediaDownloader
 from config import config
 import gemini_analyzer
+import image_generator
 import markdown
 
 def generate_html_report(analyzed_ads):
@@ -36,6 +38,7 @@ def generate_html_report(analyzed_ads):
         script_html = markdown.markdown(item['script_text'], extensions=['tables'])
         media_path = item['media_path']
         media_type = item['media_type']
+        generated_image_path = item.get('generated_image_path')
         
         # Titre dynamique pour la section des propositions
         proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
@@ -55,6 +58,22 @@ def generate_html_report(analyzed_ads):
         except Exception as e:
             print(f"Advertencia: No se pudo incrustar el medio para {ad.id}. {e}")
             media_html = "<p><i>Error al incrustar el medio.</i></p>"
+
+        # Sección para la imagen generada por IA
+        generated_image_html = ""
+        if generated_image_path:
+            try:
+                with open(generated_image_path, "rb") as img_file:
+                    img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+                img_ext = os.path.splitext(generated_image_path)[1].lower().replace('.', '')
+                
+                generated_image_html = f"""
+                <h4>Visualización del Concepto 1 (IA Generativa)</h4>
+                <img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA" style="width:100%; max-width: 400px; height:auto; border-radius: 4px; margin-top: 15px;">
+                """
+            except Exception as e:
+                print(f"Advertencia: No se pudo incrustar la imagen generada {generated_image_path}. {e}")
+                generated_image_html = "<p><i>Error al incrustar la imagen generada.</i></p>"
 
         insights = ad.insights
         kpi_table = f"""
@@ -93,6 +112,7 @@ def generate_html_report(analyzed_ads):
             <div>
                 <h3>{proposals_title}</h3>
                 <div class="analysis">{script_html}</div>
+                {generated_image_html}
             </div>
         </div>
         """
@@ -157,6 +177,7 @@ def main():
         local_media_path = None
         analysis_report_text = None
         media_type = None
+        generated_image_path = None
 
         try:
             print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
@@ -201,12 +222,34 @@ def main():
             else:
                 analysis_part = full_response # Fallback
             
+            # --- Generación de Imagen (MVP: solo la primera) ---
+            print("\\n--- Paso 3: Buscando y generando visual para el primer concepto ---")
+            # Usamos regex para encontrar el primer prompt de forma fiable
+            match = re.search(r"PROMPT_IMG: (.*)", full_response)
+            
+            if match:
+                first_prompt = match.group(1).strip()
+                print(f"  ▶️ Prompt encontrado: \"{first_prompt[:70]}...\"")
+                
+                output_filename = f"generated_concept_{ad.id}.png"
+                generated_image_path = image_generator.generate_image_from_prompt(
+                    prompt=first_prompt,
+                    output_filename=output_filename
+                )
+                if generated_image_path:
+                    print(f"  ✅ Visual para el concepto generado: {generated_image_path}")
+                else:
+                    print("  ⚠️ La generación del visual ha fallado.")
+            else:
+                print("  ⏹️ No se encontró ningún prompt con el prefijo 'PROMPT_IMG:'.")
+
             analyzed_ads_data.append({
                 "ad": ad,
                 "analysis_text": analysis_part,
                 "script_text": script_part,
                 "media_path": local_media_path,
-                "media_type": media_type
+                "media_type": media_type,
+                "generated_image_path": generated_image_path
             })
 
         except Exception as e:
@@ -224,10 +267,18 @@ def main():
     finally:
         print("\\n--- Limpieza de archivos de medios temporales ---")
         for item in analyzed_ads_data:
+            # Limpiar el medio original
             path_to_clean = item.get('media_path')
             if path_to_clean and os.path.exists(path_to_clean):
                 print(f"  🗑️ Eliminando '{path_to_clean}'...")
                 os.remove(path_to_clean)
+            
+            # Limpiar la imagen generada
+            generated_path_to_clean = item.get('generated_image_path')
+            if generated_path_to_clean and os.path.exists(generated_path_to_clean):
+                print(f"  🗑️ Eliminando '{generated_path_to_clean}'...")
+                os.remove(generated_path_to_clean)
+
         print("✅ Limpieza completada.")
 
 

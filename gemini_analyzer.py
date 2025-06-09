@@ -70,7 +70,8 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
         Inspirado por el éxito de esta imagen, genera **3 nuevos conceptos para anuncios de IMAGEN**. El objetivo es explorar variaciones creativas que mantengan el espíritu del anuncio ganador.
 
         **Formato OBLIGATORIO para la Parte 2:**
-        Presenta tus 3 conceptos en una tabla Markdown con las siguientes columnas: "Concepto de Imagen", "Descripción Visual Detallada (Prompt para IA)", y "Objetivo Estratégico". Para la descripción, sé muy específico sobre la composición, los sujetos, el entorno, los colores y el texto que debería aparecer.
+        Presenta tus 3 conceptos en una tabla Markdown con las siguientes columnas: "Concepto de Imagen", "Descripción Visual Detallada (Prompt para IA)", y "Objetivo Estratégico". 
+        **CRÍTICO: Cada prompt en la columna "Descripción Visual Detallada" DEBE comenzar con el prefijo `PROMPT_IMG:`.** Por ejemplo: `PROMPT_IMG: Un primer plano de...`.
 
         **Formato de Respuesta Final:**
         1. Comienza directamente con tu análisis de rendimiento (Parte 1).
@@ -141,8 +142,9 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
         Basándote en tu análisis y en los datos de rendimiento, genera **3 nuevas ideas de guiones** para futuras publicidades.
 
         **Formato OBLIGATORIO para la Parte 2:**
-        Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
+        Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Prompt de Imagen para el Hook", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
         - Para cada uno de los 3 Hooks, detalla al menos 8 escenas.
+        - **CRÍTICO: La columna "Prompt de Imagen para el Hook" DEBE contener un prompt de imagen detallado que represente visualmente el hook y comenzar con el prefijo `PROMPT_IMG:`.** Por ejemplo: `PROMPT_IMG: Una persona abre una caja misteriosa que emite una luz dorada, su rostro lleno de asombro...`.
 
         **Formato de Respuesta Final:**
         1. Comienza directamente con tu análisis de rendimiento (Parte 1).
