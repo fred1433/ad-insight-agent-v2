@@ -37,6 +37,9 @@ def generate_html_report(analyzed_ads):
         media_path = item['media_path']
         media_type = item['media_type']
         
+        # Titre dynamique pour la section des propositions
+        proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
+        
         media_html = ""
         try:
             with open(media_path, "rb") as media_file:
@@ -88,7 +91,7 @@ def generate_html_report(analyzed_ads):
                 <div class="analysis">{analysis_html}</div>
             </div>
             <div>
-                <h3>Propuestas de Nuevos Guiones</h3>
+                <h3>{proposals_title}</h3>
                 <div class="analysis">{script_html}</div>
             </div>
         </div>

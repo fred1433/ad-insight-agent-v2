@@ -66,17 +66,16 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
         **Parte 1: Análisis de Rendimiento**
         Analiza la imagen proporcionada a la luz de su rendimiento. Redacta un análisis conciso y perspicaz que explique **POR QUÉ** este anuncio ha funcionado. Tu respuesta debe ser directamente útil para un profesional del marketing. Cubre puntos como el impacto visual, la claridad del mensaje, la audiencia, el branding y la correlación con las métricas.
 
-        **Parte 2: Propuestas de Nuevos Guiones para Video**
-        Inspirado por el éxito de esta imagen, genera **3 nuevas ideas de guiones para anuncios de VIDEO**. El objetivo es traducir el éxito de un formato estático a un formato de video dinámico.
+        **Parte 2: Propuestas de Imágenes Alternativas**
+        Inspirado por el éxito de esta imagen, genera **3 nuevos conceptos para anuncios de IMAGEN**. El objetivo es explorar variaciones creativas que mantengan el espíritu del anuncio ganador.
 
         **Formato OBLIGATORIO para la Parte 2:**
-        Presenta tus ideas en una tabla Markdown con las siguientes columnas: "Hook (Gancho)", "Escena (Visual)", "Línea de Diálogo (Voz en Off)", y "Objetivo Estratégico".
-        - Para cada uno de los 3 Hooks, detalla al menos 8 escenas.
+        Presenta tus 3 conceptos en una tabla Markdown con las siguientes columnas: "Concepto de Imagen", "Descripción Visual Detallada (Prompt para IA)", y "Objetivo Estratégico". Para la descripción, sé muy específico sobre la composición, los sujetos, el entorno, los colores y el texto que debería aparecer.
 
         **Formato de Respuesta Final:**
         1. Comienza directamente con tu análisis de rendimiento (Parte 1).
         2. Después del análisis, inserta una línea separadora: `---`
-        3. Inmediatamente después del separador, inserta la tabla Markdown con los guiones (Parte 2). No añadas ningún texto introductorio antes de la tabla.
+        3. Inmediatamente después del separador, inserta la tabla Markdown con los conceptos (Parte 2). No añadas ningún texto introductorio antes de la tabla.
         """
         
         print("    ▶️ Enviando prompt en español e imagen al modelo...")
