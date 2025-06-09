@@ -1,12 +1,28 @@
 import os
 import base64
 import re
+import json # Importer json pour le cache
 import facebook_client
 from media_downloader import MediaDownloader
 from config import config
 import gemini_analyzer
 import image_generator
 import markdown
+
+CACHE_FILE = "analysis_cache.json"
+
+def load_cache():
+    """Charge le cache depuis le fichier s'il existe."""
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_cache(cache_data):
+    """Sauvegarde les données dans le fichier cache."""
+    with open(CACHE_FILE, 'w') as f:
+        json.dump(cache_data, f, indent=4)
+
 
 def generate_html_report(analyzed_ads):
     """Genera un informe HTML autónomo para una lista de anuncios analizados."""
@@ -27,6 +43,8 @@ def generate_html_report(analyzed_ads):
         .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         .analysis { margin-top: 20px; line-height: 1.6; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
+        .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .generated-images-grid img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
     """
@@ -38,9 +56,8 @@ def generate_html_report(analyzed_ads):
         script_html = markdown.markdown(item['script_text'], extensions=['tables'])
         media_path = item['media_path']
         media_type = item['media_type']
-        generated_image_path = item.get('generated_image_path')
-        
-        # Titre dynamique pour la section des propositions
+        generated_image_paths = item.get('generated_image_paths', []) # C'est maintenant une liste
+
         proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
         
         media_html = ""
@@ -51,50 +68,59 @@ def generate_html_report(analyzed_ads):
             if media_type == 'video':
                 media_html = f'<video controls width="100%"><source src="data:video/mp4;base64,{media_b64}" type="video/mp4">Tu navegador no soporta la etiqueta de video.</video>'
             elif media_type == 'image':
-                # Détecter le format de l'image pour le data URI
                 ext = os.path.splitext(media_path)[1].lower().replace('.', '')
                 media_html = f'<img src="data:image/{ext};base64,{media_b64}" alt="Anuncio" style="width:100%; height:auto; border-radius: 4px;">'
 
         except Exception as e:
-            print(f"Advertencia: No se pudo incrustar el medio para {ad.id}. {e}")
+            print(f"Advertencia: No se pudo incrustar el medio para {ad['id']}. {e}")
             media_html = "<p><i>Error al incrustar el medio.</i></p>"
 
-        # Sección para la imagen generada por IA
-        generated_image_html = ""
-        if generated_image_path:
-            try:
-                with open(generated_image_path, "rb") as img_file:
-                    img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
-                img_ext = os.path.splitext(generated_image_path)[1].lower().replace('.', '')
-                
-                generated_image_html = f"""
-                <h4>Visualización del Concepto 1 (IA Generativa)</h4>
-                <img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA" style="width:100%; max-width: 400px; height:auto; border-radius: 4px; margin-top: 15px;">
-                """
-            except Exception as e:
-                print(f"Advertencia: No se pudo incrustar la imagen generada {generated_image_path}. {e}")
-                generated_image_html = "<p><i>Error al incrustar la imagen generada.</i></p>"
+        generated_images_html = ""
+        if generated_image_paths:
+            generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
+            for img_path in generated_image_paths:
+                try:
+                    with open(img_path, "rb") as img_file:
+                        img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+                    img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+                    generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
+                except Exception as e:
+                    print(f"Advertencia: No se pudo incrustar la imagen generada {img_path}. {e}")
+            generated_images_html += "</div>"
+        
+        # On ne traite l'objet `ad` que s'il n'est pas déjà un dictionnaire (provenant du cache)
+        ad_id = ad['id'] if isinstance(ad, dict) else ad.id
+        ad_name = ad['name'] if isinstance(ad, dict) else ad.name
+        insights = ad['insights'] if isinstance(ad, dict) else ad.insights
+        
+        # Pour le cache, insights est un dictionnaire, pas un objet pydantic
+        insights_obj = facebook_client.AdInsights(**insights) if isinstance(insights, dict) else insights
 
-        insights = ad.insights
+        video_metrics_html = ""
+        if media_type == 'video':
+            video_metrics_html = f"""
+            <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{insights_obj.hook_rate:.2f} %</b></td></tr>
+            <tr><td><b>Tasa de Retención (Hold Rate)</b></td><td class="kpi-value"><b>{insights_obj.hold_rate:.2f} %</b></td></tr>
+            """
+
         kpi_table = f"""
         <table>
             <tr><th>Métrica</th><th class="kpi-value">Valor</th></tr>
-            <tr><td>Inversión (Spend)</td><td class="kpi-value">{insights.spend:,.2f} $</td></tr>
-            <tr><td>Costo por Compra (CPA)</td><td class="kpi-value">{insights.cpa:,.2f} $</td></tr>
-            <tr><td>Número de Compras</td><td class="kpi-value">{insights.website_purchases}</td></tr>
-            <tr><td>Valor de las Compras</td><td class="kpi-value">{insights.website_purchases_value:,.2f} $</td></tr>
-            <tr><td>ROAS</td><td class="kpi-value">{insights.roas:.2f}x</td></tr>
-            <tr><td>CPM</td><td class="kpi-value">{insights.cpm:,.2f} $</td></tr>
-            <tr><td>CTR (único)</td><td class="kpi-value">{insights.unique_ctr:.2f} %</td></tr>
-            <tr><td>Frecuencia</td><td class="kpi-value">{insights.frequency:.2f}</td></tr>
-            <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{insights.hook_rate:.2f} %</b></td></tr>
-            <tr><td><b>Tasa de Retención (Hold Rate)</b></td><td class="kpi-value"><b>{insights.hold_rate:.2f} %</b></td></tr>
+            <tr><td>Inversión (Spend)</td><td class="kpi-value">{insights_obj.spend:,.2f} $</td></tr>
+            <tr><td>Costo por Compra (CPA)</td><td class="kpi-value">{insights_obj.cpa:,.2f} $</td></tr>
+            <tr><td>Número de Compras</td><td class="kpi-value">{insights_obj.website_purchases}</td></tr>
+            <tr><td>Valor de las Compras</td><td class="kpi-value">{insights_obj.website_purchases_value:,.2f} $</td></tr>
+            <tr><td>ROAS</td><td class="kpi-value">{insights_obj.roas:.2f}x</td></tr>
+            <tr><td>CPM</td><td class="kpi-value">{insights_obj.cpm:,.2f} $</td></tr>
+            <tr><td>CTR (único)</td><td class="kpi-value">{insights_obj.unique_ctr:.2f} %</td></tr>
+            <tr><td>Frecuencia</td><td class="kpi-value">{insights_obj.frequency:.2f}</td></tr>
+            {video_metrics_html}
         </table>
         """
 
         ad_sections_html += f"""
         <div class="ad-container">
-            <h2>{ad.name} (ID: {ad.id})</h2>
+            <h2>{ad_name} (ID: {ad_id})</h2>
             <div class="grid-container">
                 <div>
                     <h3>Creatividad del Anuncio</h3>
@@ -112,7 +138,7 @@ def generate_html_report(analyzed_ads):
             <div>
                 <h3>{proposals_title}</h3>
                 <div class="analysis">{script_html}</div>
-                {generated_image_html}
+                {generated_images_html}
             </div>
         </div>
         """
@@ -148,36 +174,36 @@ def main():
     """
     print("🚀 Iniciando el pipeline de análisis de anuncios...")
 
+    cache = load_cache()
+    
     print("\\n--- Paso 1: Recuperando Anuncios ---")
     winning_ads = facebook_client.get_winning_ads()
     if not winning_ads:
         print("✅ No se encontraron anuncios ganadores. El script finaliza.")
         return
     
-    # Sélectionner le premier annonce vidéo et le premier annonce image
-    first_video_ad = next((ad for ad in winning_ads if ad.video_id), None)
-    first_image_ad = next((ad for ad in winning_ads if ad.image_url), None)
-
-    ads_to_process = []
-    if first_video_ad:
-        ads_to_process.append(first_video_ad)
-    if first_image_ad:
-        ads_to_process.append(first_image_ad)
+    video_ads = [ad for ad in winning_ads if ad.video_id][:2]
+    image_ads = [ad for ad in winning_ads if ad.image_url][:2]
+    ads_to_process = video_ads + image_ads
 
     if not ads_to_process:
         print("✅ No se encontraron anuncios ganadores con vídeo o imagen para procesar. El script finaliza.")
         return
 
-    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores.")
+    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores ({len(video_ads)} vídeos, {len(image_ads)} imágenes).")
 
     downloader = MediaDownloader()
     analyzed_ads_data = []
     
     for ad in ads_to_process:
+        if ad.id in cache:
+            print(f"\\n--- Cargando anuncio {ad.id} desde el cache ---")
+            analyzed_ads_data.append(cache[ad.id])
+            continue
+
         local_media_path = None
-        analysis_report_text = None
         media_type = None
-        generated_image_path = None
+        generated_image_paths = []
 
         try:
             print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
@@ -185,72 +211,52 @@ def main():
             if ad.video_id:
                 media_type = 'video'
                 print(f"  ▶️ Es un anuncio de video (ID: {ad.video_id}).")
-                local_media_path = downloader.download_video_locally(
-                video_id=ad.video_id, ad_id=ad.id
-            )
+                local_media_path = downloader.download_video_locally(ad.video_id, ad.id)
             elif ad.image_url:
                 media_type = 'image'
                 print(f"  ▶️ Es un anuncio de imagen (URL: {ad.image_url[:60]}...).")
-                local_media_path = downloader.download_image_locally(
-                    image_url=ad.image_url, ad_id=ad.id
-                )
+                local_media_path = downloader.download_image_locally(ad.image_url, ad.id)
             else:
-                print("  ⚠️ La publicidad no contiene ni video_id ni image_url. Omitiendo.")
                 continue
 
             if not local_media_path:
                 raise Exception("Fallo en la descarga del medio.")
 
-            # La réponse du LLM contient maintenant l'analyse ET les scripts
             full_response = ""
             if media_type == 'video':
-                full_response = gemini_analyzer.analyze_video(
-                    video_path=local_media_path, ad_data=ad
-                )
+                full_response = gemini_analyzer.analyze_video(local_media_path, ad)
             elif media_type == 'image':
-                 full_response = gemini_analyzer.analyze_image(
-                    image_path=local_media_path, ad_data=ad
-            )
+                 full_response = gemini_analyzer.analyze_image(local_media_path, ad)
             
-            # On sépare l'analyse et les scripts
-            analysis_part = ""
-            script_part = ""
-            if "---" in full_response:
-                parts = full_response.split("---", 1)
-                analysis_part = parts[0].strip()
-                script_part = parts[1].strip()
-            else:
-                analysis_part = full_response # Fallback
+            analysis_part, script_part = (full_response.split("---", 1)[0].strip(), full_response.split("---", 1)[1].strip()) if "---" in full_response else (full_response, "")
             
-            # --- Generación de Imagen (MVP: solo la primera) ---
-            print("\\n--- Paso 3: Buscando y generando visual para el primer concepto ---")
-            # Usamos regex para encontrar el primer prompt de forma fiable
-            match = re.search(r"PROMPT_IMG: (.*)", full_response)
-            
-            if match:
-                first_prompt = match.group(1).strip()
-                print(f"  ▶️ Prompt encontrado: \"{first_prompt[:70]}...\"")
-                
-                output_filename = f"generated_concept_{ad.id}.png"
-                generated_image_path = image_generator.generate_image_from_prompt(
-                    prompt=first_prompt,
-                    output_filename=output_filename
-                )
-                if generated_image_path:
-                    print(f"  ✅ Visual para el concepto generado: {generated_image_path}")
-                else:
-                    print("  ⚠️ La generación del visual ha fallado.")
-            else:
-                print("  ⏹️ No se encontró ningún prompt con el prefijo 'PROMPT_IMG:'.")
+            print("\\n--- Paso 3: Buscando y generando visuales para los conceptos ---")
+            prompts = re.findall(r"PROMPT_IMG: (.*)", full_response)
+            print(f"  ▶️ {len(prompts)} prompts encontrados.")
 
-            analyzed_ads_data.append({
-                "ad": ad,
+            for i, prompt in enumerate(prompts[:3]): # Limite à 3 générations
+                print(f"    - Procesando prompt {i+1}...")
+                output_filename = f"generated_concept_{ad.id}_{i+1}.png"
+                generated_path = image_generator.generate_image_from_prompt(prompt, output_filename)
+                if generated_path:
+                    generated_image_paths.append(generated_path)
+            
+            # Pour pouvoir sauvegarder dans le cache JSON, on convertit l'objet Pydantic en dict
+            ad_dict = ad.model_dump()
+
+            current_ad_data = {
+                "ad": ad_dict,
                 "analysis_text": analysis_part,
                 "script_text": script_part,
                 "media_path": local_media_path,
                 "media_type": media_type,
-                "generated_image_path": generated_image_path
-            })
+                "generated_image_paths": generated_image_paths
+            }
+            analyzed_ads_data.append(current_ad_data)
+
+            # Sauvegarder dans le cache après chaque succès
+            cache[ad.id] = current_ad_data
+            save_cache(cache)
 
         except Exception as e:
             print(f"❌ Ocurrió un error al procesar el anuncio {ad.id}: {e}")
@@ -266,19 +272,15 @@ def main():
         print(f"❌ Ocurrió un error al generar el informe HTML: {e}")
     finally:
         print("\\n--- Limpieza de archivos de medios temporales ---")
+        all_temp_files = []
         for item in analyzed_ads_data:
-            # Limpiar el medio original
-            path_to_clean = item.get('media_path')
+            if item.get('media_path'): all_temp_files.append(item['media_path'])
+            if item.get('generated_image_paths'): all_temp_files.extend(item['generated_image_paths'])
+        
+        for path_to_clean in set(all_temp_files): # Utiliser set pour éviter les doublons
             if path_to_clean and os.path.exists(path_to_clean):
                 print(f"  🗑️ Eliminando '{path_to_clean}'...")
                 os.remove(path_to_clean)
-            
-            # Limpiar la imagen generada
-            generated_path_to_clean = item.get('generated_image_path')
-            if generated_path_to_clean and os.path.exists(generated_path_to_clean):
-                print(f"  🗑️ Eliminando '{generated_path_to_clean}'...")
-                os.remove(generated_path_to_clean)
-
         print("✅ Limpieza completada.")
 
 
