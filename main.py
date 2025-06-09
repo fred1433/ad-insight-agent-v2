@@ -134,11 +134,21 @@ def main():
         print("✅ No se encontraron anuncios ganadores. El script finaliza.")
         return
     
-    # On filtre les publicités qui ont une créative (image ou vidéo) et on prend la première
-    ads_with_media = [ad for ad in winning_ads if ad.video_id or ad.image_url]
-    ads_to_process = ads_with_media[:1]
+    # Sélectionner le premier annonce vidéo et le premier annonce image
+    first_video_ad = next((ad for ad in winning_ads if ad.video_id), None)
+    first_image_ad = next((ad for ad in winning_ads if ad.image_url), None)
 
-    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores (imágenes o videos).")
+    ads_to_process = []
+    if first_video_ad:
+        ads_to_process.append(first_video_ad)
+    if first_image_ad:
+        ads_to_process.append(first_image_ad)
+
+    if not ads_to_process:
+        print("✅ No se encontraron anuncios ganadores con vídeo o imagen para procesar. El script finaliza.")
+        return
+
+    print(f"\\n🔬 Se procesarán {len(ads_to_process)} anuncios ganadores.")
 
     downloader = MediaDownloader()
     analyzed_ads_data = []
