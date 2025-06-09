@@ -165,8 +165,8 @@ def main():
                 media_type = 'video'
                 print(f"  ▶️ Es un anuncio de video (ID: {ad.video_id}).")
                 local_media_path = downloader.download_video_locally(
-                    video_id=ad.video_id, ad_id=ad.id
-                )
+                video_id=ad.video_id, ad_id=ad.id
+            )
             elif ad.image_url:
                 media_type = 'image'
                 print(f"  ▶️ Es un anuncio de imagen (URL: {ad.image_url[:60]}...).")
@@ -189,7 +189,7 @@ def main():
             elif media_type == 'image':
                  full_response = gemini_analyzer.analyze_image(
                     image_path=local_media_path, ad_data=ad
-                )
+            )
             
             # On sépare l'analyse et les scripts
             analysis_part = ""
@@ -200,7 +200,7 @@ def main():
                 script_part = parts[1].strip()
             else:
                 analysis_part = full_response # Fallback
-
+            
             analyzed_ads_data.append({
                 "ad": ad,
                 "analysis_text": analysis_part,

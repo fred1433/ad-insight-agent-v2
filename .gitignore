@@ -4,6 +4,10 @@ reports/
 tmp/
 facebook_cache.json
 *.html
+*.mp4
+*.png
+*.jpg
+test_*.py
 
 .venv/
 __pycache__/
