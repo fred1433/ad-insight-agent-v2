@@ -237,6 +237,8 @@ def get_winning_ads() -> List[Ad]:
             hold_rate = (thru_plays / video_3s_views * 100) if video_3s_views > 0 else 0
 
 
+            # Filtrage des publicités gagnantes basé sur les KPIs définis
+            # if cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0: # Ligne de test temporaire
             if spend >= WINNING_ADS_SPEND_THRESHOLD and cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0:
                 ad_obj = Ad(
                     id=ad_id,
