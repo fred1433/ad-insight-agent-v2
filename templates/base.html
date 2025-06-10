@@ -1,19 +1,9 @@
-{# Fichier de base pour la structure HTML de l'application. #}
-{% extends "base.html" %}
-
-{% block content %}
-    <h1>Gestion des Clients</h1>
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-{% endblock %}
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Ad Insight Agent{% endblock %}</title>
+    <title>Ad Insight Agent</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='htmx.min.js') }}" defer></script>
 </head>
