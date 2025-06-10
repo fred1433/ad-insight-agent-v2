@@ -40,9 +40,9 @@
                         </button>
                     </td>
                     <td>
-                        <form action="{{ url_for('run_analysis', client_id=client.id) }}" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-primary">Lancer Analyse Test</button>
-                        </form>
+                        <button class="btn btn-primary" hx-post="{{ url_for('run_analysis', client_id=client.id) }}" hx-trigger="click" hx-target="body" hx-swap="outerHTML">
+                            Lancer Analyse Test
+                        </button>
                     </td>
                     <td class="reports-cell">
                         {% if client.reports %}
