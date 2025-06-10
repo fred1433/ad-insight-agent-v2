@@ -281,3 +281,32 @@ def get_winning_ads(spend_threshold=WINNING_ADS_SPEND_THRESHOLD, cpa_threshold=W
                 print(f"⚠️ Erreur lors de la sauvegarde du cache : {cache_e}")
 
     return winning_ads 
+
+def get_specific_winning_ad(media_type: str, spend_threshold: float, cpa_threshold: float) -> Optional[Ad]:
+    """
+    Récupère la meilleure annonce gagnante pour un type de média spécifique ('video' ou 'image').
+    Se base sur le cache pour la rapidité.
+    """
+    print(f"Recherche de la meilleure annonce de type '{media_type}'...")
+    all_ads = get_winning_ads(spend_threshold, cpa_threshold)
+    
+    if not all_ads:
+        return None
+
+    if media_type == 'video':
+        # Filtre pour les annonces qui ont un video_id
+        candidate_ads = [ad for ad in all_ads if ad.video_id]
+    elif media_type == 'image':
+        # Filtre pour les annonces qui ont une image_url
+        candidate_ads = [ad for ad in all_ads if ad.image_url]
+    else:
+        return None
+    
+    if not candidate_ads:
+        print(f"Aucune annonce gagnante trouvée pour le type '{media_type}'.")
+        return None
+    
+    # La liste est déjà triée par CPA, donc le premier élément est le meilleur.
+    best_ad = candidate_ads[0]
+    print(f"Meilleure annonce de type '{media_type}' trouvée : {best_ad.name} (CPA: {best_ad.insights.cpa})")
+    return best_ad 

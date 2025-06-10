@@ -1,18 +1,22 @@
 # --- Core Application Dependencies ---
+Flask
 facebook-business
 pydantic
 pydantic-settings
 python-dotenv
 requests
-beautifulsoup4
 selenium
 webdriver-manager
 blinker==1.7.0
 setuptools
 google-generativeai
 Markdown
-openai
-google-cloud-aiplatform
+Pillow
+werkzeug
+pytz
+python-dateutil
+beautifulsoup4
+lxml
 
 # --- Outils de Développement et Linters ---
 black

@@ -20,10 +20,15 @@
                     Supprimer
                 </button>
             </td>
-            <td>
-                <button class="btn btn-primary" hx-post="{{ url_for('run_analysis', client_id=client.id) }}" hx-trigger="click" hx-target="#flash-messages" hx-swap="innerHTML">
-                    Lancer Analyse Test
-                </button>
+            <td class="reports-cell-buttons">
+                <div class="button-group">
+                    <button class="btn btn-primary btn-sm" hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='video') }}" hx-trigger="click" hx-target="#flash-messages" hx-swap="innerHTML">
+                        Test Vidéo
+                    </button>
+                    <button class="btn btn-secondary btn-sm" hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='image') }}" hx-trigger="click" hx-target="#flash-messages" hx-swap="innerHTML">
+                        Test Image
+                    </button>
+                </div>
             </td>
             <td class="reports-cell">
                 {% if client.reports %}

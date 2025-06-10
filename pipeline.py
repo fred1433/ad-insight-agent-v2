@@ -6,6 +6,7 @@ import threading
 import traceback
 from datetime import datetime
 import pytz
+from bs4 import BeautifulSoup
 
 import facebook_client
 from media_downloader import MediaDownloader
@@ -48,6 +49,7 @@ def generate_html_report(analyzed_ad_data, client_name):
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
         .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; justify-content: center; }
         .generated-images-grid img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        td img { max-width: 250px; height: auto; border-radius: 4px; }
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
     """
@@ -73,19 +75,64 @@ def generate_html_report(analyzed_ad_data, client_name):
     except Exception as e:
         media_html = f"<p><i>Error al incrustar el medio: {e}</i></p>"
 
-    generated_images_html = ""
-    if generated_image_paths:
-        generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
-        for img_path in generated_image_paths:
+    # Logique conditionnelle pour l'affichage des propositions
+    proposals_html_content = ""
+    if media_type == 'image' and generated_image_paths:
+        # Pour les images, on fusionne les propositions et les images dans un seul tableau
+        soup = BeautifulSoup(script_html, 'html.parser')
+        
+        # 1. Ajouter l'en-tête de la nouvelle colonne
+        header = soup.find('thead').find('tr')
+        if header:
+            new_th = soup.new_tag('th')
+            new_th.string = 'Visualización (IA)'
+            header.append(new_th)
+        
+        # 2. Ajouter les cellules pour les images
+        rows = soup.find('tbody').find_all('tr')
+        image_iterator = iter(generated_image_paths)
+        
+        for row in rows:
+            new_td = soup.new_tag('td')
             try:
+                img_path = next(image_iterator)
                 with open(img_path, "rb") as img_file:
                     img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
                 img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
-            except Exception:
+                img_tag = soup.new_tag('img', src=f"data:image/{img_ext};base64,{img_b64}", alt="Concepto generado por IA")
+                new_td.append(img_tag)
+            except (StopIteration, FileNotFoundError):
+                # Plus d'images ou fichier non trouvé, on laisse la cellule vide
                 pass
-        generated_images_html += "</div>"
-    
+            row.append(new_td)
+            
+        proposals_html_content = f"""
+        <h3>{proposals_title}</h3>
+        <div class="analysis">{str(soup)}</div>
+        """
+    else: # Pour les vidéos ou les images sans propositions
+        # On garde l'ancienne logique
+        generated_images_html = ""
+        if generated_image_paths:
+            generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
+            for img_path in generated_image_paths:
+                try:
+                    with open(img_path, "rb") as img_file:
+                        img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+                    img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+                    generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
+                except Exception:
+                    pass
+            generated_images_html += "</div>"
+        
+        proposals_html_content = f"""
+        <h3>{proposals_title}</h3>
+        <div class="analysis">
+            {script_html}
+            {generated_images_html}
+        </div>
+        """
+
     insights = facebook_client.AdInsights(**ad['insights'])
     video_metrics_html = ""
     if media_type == 'video':
@@ -117,7 +164,7 @@ def generate_html_report(analyzed_ad_data, client_name):
             <div><h3>Indicadores Clave (KPIs)</h3>{kpi_table}</div>
         </div>
         <div><h3>Análisis Cualitativo del Experto IA</h3><div class="analysis">{analysis_html}</div></div>
-        <div><h3>{proposals_title}</h3><div class="analysis">{script_html}</div>{generated_images_html}</div>
+        <div>{proposals_html_content}</div>
     </div>
     """
 
@@ -150,9 +197,9 @@ def generate_html_report(analyzed_ad_data, client_name):
     return report_path
 
 
-def run_analysis_for_client(client_id, report_id):
+def run_analysis_for_client(client_id, report_id, media_type: str):
     """
-    Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client.
+    Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client pour un type de média donné.
     Met à jour un enregistrement de rapport existant.
     """
     try:
@@ -172,17 +219,17 @@ def run_analysis_for_client(client_id, report_id):
         conn.close()
         print(f"LOG: Statut du rapport {report_id} mis à jour à RUNNING.")
 
-        # 2. Récupérer l'annonce la plus performante
-        print("Récupération de l'annonce la plus performante...")
+        # 2. Récupérer l'annonce la plus performante pour le type de média spécifié
+        print(f"Récupération de l'annonce la plus performante de type '{media_type}'...")
         facebook_client.init_facebook_api()
-        winning_ads = facebook_client.get_winning_ads(
+        best_ad = facebook_client.get_specific_winning_ad(
+            media_type=media_type,
             spend_threshold=client['spend_threshold'],
             cpa_threshold=client['cpa_threshold']
         )
-        if not winning_ads:
-            raise Exception("Aucune annonce gagnante trouvée pour ce client.")
+        if not best_ad:
+            raise Exception(f"Aucune annonce gagnante trouvée pour le type '{media_type}'.")
         
-        best_ad = winning_ads[0]
         print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id}) avec un CPA de {best_ad.insights.cpa:.2f}")
 
         # 3. Mettre à jour l'enregistrement du rapport avec l'ID de l'annonce
@@ -264,6 +311,6 @@ def run_analysis_for_client(client_id, report_id):
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:
-        run_analysis_for_client(int(sys.argv[1]), int(sys.argv[2]))
+        run_analysis_for_client(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
     else:
-        print("Usage: python pipeline.py <client_id> <report_id>") 
+        print("Usage: python pipeline.py <client_id> <report_id> <media_type>") 

@@ -83,10 +83,13 @@ def delete_client(client_id):
     response.headers['HX-Trigger'] = 'loadFlash'
     return response
 
-@app.route('/run_analysis/<int:client_id>', methods=['POST'])
-def run_analysis(client_id):
+@app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
+def run_analysis(client_id, media_type):
     """Lance le pipeline, crée un rapport IN_PROGRESS, et déclenche un rechargement de la liste."""
     
+    if media_type not in ['video', 'image']:
+        return "Type de média non valide.", 400
+
     conn = database.get_db_connection()
     client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
     client_name = client['name'] if client else f"ID {client_id}"
@@ -104,11 +107,11 @@ def run_analysis(client_id):
     conn.close()
     print(f"LOG: Tâche pré-enregistrée dans la DB. Rapport ID: {report_id} avec statut IN_PROGRESS")
     
-    # Étape 2: Lancer l'analyse en arrière-plan en lui passant le report_id
-    analysis_thread = threading.Thread(target=pipeline.run_analysis_for_client, args=(client_id, report_id))
+    # Étape 2: Lancer l'analyse en arrière-plan en lui passant le report_id et le media_type
+    analysis_thread = threading.Thread(target=pipeline.run_analysis_for_client, args=(client_id, report_id, media_type))
     analysis_thread.start()
     
-    flash(f"L'analyse pour '{client_name}' a été lancée. La liste va se mettre à jour.", "info")
+    flash(f"L'analyse de type '{media_type}' pour '{client_name}' a été lancée. La liste va se mettre à jour.", "info")
     
     # Étape 3: Renvoyer la réponse qui met à jour les messages flash et déclenche le rechargement de la liste.
     # Le bouton cliqué a pour target #flash-messages. La réponse met à jour cette cible.
