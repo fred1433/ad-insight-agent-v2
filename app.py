@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response
 from datetime import datetime
 from dateutil import parser
 import database
@@ -69,23 +69,53 @@ def delete_client(client_id):
 
 @app.route('/run_analysis/<int:client_id>', methods=['POST'])
 def run_analysis(client_id):
-    """Lance le pipeline d'analyse pour un client en tâche de fond."""
+    """Lance le pipeline d'analyse pour un client et notifie l'UI via HTMX."""
     
-    # Récupérer le nom du client pour un message plus clair
     conn = database.get_db_connection()
     client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
     conn.close()
-    
     client_name = client['name'] if client else f"ID {client_id}"
 
     print(f"Requête reçue pour lancer l'analyse du client: {client_name}")
     
-    # Créer et démarrer un thread pour exécuter la tâche de fond
     analysis_thread = threading.Thread(target=pipeline.run_analysis_for_client, args=(client_id,))
     analysis_thread.start()
     
-    flash(f"L'analyse pour le client '{client_name}' a été lancée en arrière-plan.", "info")
-    return redirect(url_for('index'))
+    flash(f"L'analyse pour '{client_name}' a été lancée. La liste sera mise à jour.", "info")
+    
+    # On recharge juste le bloc des messages flash
+    response = make_response()
+    response.headers['HX-Reswap'] = 'innerHTML'
+    response.headers['HX-Retarget'] = '#flash-messages'
+    response.headers['HX-Trigger'] = '{"reloadReports": "30s"}' # Déclenche un événement après 30s
+    return render_template('_flash_messages.html')
+
+@app.route('/clients')
+def get_clients_list():
+    """Route pour rafraîchir uniquement la liste des clients."""
+    conn = database.get_db_connection()
+    clients_cursor = conn.execute('SELECT * FROM clients ORDER BY name')
+    clients_list = clients_cursor.fetchall()
+
+    clients_with_reports = []
+    for client in clients_list:
+        client_dict = dict(client)
+        reports_cursor = conn.execute(
+            'SELECT id, status, report_path, created_at, ad_id FROM reports WHERE client_id = ? ORDER BY created_at DESC',
+            (client['id'],)
+        )
+        
+        reports = []
+        for row in reports_cursor.fetchall():
+            report_dict = dict(row)
+            if report_dict['created_at']:
+                report_dict['created_at'] = parser.parse(report_dict['created_at'])
+            reports.append(report_dict)
+            
+        client_dict['reports'] = reports
+        clients_with_reports.append(client_dict)
+    conn.close()
+    return render_template('_client_list.html', clients=clients_with_reports)
 
 @app.route('/reports/<path:filename>')
 def serve_report(filename):
