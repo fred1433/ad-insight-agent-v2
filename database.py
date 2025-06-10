@@ -10,13 +10,20 @@ def get_db_connection():
     return conn
 
 def init_db():
-    """Initialise la base de données en créant les tables nécessaires."""
-    if os.path.exists(DATABASE_FILE):
-        print("La base de données existe déjà.")
+    """Initialise la base de données en créant les tables nécessaires de manière idempotente."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Vérifie si la table 'clients' existe déjà
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='clients'")
+    table_exists = cursor.fetchone()
+    
+    if table_exists:
+        print("La base de données et les tables existent déjà.")
+        conn.close()
         return
         
-    print("Initialisation de la base de données...")
-    conn = get_db_connection()
+    print("Initialisation des tables de la base de données...")
     
     # On pourrait mettre le schéma dans un fichier .sql séparé si'l grandit
     conn.executescript("""
@@ -32,8 +39,8 @@ def init_db():
         CREATE TABLE reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER NOT NULL,
-            ad_id TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, RUNNING, COMPLETE, FAILED
+            ad_id TEXT, -- Peut être NULL au début
+            status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, RUNNING, COMPLETED, FAILED
             report_path TEXT,
             created_at TIMESTAMP NOT NULL,
             FOREIGN KEY (client_id) REFERENCES clients (id)

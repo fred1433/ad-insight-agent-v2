@@ -150,11 +150,11 @@ def generate_html_report(analyzed_ad_data, client_name):
     return report_path
 
 
-def run_analysis_for_client(client_id):
+def run_analysis_for_client(client_id, report_id):
     """
     Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client.
+    Met à jour un enregistrement de rapport existant.
     """
-    report_id = None
     try:
         # 1. Récupérer les infos du client
         conn = database.get_db_connection()
@@ -163,7 +163,14 @@ def run_analysis_for_client(client_id):
         if not client:
             raise Exception(f"Client {client_id} non trouvé.")
 
-        print(f"--- DÉBUT PIPELINE pour le client : {client['name']} ---")
+        print(f"--- DÉBUT PIPELINE pour le client : {client['name']} (Rapport ID: {report_id}) ---")
+        
+        # Mettre à jour le statut du rapport à RUNNING
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('RUNNING', report_id))
+        conn.commit()
+        conn.close()
+        print(f"LOG: Statut du rapport {report_id} mis à jour à RUNNING.")
 
         # 2. Récupérer l'annonce la plus performante
         print("Récupération de l'annonce la plus performante...")
@@ -178,20 +185,11 @@ def run_analysis_for_client(client_id):
         best_ad = winning_ads[0]
         print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id}) avec un CPA de {best_ad.insights.cpa:.2f}")
 
-        # 3. Créer l'enregistrement du rapport avec le fuseau horaire de Mexico
+        # 3. Mettre à jour l'enregistrement du rapport avec l'ID de l'annonce
         conn = database.get_db_connection()
-        
-        # Obtenir l'heure actuelle en UTC, puis la convertir pour Mexico
-        utc_now = pytz.utc.localize(datetime.utcnow())
-        mexico_tz = pytz.timezone("America/Mexico_City")
-        mexico_now = utc_now.astimezone(mexico_tz)
-
-        cursor = conn.execute('INSERT INTO reports (client_id, ad_id, status, created_at) VALUES (?, ?, ?, ?)', 
-                              (client_id, best_ad.id, 'RUNNING', mexico_now))
-        report_id = cursor.lastrowid
+        conn.execute('UPDATE reports SET ad_id = ? WHERE id = ?', (best_ad.id, report_id))
         conn.commit()
         conn.close()
-        print(f"Tâche enregistrée dans la DB. Rapport ID: {report_id} à l'heure de Mexico: {mexico_now}")
 
         # 4. Logique d'analyse complète (extraite de main.py) pour cette seule annonce
         cache = load_cache()
@@ -245,25 +243,27 @@ def run_analysis_for_client(client_id):
         print("Génération du rapport HTML...")
         report_path = generate_html_report(analyzed_ad_data, client['name'])
 
-        # 6. Mettre à jour le statut du rapport dans la DB
+        # 6. Mettre à jour le statut du rapport dans la DB à COMPLETED
         conn = database.get_db_connection()
         conn.execute('UPDATE reports SET status = ?, report_path = ? WHERE id = ?', ('COMPLETED', report_path, report_id))
         conn.commit()
         conn.close()
+        print(f"LOG: Statut du rapport {report_id} mis à jour à COMPLETED.")
         print(f"--- FIN PIPELINE pour le client : {client['name']} ---")
 
     except Exception as e:
-        print(f"!!! ERREUR PIPELINE pour le client ID {client_id}: {e}")
+        print(f"ERREUR dans le pipeline pour le rapport {report_id}: {e}")
         traceback.print_exc()
         if report_id:
             conn = database.get_db_connection()
             conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('FAILED', report_id))
             conn.commit()
             conn.close()
+            print(f"LOG: Statut du rapport {report_id} mis à jour à FAILED.")
 
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:
-        run_analysis_for_client(int(sys.argv[1]))
+        run_analysis_for_client(int(sys.argv[1]), int(sys.argv[2]))
     else:
-        print("Usage: python pipeline.py <client_id>") 
+        print("Usage: python pipeline.py <client_id> <report_id>") 
