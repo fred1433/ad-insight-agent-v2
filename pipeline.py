@@ -33,53 +33,35 @@ def generate_html_report(analyzed_ad_data, client_name):
     css_style = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
-        .main-container { max-width: 1200px; margin: 40px auto; }
+        .main-container { max-width: 900px; margin: 40px auto; }
         .ad-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
         h1, h2, h3 { color: #0056b3; }
         h1 { font-size: 2.8em; text-align: center; margin-bottom: 20px; }
         h1 small { font-size: 0.5em; color: #6c757d; display: block; margin-top: 10px;}
-        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-top: 40px;}
+        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-top: 40px; }
         h3 { font-size: 1.5em; border-bottom: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: top;}
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
         th { background-color: #e9ecef; font-weight: 600; }
         .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         .analysis { margin-top: 20px; line-height: 1.6; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
-        .concept-image { max-width: 200px; width: 100%; height: auto; border-radius: 4px;}
-        .table-image-cell { width: 220px; }
+        .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; justify-content: center; }
+        .generated-images-grid img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
     """
 
     ad = analyzed_ad_data['ad']
     analysis_html = markdown.markdown(analyzed_ad_data['analysis_text'], extensions=['tables'])
-    script_text_with_placeholders = analyzed_ad_data['script_text']
-    
-    # Remplacer les prompts par des placeholders dans le texte du script
-    prompts = re.findall(r"PROMPT_IMG: (.*)", analyzed_ad_data['analysis_text'] + analyzed_ad_data['script_text'])
-    for i, prompt in enumerate(prompts):
-        placeholder = f"<!-- IMAGE_PLACEHOLDER_{i} -->"
-        script_text_with_placeholders = script_text_with_placeholders.replace(f"PROMPT_IMG: {prompt}", placeholder)
-        
-    # Convertir le markdown avec les placeholders en HTML
-    script_html = markdown.markdown(script_text_with_placeholders, extensions=['tables'])
-
-    # Maintenant, remplacer les placeholders par les vraies images
-    generated_image_paths = analyzed_ad_data.get('generated_image_paths', [])
-    for i, img_path in enumerate(generated_image_paths):
-        placeholder = f"<!-- IMAGE_PLACEHOLDER_{i} -->"
-        try:
-            with open(img_path, "rb") as img_file:
-                img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
-            img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-            image_html = f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concept généré" class="concept-image">'
-            script_html = script_html.replace(placeholder, image_html)
-        except Exception as e:
-            script_html = script_html.replace(placeholder, f"<i>Image non trouvée: {e}</i>")
-
+    script_html = markdown.markdown(analyzed_ad_data['script_text'], extensions=['tables'])
     media_path = analyzed_ad_data['media_path']
     media_type = analyzed_ad_data['media_type']
+    generated_image_paths = analyzed_ad_data.get('generated_image_paths', [])
+
+    proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
+    
+    media_html = ""
     try:
         with open(media_path, "rb") as media_file:
             media_b64 = base64.b64encode(media_file.read()).decode('utf-8')
@@ -91,6 +73,19 @@ def generate_html_report(analyzed_ad_data, client_name):
     except Exception as e:
         media_html = f"<p><i>Error al incrustar el medio: {e}</i></p>"
 
+    generated_images_html = ""
+    if generated_image_paths:
+        generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
+        for img_path in generated_image_paths:
+            try:
+                with open(img_path, "rb") as img_file:
+                    img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+                img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+                generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
+            except Exception:
+                pass
+        generated_images_html += "</div>"
+    
     insights = facebook_client.AdInsights(**ad['insights'])
     video_metrics_html = ""
     if media_type == 'video':
@@ -98,6 +93,7 @@ def generate_html_report(analyzed_ad_data, client_name):
         <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{insights.hook_rate:.2f} %</b></td></tr>
         <tr><td><b>Tasa de Retención (Hold Rate)</b></td><td class="kpi-value"><b>{insights.hold_rate:.2f} %</b></td></tr>
         """
+
     kpi_table = f"""
     <table>
         <tr><th>Métrica</th><th class="kpi-value">Valor</th></tr>
@@ -112,9 +108,7 @@ def generate_html_report(analyzed_ad_data, client_name):
         {video_metrics_html}
     </table>
     """
-    
-    proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
-    
+
     ad_section_html = f"""
     <div class="ad-container">
         <h2>{ad['name']} (ID: {ad['id']})</h2>
@@ -123,7 +117,7 @@ def generate_html_report(analyzed_ad_data, client_name):
             <div><h3>Indicadores Clave (KPIs)</h3>{kpi_table}</div>
         </div>
         <div><h3>Análisis Cualitativo del Experto IA</h3><div class="analysis">{analysis_html}</div></div>
-        <div><h3>{proposals_title}</h3><div class="analysis">{script_html}</div></div>
+        <div><h3>{proposals_title}</h3><div class="analysis">{script_html}</div>{generated_images_html}</div>
     </div>
     """
 
