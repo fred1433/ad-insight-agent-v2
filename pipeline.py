@@ -149,7 +149,7 @@ def generate_html_report(analyzed_ad_data, client_name):
                             
                             # Créer la cellule qui s'étendra sur 2 colonnes et N lignes
                             img_td = soup.new_tag('td', colspan="2", rowspan=rowspan_count)
-                            img_td.attrs['style'] = "vertical-align: middle; text-align: center;"
+                            img_td.attrs['style'] = "vertical-align: top; text-align: center;"
                             with open(img_path, "rb") as img_file:
                                 img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
                             img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
