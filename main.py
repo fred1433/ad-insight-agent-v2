@@ -27,7 +27,7 @@ def save_cache(cache_data):
 def generate_html_report(analyzed_ads):
     """Genera un informe HTML autónomo para una lista de anuncios analizados."""
     
-    # CSS para un estilo profesional
+    # CSS pour un estilo profesional
     css_style = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
@@ -221,6 +221,8 @@ def main():
                 print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
                 
                 # Étape 1: Assurer la présence du média principal
+                local_media_path = None
+                media_type = None
                 if media_needs_redownload:
                     local_media_path = cached_data['media_path']
                     media_type = cached_data['media_type']
