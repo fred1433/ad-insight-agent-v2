@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from datetime import datetime
 import database
 import threading
 import pipeline
@@ -11,9 +12,34 @@ app.config['SECRET_KEY'] = 'une-super-cle-secrete-a-changer-en-prod'
 
 @app.route('/')
 def index():
-    """Affiche la page principale avec la liste des clients et le formulaire d'ajout."""
-    clients = database.get_all_clients()
-    return render_template('index.html', clients=clients)
+    """Affiche la liste des clients et leurs rapports."""
+    conn = database.get_db_connection()
+    # Récupérer tous les clients
+    clients_cursor = conn.execute('SELECT * FROM clients ORDER BY name')
+    clients_list = clients_cursor.fetchall()
+
+    # Pour chaque client, récupérer ses rapports
+    clients_with_reports = []
+    for client in clients_list:
+        client_dict = dict(client)
+        reports_cursor = conn.execute(
+            'SELECT id, status, report_path, created_at, ad_id FROM reports WHERE client_id = ? ORDER BY created_at DESC',
+            (client['id'],)
+        )
+        
+        reports = []
+        for row in reports_cursor.fetchall():
+            report_dict = dict(row)
+            # Conversion de la date (string) en objet datetime
+            if report_dict['created_at']:
+                report_dict['created_at'] = datetime.strptime(report_dict['created_at'], '%Y-%m-%d %H:%M:%S')
+            reports.append(report_dict)
+            
+        client_dict['reports'] = reports
+        clients_with_reports.append(client_dict)
+
+    conn.close()
+    return render_template('index.html', clients=clients_with_reports)
 
 @app.route('/add_client', methods=['POST'])
 def add_client():
@@ -59,6 +85,11 @@ def run_analysis(client_id):
     
     flash(f"L'analyse pour le client '{client_name}' a été lancée en arrière-plan.", "info")
     return redirect(url_for('index'))
+
+@app.route('/reports/<path:filename>')
+def serve_report(filename):
+    """Sert un fichier de rapport depuis le dossier 'reports'."""
+    return send_from_directory('reports', filename)
 
 def setup_database():
     """Initialise la base de données si elle n'existe pas."""
