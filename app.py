@@ -124,17 +124,26 @@ def get_clients_list():
     print("LOG: /clients a été appelé pour rafraîchir la liste.")
     clients, is_analysis_running = get_clients_with_reports()
     
-    response = make_response(render_template('_client_list.html', clients=clients))
-    
-    # Si une analyse est en cours, on déclenche le prochain poll en renvoyant un header.
     if is_analysis_running:
-        # HX-Trigger-After-Settle est plus robuste, il attend que le contenu soit inséré dans le DOM.
+        response = make_response(render_template('_client_list.html', clients=clients))
+        # Si une analyse est en cours, on déclenche le prochain poll en renvoyant un header.
         response.headers['HX-Trigger-After-Settle'] = '{"loadClientList": {"delay": "5s"}}'
         print("LOG: Analyse en cours détectée. Déclenchement du prochain poll dans 5s.")
+        return response
     else:
-        print("LOG: Aucune analyse en cours. Arrêt du polling en chaîne.")
+        print("LOG: Aucune analyse en cours. Arrêt du polling. Envoi de la liste finale et nettoyage des messages flash.")
+        # On prépare une réponse en deux parties : la liste finale et un bloc de messages vide.
+        client_list_html = render_template('_client_list.html', clients=clients)
+        flash_messages_html = render_template('_flash_messages.html') # Sera vide car les messages ont déjà été consommés
 
-    return response
+        # On utilise un OOB (Out-of-Band) Swap pour mettre à jour la liste ET les messages en une seule fois.
+        response_html = f"""
+        {client_list_html}
+        <div id="flash-messages" hx-swap-oob="true">
+            {flash_messages_html}
+        </div>
+        """
+        return make_response(response_html)
 
 @app.route('/reports/<path:filename>')
 def serve_report(filename):
