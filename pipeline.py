@@ -32,28 +32,28 @@ def generate_html_report(analyzed_ad_data, client_name):
     css_style = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
-        .main-container { max-width: 900px; margin: 40px auto; }
+        .main-container { max-width: 1200px; margin: 40px auto; }
         .ad-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
         h1, h2, h3 { color: #0056b3; }
         h1 { font-size: 2.8em; text-align: center; margin-bottom: 20px; }
         h1 small { font-size: 0.5em; color: #6c757d; display: block; margin-top: 10px;}
-        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-top: 40px;}
         h3 { font-size: 1.5em; border-bottom: none; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: top;}
         th { background-color: #e9ecef; font-weight: 600; }
         .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         .analysis { margin-top: 20px; line-height: 1.6; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
-        .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
         .generated-images-grid img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .concept-image { max-width: 200px; width: 100%; height: auto; border-radius: 4px;}
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
     """
 
     ad = analyzed_ad_data['ad']
     analysis_html = markdown.markdown(analyzed_ad_data['analysis_text'], extensions=['tables'])
-    script_html = markdown.markdown(analyzed_ad_data['script_text'], extensions=['tables'])
+    script_text = analyzed_ad_data['script_text']
     media_path = analyzed_ad_data['media_path']
     media_type = analyzed_ad_data['media_type']
     generated_image_paths = analyzed_ad_data.get('generated_image_paths', [])
@@ -72,19 +72,49 @@ def generate_html_report(analyzed_ad_data, client_name):
     except Exception as e:
         media_html = f"<p><i>Error al incrustar el medio: {e}</i></p>"
 
-    generated_images_html = ""
-    if generated_image_paths:
-        generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
-        for img_path in generated_image_paths:
+    # Associer chaque image générée à son script
+    prompts = re.findall(r"PROMPT_IMG: (.*)", analyzed_ad_data['analysis_text'] + script_text)
+    image_map = {}
+    for i, prompt in enumerate(prompts):
+        if i < len(generated_image_paths):
             try:
-                with open(img_path, "rb") as img_file:
+                with open(generated_image_paths[i], "rb") as img_file:
                     img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
-                img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
+                img_ext = os.path.splitext(generated_image_paths[i])[1].lower().replace('.', '')
+                image_map[prompt] = f'<img src="data:image/{img_ext};base64,{img_b64}" alt="{prompt}" class="concept-image">'
             except Exception:
                 pass
-        generated_images_html += "</div>"
-    
+
+    # Convertir le markdown du script en HTML et insérer les images
+    script_html_table = ""
+    script_lines = script_text.strip().split('\n')
+    in_table = False
+    for line in script_lines:
+        if '----' in line and not in_table:
+            in_table = True
+            # Ajouter une colonne pour l'image
+            script_html_table += "<thead>\n"
+            header = script_lines[script_lines.index(line) - 1]
+            header_cols = [f"<th>{h.strip()}</th>" for h in header.split('|')]
+            header_cols.insert(2, "<th>Visualisation du Concept</th>") 
+            script_html_table += f"<tr>{''.join(header_cols)}</tr>\n</thead>\n<tbody>\n"
+        elif in_table and '|' in line and '----' not in line:
+            row_cells = [f"<td>{cell.strip()}</td>" for cell in line.split('|')]
+            # Trouver le bon prompt dans la ligne pour faire correspondre l'image
+            prompt_in_row = next((p for p in prompts if p in line), None)
+            image_html = image_map.get(prompt_in_row, "<td></td>")
+            if "<td>" not in image_html:
+                image_html = f"<td>{image_html}</td>"
+            row_cells.insert(2, image_html)
+            script_html_table += f"<tr>{''.join(row_cells)}</tr>\n"
+        elif not in_table:
+            script_html_table += markdown.markdown(line)
+        
+    if in_table:
+        script_html_table = f"<table>{script_html_table}</tbody></table>"
+    else: # Fallback si pas de table détectée
+        script_html_table = markdown.markdown(script_text, extensions=['tables'])
+
     insights = facebook_client.AdInsights(**ad['insights'])
     video_metrics_html = ""
     if media_type == 'video':
@@ -116,7 +146,7 @@ def generate_html_report(analyzed_ad_data, client_name):
             <div><h3>Indicadores Clave (KPIs)</h3>{kpi_table}</div>
         </div>
         <div><h3>Análisis Cualitativo del Experto IA</h3><div class="analysis">{analysis_html}</div></div>
-        <div><h3>{proposals_title}</h3><div class="analysis">{script_html}</div>{generated_images_html}</div>
+        <div><h3>{proposals_title}</h3><div class="analysis">{script_html_table}</div></div>
     </div>
     """
 
