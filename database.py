@@ -35,7 +35,7 @@ def init_db():
             ad_id TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, RUNNING, COMPLETE, FAILED
             report_path TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP NOT NULL,
             FOREIGN KEY (client_id) REFERENCES clients (id)
         );
     """)

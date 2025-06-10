@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from datetime import datetime
+from dateutil import parser
 import database
 import threading
 import pipeline
@@ -30,9 +31,9 @@ def index():
         reports = []
         for row in reports_cursor.fetchall():
             report_dict = dict(row)
-            # Conversion de la date (string) en objet datetime
+            # Conversion robuste de la date (string) en objet datetime
             if report_dict['created_at']:
-                report_dict['created_at'] = datetime.strptime(report_dict['created_at'], '%Y-%m-%d %H:%M:%S')
+                report_dict['created_at'] = parser.parse(report_dict['created_at'])
             reports.append(report_dict)
             
         client_dict['reports'] = reports

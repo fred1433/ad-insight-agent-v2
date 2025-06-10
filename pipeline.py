@@ -5,6 +5,7 @@ import json
 import threading
 import traceback
 from datetime import datetime
+import pytz
 
 import facebook_client
 from media_downloader import MediaDownloader
@@ -45,22 +46,40 @@ def generate_html_report(analyzed_ad_data, client_name):
         .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
         .analysis { margin-top: 20px; line-height: 1.6; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
-        .generated-images-grid img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .concept-image { max-width: 200px; width: 100%; height: auto; border-radius: 4px;}
+        .table-image-cell { width: 220px; }
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
     """
 
     ad = analyzed_ad_data['ad']
     analysis_html = markdown.markdown(analyzed_ad_data['analysis_text'], extensions=['tables'])
-    script_text = analyzed_ad_data['script_text']
+    script_text_with_placeholders = analyzed_ad_data['script_text']
+    
+    # Remplacer les prompts par des placeholders dans le texte du script
+    prompts = re.findall(r"PROMPT_IMG: (.*)", analyzed_ad_data['analysis_text'] + analyzed_ad_data['script_text'])
+    for i, prompt in enumerate(prompts):
+        placeholder = f"<!-- IMAGE_PLACEHOLDER_{i} -->"
+        script_text_with_placeholders = script_text_with_placeholders.replace(f"PROMPT_IMG: {prompt}", placeholder)
+        
+    # Convertir le markdown avec les placeholders en HTML
+    script_html = markdown.markdown(script_text_with_placeholders, extensions=['tables'])
+
+    # Maintenant, remplacer les placeholders par les vraies images
+    generated_image_paths = analyzed_ad_data.get('generated_image_paths', [])
+    for i, img_path in enumerate(generated_image_paths):
+        placeholder = f"<!-- IMAGE_PLACEHOLDER_{i} -->"
+        try:
+            with open(img_path, "rb") as img_file:
+                img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+            img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+            image_html = f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concept généré" class="concept-image">'
+            script_html = script_html.replace(placeholder, image_html)
+        except Exception as e:
+            script_html = script_html.replace(placeholder, f"<i>Image non trouvée: {e}</i>")
+
     media_path = analyzed_ad_data['media_path']
     media_type = analyzed_ad_data['media_type']
-    generated_image_paths = analyzed_ad_data.get('generated_image_paths', [])
-
-    proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
-    
-    media_html = ""
     try:
         with open(media_path, "rb") as media_file:
             media_b64 = base64.b64encode(media_file.read()).decode('utf-8')
@@ -72,49 +91,6 @@ def generate_html_report(analyzed_ad_data, client_name):
     except Exception as e:
         media_html = f"<p><i>Error al incrustar el medio: {e}</i></p>"
 
-    # Associer chaque image générée à son script
-    prompts = re.findall(r"PROMPT_IMG: (.*)", analyzed_ad_data['analysis_text'] + script_text)
-    image_map = {}
-    for i, prompt in enumerate(prompts):
-        if i < len(generated_image_paths):
-            try:
-                with open(generated_image_paths[i], "rb") as img_file:
-                    img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
-                img_ext = os.path.splitext(generated_image_paths[i])[1].lower().replace('.', '')
-                image_map[prompt] = f'<img src="data:image/{img_ext};base64,{img_b64}" alt="{prompt}" class="concept-image">'
-            except Exception:
-                pass
-
-    # Convertir le markdown du script en HTML et insérer les images
-    script_html_table = ""
-    script_lines = script_text.strip().split('\n')
-    in_table = False
-    for line in script_lines:
-        if '----' in line and not in_table:
-            in_table = True
-            # Ajouter une colonne pour l'image
-            script_html_table += "<thead>\n"
-            header = script_lines[script_lines.index(line) - 1]
-            header_cols = [f"<th>{h.strip()}</th>" for h in header.split('|')]
-            header_cols.insert(2, "<th>Visualisation du Concept</th>") 
-            script_html_table += f"<tr>{''.join(header_cols)}</tr>\n</thead>\n<tbody>\n"
-        elif in_table and '|' in line and '----' not in line:
-            row_cells = [f"<td>{cell.strip()}</td>" for cell in line.split('|')]
-            # Trouver le bon prompt dans la ligne pour faire correspondre l'image
-            prompt_in_row = next((p for p in prompts if p in line), None)
-            image_html = image_map.get(prompt_in_row, "<td></td>")
-            if "<td>" not in image_html:
-                image_html = f"<td>{image_html}</td>"
-            row_cells.insert(2, image_html)
-            script_html_table += f"<tr>{''.join(row_cells)}</tr>\n"
-        elif not in_table:
-            script_html_table += markdown.markdown(line)
-        
-    if in_table:
-        script_html_table = f"<table>{script_html_table}</tbody></table>"
-    else: # Fallback si pas de table détectée
-        script_html_table = markdown.markdown(script_text, extensions=['tables'])
-
     insights = facebook_client.AdInsights(**ad['insights'])
     video_metrics_html = ""
     if media_type == 'video':
@@ -122,7 +98,6 @@ def generate_html_report(analyzed_ad_data, client_name):
         <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{insights.hook_rate:.2f} %</b></td></tr>
         <tr><td><b>Tasa de Retención (Hold Rate)</b></td><td class="kpi-value"><b>{insights.hold_rate:.2f} %</b></td></tr>
         """
-
     kpi_table = f"""
     <table>
         <tr><th>Métrica</th><th class="kpi-value">Valor</th></tr>
@@ -137,7 +112,9 @@ def generate_html_report(analyzed_ad_data, client_name):
         {video_metrics_html}
     </table>
     """
-
+    
+    proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
+    
     ad_section_html = f"""
     <div class="ad-container">
         <h2>{ad['name']} (ID: {ad['id']})</h2>
@@ -146,7 +123,7 @@ def generate_html_report(analyzed_ad_data, client_name):
             <div><h3>Indicadores Clave (KPIs)</h3>{kpi_table}</div>
         </div>
         <div><h3>Análisis Cualitativo del Experto IA</h3><div class="analysis">{analysis_html}</div></div>
-        <div><h3>{proposals_title}</h3><div class="analysis">{script_html_table}</div></div>
+        <div><h3>{proposals_title}</h3><div class="analysis">{script_html}</div></div>
     </div>
     """
 
@@ -207,14 +184,20 @@ def run_analysis_for_client(client_id):
         best_ad = winning_ads[0]
         print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id}) avec un CPA de {best_ad.insights.cpa:.2f}")
 
-        # 3. Créer l'enregistrement du rapport MAINTENANT qu'on a l'ad_id
+        # 3. Créer l'enregistrement du rapport avec le fuseau horaire de Mexico
         conn = database.get_db_connection()
-        cursor = conn.execute('INSERT INTO reports (client_id, ad_id, status) VALUES (?, ?, ?)', 
-                              (client_id, best_ad.id, 'RUNNING'))
+        
+        # Obtenir l'heure actuelle en UTC, puis la convertir pour Mexico
+        utc_now = pytz.utc.localize(datetime.utcnow())
+        mexico_tz = pytz.timezone("America/Mexico_City")
+        mexico_now = utc_now.astimezone(mexico_tz)
+
+        cursor = conn.execute('INSERT INTO reports (client_id, ad_id, status, created_at) VALUES (?, ?, ?, ?)', 
+                              (client_id, best_ad.id, 'RUNNING', mexico_now))
         report_id = cursor.lastrowid
         conn.commit()
         conn.close()
-        print(f"Tâche enregistrée dans la DB. Rapport ID: {report_id}")
+        print(f"Tâche enregistrée dans la DB. Rapport ID: {report_id} à l'heure de Mexico: {mexico_now}")
 
         # 4. Logique d'analyse complète (extraite de main.py) pour cette seule annonce
         cache = load_cache()
