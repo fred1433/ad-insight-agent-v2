@@ -34,7 +34,7 @@ def generate_html_report(analyzed_ad_data, client_name):
     css_style = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
-        .main-container { max-width: 900px; margin: 40px auto; }
+        .main-container { max-width: 1200px; margin: 40px auto; }
         .ad-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
         h1, h2, h3 { color: #0056b3; }
         h1 { font-size: 2.8em; text-align: center; margin-bottom: 20px; }
@@ -81,55 +81,116 @@ def generate_html_report(analyzed_ad_data, client_name):
         # Pour les images, on fusionne les propositions et les images dans un seul tableau
         soup = BeautifulSoup(script_html, 'html.parser')
         
-        # 1. Ajouter l'en-tête de la nouvelle colonne
-        header = soup.find('thead').find('tr')
-        if header:
-            new_th = soup.new_tag('th')
-            new_th.string = 'Visualización (IA)'
-            header.append(new_th)
-        
-        # 2. Ajouter les cellules pour les images
-        rows = soup.find('tbody').find_all('tr')
-        image_iterator = iter(generated_image_paths)
-        
-        for row in rows:
-            new_td = soup.new_tag('td')
-            try:
-                img_path = next(image_iterator)
-                with open(img_path, "rb") as img_file:
-                    img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
-                img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                img_tag = soup.new_tag('img', src=f"data:image/{img_ext};base64,{img_b64}", alt="Concepto generado por IA")
-                new_td.append(img_tag)
-            except (StopIteration, FileNotFoundError):
-                # Plus d'images ou fichier non trouvé, on laisse la cellule vide
-                pass
-            row.append(new_td)
+        table = soup.find('table')
+        if table:
+            # 1. Ajouter l'en-tête de la nouvelle colonne
+            header = table.find('thead').find('tr')
+            if header:
+                new_th = soup.new_tag('th')
+                new_th.string = 'Visualización (IA)'
+                header.append(new_th)
             
-        proposals_html_content = f"""
-        <h3>{proposals_title}</h3>
-        <div class="analysis">{str(soup)}</div>
-        """
-    else: # Pour les vidéos ou les images sans propositions
-        # On garde l'ancienne logique
-        generated_images_html = ""
-        if generated_image_paths:
-            generated_images_html += "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
-            for img_path in generated_image_paths:
+            # 2. Ajouter les cellules pour les images
+            rows = table.find('tbody').find_all('tr')
+            image_iterator = iter(generated_image_paths)
+            
+            for row in rows:
+                new_td = soup.new_tag('td')
                 try:
+                    img_path = next(image_iterator)
                     with open(img_path, "rb") as img_file:
                         img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
                     img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
-                    generated_images_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
-                except Exception:
+                    img_tag = soup.new_tag('img', src=f"data:image/{img_ext};base64,{img_b64}", alt="Concepto generado por IA")
+                    new_td.append(img_tag)
+                except (StopIteration, FileNotFoundError):
                     pass
-            generated_images_html += "</div>"
-        
+                row.append(new_td)
+                
+            proposals_html_content = f"""
+            <h3>{proposals_title}</h3>
+            <div class="analysis">{str(soup)}</div>
+            """
+        else: # Fallback si le script n'est pas un tableau
+            proposals_html_content = f"""
+            <h3>{proposals_title}</h3>
+            <div class="analysis">{script_html}</div>
+            {create_image_grid_html(generated_image_paths)}
+            """
+    elif media_type == 'video' and generated_image_paths:
+        # Pour les vidéos, on utilise colspan et rowspan pour placer l'image dans l'espace vide sous le hook
+        soup = BeautifulSoup(script_html, 'html.parser')
+        table = soup.find('table')
+        if table:
+            rows = table.find('tbody').find_all('tr')
+            image_iterator = iter(generated_image_paths)
+            
+            i = 0
+            while i < len(rows):
+                row = rows[i]
+                tds = row.find_all('td', recursive=False)
+                # Heuristique : une ligne de "hook" a du contenu dans les deux premières cellules
+                is_hook_row = len(tds) > 1 and tds[0].get_text(strip=True) and tds[1].get_text(strip=True)
+
+                if is_hook_row:
+                    scene_rows = []
+                    for j in range(i + 1, len(rows)):
+                        next_row = rows[j]
+                        next_tds = next_row.find_all('td', recursive=False)
+                        # Arrêter si on trouve le prochain hook
+                        if len(next_tds) > 1 and next_tds[0].get_text(strip=True) and next_tds[1].get_text(strip=True):
+                            break
+                        scene_rows.append(next_row)
+                    
+                    rowspan_count = len(scene_rows)
+                    if rowspan_count > 0:
+                        try:
+                            img_path = next(image_iterator)
+                            
+                            # Créer la cellule qui s'étendra sur 2 colonnes et N lignes
+                            img_td = soup.new_tag('td', colspan="2", rowspan=rowspan_count)
+                            img_td.attrs['style'] = "vertical-align: middle; text-align: center;"
+                            with open(img_path, "rb") as img_file:
+                                img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+                            img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+                            img_tag = soup.new_tag('img', src=f"data:image/{img_ext};base64,{img_b64}", alt="Concepto generado por IA")
+                            img_td.append(img_tag)
+                            
+                            # Dans la 1ère ligne de scène, supprimer les 2 premières cellules et insérer la nouvelle
+                            first_scene_row_tds = scene_rows[0].find_all('td', recursive=False)
+                            if len(first_scene_row_tds) >= 2:
+                                first_scene_row_tds[0].decompose()
+                                first_scene_row_tds[1].decompose()
+                            scene_rows[0].insert(0, img_td)
+
+                            # Dans les lignes de scène suivantes, supprimer les 2 premières cellules
+                            for j in range(1, len(scene_rows)):
+                                subsequent_scene_row_tds = scene_rows[j].find_all('td', recursive=False)
+                                if len(subsequent_scene_row_tds) >= 2:
+                                    subsequent_scene_row_tds[0].decompose()
+                                    subsequent_scene_row_tds[1].decompose()
+                        except (StopIteration, FileNotFoundError):
+                            pass
+                    i += 1 + rowspan_count
+                else:
+                    i += 1
+            
+            proposals_html_content = f"""
+            <h3>{proposals_title}</h3>
+            <div class="analysis">{str(soup)}</div>
+            """
+        else: # Fallback
+            proposals_html_content = f"""
+            <h3>{proposals_title}</h3>
+            <div class="analysis">{script_html}</div>
+            {create_image_grid_html(generated_image_paths)}
+            """
+    else: 
+        # S'il n'y a pas d'images générées, on affiche juste le script
         proposals_html_content = f"""
         <h3>{proposals_title}</h3>
         <div class="analysis">
             {script_html}
-            {generated_images_html}
         </div>
         """
 
@@ -196,6 +257,22 @@ def generate_html_report(analyzed_ad_data, client_name):
     print(f"Rapport HTML généré : {report_path}")
     return report_path
 
+def create_image_grid_html(image_paths):
+    """Crée le HTML pour une grille d'images."""
+    if not image_paths:
+        return ""
+    
+    grid_html = "<h4>Visualización de Conceptos (IA Generativa)</h4><div class='generated-images-grid'>"
+    for img_path in image_paths:
+        try:
+            with open(img_path, "rb") as img_file:
+                img_b64 = base64.b64encode(img_file.read()).decode('utf-8')
+            img_ext = os.path.splitext(img_path)[1].lower().replace('.', '')
+            grid_html += f'<img src="data:image/{img_ext};base64,{img_b64}" alt="Concepto generado por IA">'
+        except Exception:
+            pass
+    grid_html += "</div>"
+    return grid_html
 
 def run_analysis_for_client(client_id, report_id, media_type: str):
     """
