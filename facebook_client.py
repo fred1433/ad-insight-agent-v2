@@ -128,10 +128,11 @@ def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Di
     return insights_map
 
 
-def get_winning_ads() -> List[Ad]:
+def get_winning_ads(spend_threshold=WINNING_ADS_SPEND_THRESHOLD, cpa_threshold=WINNING_ADS_CPA_THRESHOLD) -> List[Ad]:
     """
     Récupère les publicités gagnantes en utilisant des appels par lots pour
     une meilleure performance et un système de cache pour éviter les appels répétés.
+    Les seuils peuvent être surchargés.
     """
     # --- Étape 1: Vérification du cache ---
     if os.path.exists(CACHE_FILE):
@@ -238,8 +239,7 @@ def get_winning_ads() -> List[Ad]:
 
 
             # Filtrage des publicités gagnantes basé sur les KPIs définis
-            # if cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0: # Ligne de test temporaire
-            if spend >= WINNING_ADS_SPEND_THRESHOLD and cpa <= WINNING_ADS_CPA_THRESHOLD and cpa > 0:
+            if spend >= spend_threshold and cpa <= cpa_threshold and cpa > 0:
                 ad_obj = Ad(
                     id=ad_id,
                     name=ad_data['name'],
@@ -261,8 +261,13 @@ def get_winning_ads() -> List[Ad]:
                 )
                 winning_ads.append(ad_obj)
         
+        # Triage des publicités gagnantes pour avoir la meilleure en premier (CPA le plus bas)
+        winning_ads.sort(key=lambda ad: ad.insights.cpa)
+        
+        print(f"✅ {len(winning_ads)} publicités gagnantes trouvées et triées par CPA.")
+
     except Exception as e:
-        print(f"❌ Erreur lors de la récupération des publicités Facebook : {e}")
+        print(f"❌ Une erreur est survenue lors de la récupération des publicités : {e}")
     
     finally:
         # --- Étape 4: Sauvegarde dans le cache QUOI QU'IL ARRIVE ---

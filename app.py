@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import database
+import threading
+import pipeline
 
 # Crée l'application Flask
 app = Flask(__name__)
@@ -37,6 +39,26 @@ def delete_client(client_id):
     # HTMX s'attend à recevoir le contenu qui doit remplacer la ligne du tableau.
     # En renvoyant une réponse vide, la ligne du tableau sera simplement supprimée.
     return ""
+
+@app.route('/run_analysis/<int:client_id>', methods=['POST'])
+def run_analysis(client_id):
+    """Lance le pipeline d'analyse pour un client en tâche de fond."""
+    
+    # Récupérer le nom du client pour un message plus clair
+    conn = database.get_db_connection()
+    client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
+    conn.close()
+    
+    client_name = client['name'] if client else f"ID {client_id}"
+
+    print(f"Requête reçue pour lancer l'analyse du client: {client_name}")
+    
+    # Créer et démarrer un thread pour exécuter la tâche de fond
+    analysis_thread = threading.Thread(target=pipeline.run_analysis_for_client, args=(client_id,))
+    analysis_thread.start()
+    
+    flash(f"L'analyse pour le client '{client_name}' a été lancée en arrière-plan.", "info")
+    return redirect(url_for('index'))
 
 def setup_database():
     """Initialise la base de données si elle n'existe pas."""
