@@ -14,13 +14,13 @@ CACHE_FILE = "analysis_cache.json"
 def load_cache():
     """Charge le cache depuis le fichier s'il existe."""
     if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, 'r') as f:
+        with open(CACHE_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
 
 def save_cache(cache_data):
     """Sauvegarde les données dans le fichier cache."""
-    with open(CACHE_FILE, 'w') as f:
+    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
         json.dump(cache_data, f, indent=4)
 
 
@@ -149,7 +149,7 @@ def generate_html_report(analyzed_ads):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Informe de Análisis de Anuncios</title>
+        <title>Informe de Análisis de Rendimiento de Anuncios</title>
         {css_style}
     </head>
     <body>
@@ -175,7 +175,7 @@ def main():
     print("🚀 Iniciando el pipeline de análisis de anuncios...")
 
     cache = load_cache()
-    
+
     print("\\n--- Paso 1: Recuperando Anuncios ---")
     winning_ads = facebook_client.get_winning_ads()
     if not winning_ads:
@@ -196,70 +196,106 @@ def main():
     analyzed_ads_data = []
     
     for ad in ads_to_process:
+        media_needs_redownload = False
+        analysis_needed = True
+        
+        # Vérifier le cache
         if ad.id in cache:
-            print(f"\\n--- Cargando anuncio {ad.id} desde el cache ---")
-            analyzed_ads_data.append(cache[ad.id])
-            continue
+            print(f"\\n--- Verificando cache para el anuncio {ad.id} ---")
+            cached_data = cache[ad.id]
+            # Vérifier si tous les fichiers nécessaires existent
+            media_path_exists = os.path.exists(cached_data['media_path'])
+            generated_images_exist = all(os.path.exists(p) for p in cached_data.get('generated_image_paths', []))
 
-        local_media_path = None
-        media_type = None
-        generated_image_paths = []
-
-        try:
-            print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
-            
-            if ad.video_id:
-                media_type = 'video'
-                print(f"  ▶️ Es un anuncio de video (ID: {ad.video_id}).")
-                local_media_path = downloader.download_video_locally(ad.video_id, ad.id)
-            elif ad.image_url:
-                media_type = 'image'
-                print(f"  ▶️ Es un anuncio de imagen (URL: {ad.image_url[:60]}...).")
-                local_media_path = downloader.download_image_locally(ad.image_url, ad.id)
+            if media_path_exists and generated_images_exist:
+                print(f"  ✅ Cache completo y válido encontrado. Saltando análisis.")
+                analyzed_ads_data.append(cached_data)
+                analysis_needed = False
             else:
-                continue
+                print(f"  ⚠️ Cache incompleto. El medio o las imágenes generadas no existen. Se volverán a descargar.")
+                media_needs_redownload = True # On force le re-téléchargement mais on garde l'analyse
+                analysis_needed = False # On ne refait pas l'analyse LLM si on a déjà le texte
+                
+        if analysis_needed or media_needs_redownload:
+            try:
+                print(f"\\n--- Procesando anuncio: {ad.name} ({ad.id}) ---")
+                
+                # Étape 1: Assurer la présence du média principal
+                if media_needs_redownload:
+                    local_media_path = cached_data['media_path']
+                    media_type = cached_data['media_type']
+                    if not os.path.exists(local_media_path):
+                        if media_type == 'video':
+                             downloader.download_video_locally(ad.video_id, ad.id)
+                        elif media_type == 'image':
+                             downloader.download_image_locally(ad.image_url, ad.id)
+                else: # Cas nominal: pas dans le cache
+                    if ad.video_id:
+                        media_type = 'video'
+                        print(f"  ▶️ Es un anuncio de video (ID: {ad.video_id}).")
+                        local_media_path = downloader.download_video_locally(ad.video_id, ad.id)
+                    elif ad.image_url:
+                        media_type = 'image'
+                        print(f"  ▶️ Es un anuncio de imagen (URL: {ad.image_url[:60]}...).")
+                        local_media_path = downloader.download_image_locally(ad.image_url, ad.id)
+                    else:
+                        continue # Pas de média, on passe au suivant
 
-            if not local_media_path:
-                raise Exception("Fallo en la descarga del medio.")
+                if not local_media_path or not os.path.exists(local_media_path):
+                    raise Exception("Fallo en la descarga del medio.")
 
-            full_response = ""
-            if media_type == 'video':
-                full_response = gemini_analyzer.analyze_video(local_media_path, ad)
-            elif media_type == 'image':
-                 full_response = gemini_analyzer.analyze_image(local_media_path, ad)
-            
-            analysis_part, script_part = (full_response.split("---", 1)[0].strip(), full_response.split("---", 1)[1].strip()) if "---" in full_response else (full_response, "")
-            
-            print("\\n--- Paso 3: Buscando y generando visuales para los conceptos ---")
-            prompts = re.findall(r"PROMPT_IMG: (.*)", full_response)
-            print(f"  ▶️ {len(prompts)} prompts encontrados.")
+                # Étape 2: Analyse (seulement si nécessaire)
+                if analysis_needed:
+                    print("\\n--- Paso 2: Analizando con IA de Gemini ---")
+                    full_response = ""
+                    if media_type == 'video':
+                        full_response = gemini_analyzer.analyze_video(local_media_path, ad)
+                    elif media_type == 'image':
+                        full_response = gemini_analyzer.analyze_image(local_media_path, ad)
+                    
+                    analysis_part, script_part = (full_response.split("---", 1)[0].strip(), full_response.split("---", 1)[1].strip()) if "---" in full_response else (full_response, "")
+                else: # Utiliser l'analyse du cache
+                    analysis_part = cached_data['analysis_text']
+                    script_part = cached_data['script_text']
+                    full_response = analysis_part + " --- " + script_part # Reconstituer pour trouver les prompts
 
-            for i, prompt in enumerate(prompts[:3]): # Limite à 3 générations
-                print(f"    - Procesando prompt {i+1}...")
-                output_filename = f"generated_concept_{ad.id}_{i+1}.png"
-                generated_path = image_generator.generate_image_from_prompt(prompt, output_filename)
-                if generated_path:
-                    generated_image_paths.append(generated_path)
-            
-            # Pour pouvoir sauvegarder dans le cache JSON, on convertit l'objet Pydantic en dict
-            ad_dict = ad.model_dump()
+                # Étape 3: Génération d'images
+                generated_image_paths = []
+                if media_needs_redownload and not generated_images_exist:
+                     print("\\n--- Regenerando visuales para los conceptos ---")
+                elif analysis_needed:
+                    print("\\n--- Paso 3: Buscando y generando visuales para los conceptos ---")
 
-            current_ad_data = {
-                "ad": ad_dict,
-                "analysis_text": analysis_part,
-                "script_text": script_part,
-                "media_path": local_media_path,
-                "media_type": media_type,
-                "generated_image_paths": generated_image_paths
-            }
-            analyzed_ads_data.append(current_ad_data)
+                if analysis_needed or (media_needs_redownload and not generated_images_exist):
+                    prompts = re.findall(r"PROMPT_IMG: (.*)", full_response)
+                    print(f"  ▶️ {len(prompts)} prompts encontrados.")
 
-            # Sauvegarder dans le cache après chaque succès
-            cache[ad.id] = current_ad_data
-            save_cache(cache)
+                    for i, prompt in enumerate(prompts[:3]): # Limite à 3 générations
+                        print(f"    - Procesando prompt {i+1}...")
+                        output_filename = f"generated_concept_{ad.id}_{i+1}.png"
+                        generated_path = image_generator.generate_image_from_prompt(prompt, output_filename)
+                        if generated_path:
+                            generated_image_paths.append(generated_path)
+                else: # Les images existent déjà
+                    generated_image_paths = cached_data['generated_image_paths']
 
-        except Exception as e:
-            print(f"❌ Ocurrió un error al procesar el anuncio {ad.id}: {e}")
+                ad_dict = ad.model_dump()
+                current_ad_data = {
+                    "ad": ad_dict,
+                    "analysis_text": analysis_part,
+                    "script_text": script_part,
+                    "media_path": local_media_path,
+                    "media_type": media_type,
+                    "generated_image_paths": generated_image_paths
+                }
+                analyzed_ads_data.append(current_ad_data)
+
+                # Sauvegarder dans le cache après chaque succès
+                cache[ad.id] = current_ad_data
+                save_cache(cache)
+
+            except Exception as e:
+                print(f"❌ Ocurrió un error al procesar el anuncio {ad.id}: {e}")
         
     if not analyzed_ads_data:
         print("\\n❌ No se pudo analizar ningún anuncio. El script finaliza.")
@@ -270,18 +306,18 @@ def main():
         print(f"\\n🎉 Informe HTML consolidado generado con éxito: '{os.path.abspath(report_file)}'")
     except Exception as e:
         print(f"❌ Ocurrió un error al generar el informe HTML: {e}")
-    finally:
-        print("\\n--- Limpieza de archivos de medios temporales ---")
-        all_temp_files = []
-        for item in analyzed_ads_data:
-            if item.get('media_path'): all_temp_files.append(item['media_path'])
-            if item.get('generated_image_paths'): all_temp_files.extend(item['generated_image_paths'])
+    # finally:
+    #     print("\\n--- Limpieza de archivos de medios temporales ---")
+    #     all_temp_files = []
+    #     for item in analyzed_ads_data:
+    #         if item.get('media_path'): all_temp_files.append(item['media_path'])
+    #         if item.get('generated_image_paths'): all_temp_files.extend(item['generated_image_paths'])
         
-        for path_to_clean in set(all_temp_files): # Utiliser set pour éviter les doublons
-            if path_to_clean and os.path.exists(path_to_clean):
-                print(f"  🗑️ Eliminando '{path_to_clean}'...")
-                os.remove(path_to_clean)
-        print("✅ Limpieza completada.")
+    #     for path_to_clean in set(all_temp_files): # Utiliser set pour éviter les doublons
+    #         if path_to_clean and os.path.exists(path_to_clean):
+    #             # print(f"  🗑️ Eliminando '{path_to_clean}'...")
+    #             os.remove(path_to_clean)
+    #     print("✅ Limpieza completada.")
 
 
 if __name__ == '__main__':
