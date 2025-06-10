@@ -1,0 +1,94 @@
+{# Ce commentaire force la mise à jour pour Git #}
+{% extends "base.html" %}
+
+{% block title %}Gestion des Clients - Ad Insight Agent{% endblock %}
+
+{% block content %}
+    <h1>Gestion des Clients</h1>
+    
+    {# Section pour afficher les messages flash #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Section pour afficher les clients existants -->
+    <div id="client-list">
+        <h2>Clients Enregistrés</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom du Client</th>
+                    <th>Seuil de Dépense</th>
+                    <th>Seuil CPA</th>
+                    <th>Actions</th>
+                    <th>Analyse Test</th>
+                    <th>Rapports d'Analyse</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for client in clients %}
+                <tr id="client-{{ client.id }}">
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.spend_threshold }} $</td>
+                    <td>{{ client.cpa_threshold }} $</td>
+                    <td>
+                        <button class="btn btn-danger" hx-delete="/delete_client/{{ client.id }}" hx-target="#client-{{ client.id }}" hx-swap="outerHTML" hx-confirm="Êtes-vous sûr de vouloir supprimer le client {{ client.name }}?">
+                            Supprimer
+                        </button>
+                    </td>
+                    <td>
+                        <form action="{{ url_for('run_analysis', client_id=client.id) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn">Lancer Analyse Test</button>
+                        </form>
+                    </td>
+                    <td class="reports-cell">
+                        {% if client.reports %}
+                            <ul>
+                            {% for report in client.reports %}
+                                <li>
+                                    <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span> - 
+                                    <span class="status-badge status-{{ report.status.lower() }}">{{ report.status }}</span>
+                                    {% if report.status == 'COMPLETED' and report.report_path %}
+                                        <a href="{{ url_for('serve_report', filename=report.report_path.split('/')[-1]) }}" target="_blank">Voir le rapport</a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>Aucun rapport</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Aucun client trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section pour ajouter un nouveau client -->
+    <div>
+        <h2>Ajouter un Nouveau Client</h2>
+        <form action="{{ url_for('add_client') }}" method="post">
+            <div class="form-group">
+                <label for="name">Nom du Client</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+             <div class="form-group">
+                <label for="spend_threshold">Dépense Minimale ($)</label>
+                <input type="number" id="spend_threshold" name="spend_threshold" value="3000.0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="cpa_threshold">CPA Maximum ($)</label>
+                <input type="number" id="cpa_threshold" name="cpa_threshold" value="600.0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter le Client</button>
+        </form>
+    </div>
+{% endblock %} 
