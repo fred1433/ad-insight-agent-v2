@@ -59,6 +59,15 @@ def add_client(name, token, spend_threshold, cpa_threshold):
     conn.commit()
     conn.close()
 
+def delete_client(client_id):
+    """Supprime un client et tous ses rapports associés de la base de données."""
+    conn = get_db_connection()
+    # On supprime d'abord les rapports pour respecter la contrainte de clé étrangère
+    conn.execute('DELETE FROM reports WHERE client_id = ?', (client_id,))
+    conn.execute('DELETE FROM clients WHERE id = ?', (client_id,))
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     # Permet d'initialiser la DB en exécutant `python database.py`
     init_db() 

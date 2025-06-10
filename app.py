@@ -28,6 +28,16 @@ def add_client():
     
     return redirect(url_for('index'))
 
+@app.route('/delete_client/<int:client_id>', methods=['DELETE'])
+def delete_client(client_id):
+    """Traite la requête de suppression d'un client."""
+    client_name = request.form.get('name', 'Unknown') # Récupérer le nom pour le message flash
+    database.delete_client(client_id)
+    flash(f'Client "{client_name}" supprimé avec succès!', 'danger')
+    # HTMX s'attend à recevoir le contenu qui doit remplacer la ligne du tableau.
+    # En renvoyant une réponse vide, la ligne du tableau sera simplement supprimée.
+    return ""
+
 def setup_database():
     """Initialise la base de données si elle n'existe pas."""
     with app.app_context():
