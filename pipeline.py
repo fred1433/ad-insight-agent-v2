@@ -7,6 +7,7 @@ import traceback
 from datetime import datetime
 import pytz
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
 import facebook_client
 from media_downloader import MediaDownloader
@@ -14,6 +15,16 @@ import gemini_analyzer
 import image_generator
 import markdown
 import database
+
+# On charge les variables d'environnement (comme les clés API et les prix)
+load_dotenv()
+
+# --- CONFIGURATION DES COÛTS (chargée depuis les variables d'environnement) ---
+# Tarifs basés sur Gemini 1.5 Pro et Imagen 3 (vérifier les tarifs officiels)
+# Prix par MILLION de tokens
+GEMINI_INPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_INPUT_PRICE_PER_MILLION_TOKENS", "2.50"))
+GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS", "7.50"))
+IMAGEN_PRICE_PER_IMAGE = float(os.getenv("IMAGEN_PRICE_PER_IMAGE", "0.03"))
 
 # Le nom du fichier de cache d'analyse (doit être spécifique au client à l'avenir)
 CACHE_FILE = "analysis_cache.json"
@@ -27,6 +38,26 @@ def load_cache():
 def save_cache(cache_data):
     with open(CACHE_FILE, 'w', encoding='utf-8') as f:
         json.dump(cache_data, f, indent=4)
+
+def calculate_analysis_cost(usage_metadata: dict) -> float:
+    """Calcule le coût d'un appel à l'API Gemini à partir de ses métadonnées d'utilisation."""
+    if not usage_metadata or not isinstance(usage_metadata, dict):
+         # L'API peut retourner un objet, pas un dict, on convertit si besoin
+        try:
+            usage_metadata = {
+                'prompt_token_count': usage_metadata.prompt_token_count,
+                'candidates_token_count': usage_metadata.candidates_token_count
+            }
+        except AttributeError:
+            return 0.0
+
+    input_tokens = usage_metadata.get('prompt_token_count', 0)
+    output_tokens = usage_metadata.get('candidates_token_count', 0)
+
+    input_cost = (input_tokens / 1_000_000) * GEMINI_INPUT_PRICE_PER_MILLION_TOKENS
+    output_cost = (output_tokens / 1_000_000) * GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS
+
+    return input_cost + output_cost
 
 def generate_html_report(analyzed_ad_data, client_name):
     """Génère un rapport HTML autonome pour un seul annonce analysée."""
@@ -279,6 +310,11 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
     Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client pour un type de média donné.
     Met à jour un enregistrement de rapport existant.
     """
+    # Initialisation des coûts
+    cost_analysis = 0.0
+    cost_generation = 0.0
+    total_cost = 0.0
+
     try:
         # 1. Récupérer les infos du client
         conn = database.get_db_connection()
@@ -320,6 +356,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         if best_ad.id in cache and all(os.path.exists(p) for p in cache[best_ad.id].get('generated_image_paths', [])):
              print("Annonce déjà dans le cache complet, on utilise le cache.")
              analyzed_ad_data = cache[best_ad.id]
+             # Note : on ne recalcule pas le coût si on utilise le cache. On pourrait le stocker aussi.
         else:
             print("Analyse de l'annonce requise...")
             downloader = MediaDownloader()
@@ -335,23 +372,34 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
             if not local_media_path:
                 raise Exception("Échec du téléchargement du média.")
 
-            full_response = ""
+            full_response_text, usage_metadata = "", {}
             if media_type == 'video':
-                full_response = gemini_analyzer.analyze_video(local_media_path, best_ad)
+                full_response_text, usage_metadata = gemini_analyzer.analyze_video(local_media_path, best_ad)
             else:
-                full_response = gemini_analyzer.analyze_image(local_media_path, best_ad)
+                full_response_text, usage_metadata = gemini_analyzer.analyze_image(local_media_path, best_ad)
+
+            # Calcul du coût de l'analyse
+            cost_analysis = calculate_analysis_cost(usage_metadata)
+            print(f"💰 Usage metadata from Gemini: {usage_metadata}")
+            print(f"💰 Coût de l'analyse Gemini estimé : ${cost_analysis:.4f}")
             
-            analysis_part, script_part = (full_response.split("---", 1) + [""])[:2]
+            analysis_part, script_part = (full_response_text.split("---", 1) + [""])[:2]
             
             print("Génération des images concepts...")
-            prompts = re.findall(r"PROMPT_IMG: (.*)", full_response)
+            prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
             generated_image_paths = []
+            images_generated_count = 0
             for i, prompt in enumerate(prompts[:3]):
                 output_filename = f"generated_concept_{best_ad.id}_{i+1}.png"
-                generated_path = image_generator.generate_image_from_prompt(prompt, output_filename)
+                generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
                 if generated_path:
                     generated_image_paths.append(generated_path)
+                    images_generated_count += count
             
+            # Calcul du coût de la génération d'images
+            cost_generation = images_generated_count * IMAGEN_PRICE_PER_IMAGE
+            print(f"💰 Coût de la génération d'images estimé : ${cost_generation:.4f}")
+
             analyzed_ad_data = {
                 "ad": best_ad.model_dump(),
                 "analysis_text": analysis_part.strip(),
@@ -360,6 +408,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
                 "media_type": media_type,
                 "generated_image_paths": generated_image_paths
             }
+            # On ne sauvegarde pas le coût dans le cache fichier pour l'instant
             cache[best_ad.id] = analyzed_ad_data
             save_cache(cache)
         
@@ -367,12 +416,16 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         print("Génération du rapport HTML...")
         report_path = generate_html_report(analyzed_ad_data, client['name'])
 
-        # 6. Mettre à jour le statut du rapport dans la DB à COMPLETED
+        # 6. Mettre à jour le rapport dans la DB avec les coûts et le statut final
+        total_cost = cost_analysis + cost_generation
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET status = ?, report_path = ? WHERE id = ?', ('COMPLETED', report_path, report_id))
+        conn.execute(
+            'UPDATE reports SET status = ?, report_path = ?, cost_analysis = ?, cost_generation = ?, total_cost = ? WHERE id = ?',
+            ('COMPLETED', report_path, cost_analysis, cost_generation, total_cost, report_id)
+        )
         conn.commit()
         conn.close()
-        print(f"LOG: Statut du rapport {report_id} mis à jour à COMPLETED.")
+        print(f"LOG: Statut du rapport {report_id} mis à jour à COMPLETED avec un coût total de ${total_cost:.4f}")
         print(f"--- FIN PIPELINE pour le client : {client['name']} ---")
 
     except Exception as e:

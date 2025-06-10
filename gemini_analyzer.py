@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import time
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, Tuple
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -12,6 +12,11 @@ if TYPE_CHECKING:
 
 # Cargar las variables de entorno
 load_dotenv()
+
+# --- CONFIGURATION ---
+# Le nom du modèle est chargé depuis les variables d'environnement pour plus de flexibilité.
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-pro-latest")
+# --- FIN CONFIGURATION ---
 
 def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
     """Formatea las métricas del anuncio para una inyección limpia en el prompt."""
@@ -32,7 +37,7 @@ def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
     return "\\n".join(metrics)
 
 
-def analyze_image(image_path: str, ad_data: Ad) -> str:
+def analyze_image(image_path: str, ad_data: Ad) -> Tuple[str, Dict]:
     """
     Analyse une image et ses métriques pour fournir une explication textuelle de sa performance.
 
@@ -41,25 +46,23 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
         ad_data: L'objet contenant les données de la publicité.
 
     Returns:
-        Une chaîne de caractères contenant l'analyse marketing, ou un message d'erreur.
+        Un tuple contenant l'analyse marketing et les métadonnées d'utilisation, 
+        ou un message d'erreur et un dictionnaire vide.
     """
     print(f"  🧠 Iniciando análisis de marketing para la imagen del anuncio '{ad_data.name}'...")
     try:
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("La clave de API GEMINI_API_KEY no se encuentra.")
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        # Le nom du modèle est maintenant lu depuis la variable de configuration
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(os.getenv("GEMINI_MODEL_NAME"))
-
-        # --- Construction du Prompt en Espagnol pour Image ---
-        metrics_text = _format_ad_metrics_for_prompt(ad_data)
+        ad_metrics_text = _format_ad_metrics_for_prompt(ad_data)
         
         prompt = f"""
         **Contexto:** Eres un Director de Marketing y un experto en estrategia de publicidad, especializado en analizar el rendimiento de creatividades en redes sociales. Se te presenta una imagen publicitaria considerada "ganadora" junto con sus métricas clave.
 
         **Métricas del Anuncio Ganador:**
-        {metrics_text}
+        {ad_metrics_text}
 
         **Tu Doble Misión:**
 
@@ -85,14 +88,14 @@ def analyze_image(image_path: str, ad_data: Ad) -> str:
 
         print("    ✅ Respuesta recibida.")
         
-        return response.text.strip()
+        return response.text.strip(), response.usage_metadata
 
     except Exception as e:
         print(f"    ❌ Ocurrió un error durante el análisis de Gemini: {e}")
-        return f"Error durante el análisis de la imagen: {e}"
+        return f"Error durante el análisis de la imagen: {e}", {}
 
 
-def analyze_video(video_path: str, ad_data: Ad) -> str:
+def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
     """
     Analiza un video y sus métricas para proporcionar una explicación textual de su rendimiento.
 
@@ -101,37 +104,37 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
         ad_data: El objeto que contiene los datos del anuncio (nombre, insights, etc.).
 
     Returns:
-        Una cadena de caracteres que contiene el análisis de marketing, o un mensaje de error.
+        Un tuple contenant l'analyse marketing et les métadonnées d'utilisation, 
+        ou un message d'erreur et un dictionnaire vide.
     """
     print(f"  🧠 Iniciando análisis de marketing para el anuncio '{ad_data.name}'...")
     video_file = None
 
     try:
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("La clave de API GEMINI_API_KEY no se encuentra.")
-
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(os.getenv("GEMINI_MODEL_NAME"))
-
-        print(f"    ▶️ Subiendo el video '{os.path.basename(video_path)}'...")
-        video_file = genai.upload_file(path=video_path, display_name=f"Ad: {ad_data.id}")
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        
+        print("    ⏳ Subiendo el archivo de video a la API de Gemini...")
+        video_file = genai.upload_file(path=video_path)
         
         while video_file.state.name == "PROCESSING":
-            time.sleep(5)
-            video_file = genai.get_file(video_file.name)
+            print("      Procesando video...")
+            time.sleep(10)
         
         if video_file.state.name == "FAILED":
-             raise ValueError(f"El procesamiento del video {video_file.name} ha fallado.")
-
-        # --- Construction du Prompt en Español ---
-        metrics_text = _format_ad_metrics_for_prompt(ad_data)
+            raise Exception("Falló el procesamiento del video en Gemini.")
+            
+        print("    ✅ Video subido y procesado.")
+        
+        # Le nom du modèle est maintenant lu depuis la variable de configuration
+        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+        
+        ad_metrics_text = _format_ad_metrics_for_prompt(ad_data)
         
         prompt = f"""
         **Contexto:** Eres un Director de Marketing y un experto en estrategia de publicidad en video, especializado en analizar el rendimiento de creatividades en redes sociales. Se te presenta un video publicitario considerado "ganador" junto con sus métricas clave de rendimiento.
 
         **Métricas del Anuncio Ganador:**
-        {metrics_text}
+        {ad_metrics_text}
 
         **Tu Doble Misión:**
 
@@ -159,7 +162,7 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
         
         genai.delete_file(video_file.name)
         
-        return response.text.strip()
+        return response.text.strip(), response.usage_metadata
 
     except Exception as e:
         print(f"    ❌ Ocurrió un error durante el análisis de Gemini: {e}")
@@ -168,4 +171,4 @@ def analyze_video(video_path: str, ad_data: Ad) -> str:
                 genai.delete_file(video_file.name)
             except Exception as delete_error:
                 print(f"      Falló el intento de limpieza del archivo remoto: {delete_error}")
-        return f"Error durante el análisis: {e}" 
+        return f"Error durante el análisis: {e}", {} 

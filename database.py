@@ -43,8 +43,17 @@ def init_db():
             status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, RUNNING, COMPLETED, FAILED
             report_path TEXT,
             created_at TIMESTAMP NOT NULL,
+            cost_analysis REAL DEFAULT 0.0,
+            cost_generation REAL DEFAULT 0.0,
+            total_cost REAL DEFAULT 0.0,
             FOREIGN KEY (client_id) REFERENCES clients (id)
         );
+
+        /*
+        NOTE POUR LE DÉVELOPPEMENT :
+        Si vous modifiez ce schéma, supprimez le fichier 'app_database.db' existant.
+        Il sera recréé avec la nouvelle structure au prochain lancement de l'application.
+        */
     """)
     
     conn.commit()

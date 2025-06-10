@@ -36,9 +36,23 @@
                     {% for report in client.reports %}
                         <li>
                             <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span> - 
-                            <span class="status-badge status-{{ report.status.lower() }}">{{ report.status }}</span>
+                            
+                            {% if report.status in ['IN_PROGRESS', 'RUNNING'] %}
+                                <span class="status-badge status-{{ report.status.lower() }}" 
+                                      hx-get="{{ url_for('get_report_status', report_id=report.id) }}" 
+                                      hx-trigger="every 3s"
+                                      hx-swap="none">
+                                    {{ report.status }}
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-{{ report.status.lower() }}">{{ report.status }}</span>
+                            {% endif %}
+
                             {% if report.status == 'COMPLETED' and report.report_path %}
                                 <a href="{{ url_for('serve_report', filename=report.report_path.split('/')[-1]) }}" target="_blank">Voir le rapport</a>
+                                <span class="cost-badge" title="Analyse: ${{ '%.4f'|format(report.cost_analysis) }} | Génération: ${{ '%.4f'|format(report.cost_generation) }}">
+                                    (Coût: ${{ '%.4f'|format(report.total_cost) }})
+                                </span>
                             {% endif %}
                         </li>
                     {% endfor %}

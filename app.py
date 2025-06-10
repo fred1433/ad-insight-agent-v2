@@ -1,10 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response
 from datetime import datetime
 from dateutil import parser
 import database
 import threading
 import pipeline
 import pytz
+import logging
+
+# --- FILTRE DE LOGS ---
+# Filtre pour ne pas afficher les requêtes de polling dans le terminal
+class SuppressReportStatusFilter(logging.Filter):
+    def filter(self, record):
+        # record.getMessage() contient la ligne de log, ex: "GET /report_status/5 HTTP/1.1" 204
+        return '/report_status/' not in record.getMessage()
+
+# Appliquer le filtre au logger par défaut de Werkzeug (qui gère les requêtes HTTP)
+log = logging.getLogger('werkzeug')
+log.addFilter(SuppressReportStatusFilter())
+
+# --- FIN DU FILTRE ---
+
 
 # Crée l'application Flask
 app = Flask(__name__)
@@ -13,26 +28,23 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'une-super-cle-secrete-a-changer-en-prod'
 
 def get_clients_with_reports():
-    """Récupère tous les clients avec leurs rapports et vérifie les tâches en cours."""
+    """Récupère tous les clients avec leurs rapports."""
     conn = database.get_db_connection()
     clients_cursor = conn.execute('SELECT * FROM clients ORDER BY name')
     clients_list = clients_cursor.fetchall()
 
     clients_with_reports = []
-    is_analysis_running = False
     
     for client in clients_list:
         client_dict = dict(client)
         reports_cursor = conn.execute(
-            'SELECT id, status, report_path, created_at, ad_id FROM reports WHERE client_id = ? ORDER BY created_at DESC',
+            'SELECT id, status, report_path, created_at, ad_id, cost_analysis, cost_generation, total_cost FROM reports WHERE client_id = ? ORDER BY created_at DESC',
             (client['id'],)
         )
         
         reports = []
         for row in reports_cursor.fetchall():
             report_dict = dict(row)
-            if report_dict['status'] in ('IN_PROGRESS', 'RUNNING'):
-                is_analysis_running = True
             if report_dict['created_at']:
                 report_dict['created_at'] = parser.parse(report_dict['created_at'])
             reports.append(report_dict)
@@ -41,12 +53,32 @@ def get_clients_with_reports():
         clients_with_reports.append(client_dict)
 
     conn.close()
-    return clients_with_reports, is_analysis_running
+    return clients_with_reports
 
 @app.route('/')
 def index():
     """Affiche la page principale."""
     return render_template('index.html')
+
+@app.route('/report_status/<int:report_id>')
+def get_report_status(report_id):
+    """Vérifie le statut d'un rapport. Utilisé pour le polling intelligent."""
+    conn = database.get_db_connection()
+    report = conn.execute('SELECT status FROM reports WHERE id = ?', (report_id,)).fetchone()
+    conn.close()
+
+    if report and report['status'] in ('IN_PROGRESS', 'RUNNING'):
+        # Le rapport est toujours en cours. On renvoie 204 No Content pour que
+        # HTMX ne fasse rien et continue le polling.
+        return "", 204
+    else:
+        # Le rapport est terminé (ou a échoué).
+        # On renvoie une réponse vide, mais avec un header qui déclenche le 
+        # rechargement de toute la liste des clients. Le polling s'arrêtera 
+        # car le badge qui le déclenchait sera remplacé.
+        response = make_response("")
+        response.headers['HX-Trigger'] = 'loadClientList'
+        return response
 
 @app.route('/add_client', methods=['POST'])
 def add_client():
@@ -85,7 +117,7 @@ def delete_client(client_id):
 
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
 def run_analysis(client_id, media_type):
-    """Lance le pipeline, crée un rapport IN_PROGRESS, et déclenche un rechargement de la liste."""
+    """Lance le pipeline et crée un rapport."""
     
     if media_type not in ['video', 'image']:
         return "Type de média non valide.", 400
@@ -107,46 +139,25 @@ def run_analysis(client_id, media_type):
     conn.close()
     print(f"LOG: Tâche pré-enregistrée dans la DB. Rapport ID: {report_id} avec statut IN_PROGRESS")
     
-    # Étape 2: Lancer l'analyse en arrière-plan en lui passant le report_id et le media_type
-    analysis_thread = threading.Thread(target=pipeline.run_analysis_for_client, args=(client_id, report_id, media_type))
+    # Étape 2: Lancer l'analyse en arrière-plan. Plus besoin de queue.
+    analysis_thread = threading.Thread(
+        target=pipeline.run_analysis_for_client, 
+        args=(client_id, report_id, media_type)
+    )
     analysis_thread.start()
     
-    flash(f"L'analyse de type '{media_type}' pour '{client_name}' a été lancée. La liste va se mettre à jour.", "info")
+    flash(f"L'analyse de type '{media_type}' pour '{client_name}' a été lancée.", "info")
     
-    # Étape 3: Renvoyer la réponse qui met à jour les messages flash et déclenche le rechargement de la liste.
-    # Le bouton cliqué a pour target #flash-messages. La réponse met à jour cette cible.
+    # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste (pour voir le statut PENDING).
     response = make_response(render_template('_flash_messages.html'))
-    # On ajoute un header qui déclenche un événement personnalisé pour que la liste se recharge.
     response.headers['HX-Trigger'] = 'loadClientList'
-    print("LOG: /run_analysis a renvoyé une réponse pour mettre à jour les messages et déclencher 'loadClientList'.")
     return response
 
 @app.route('/clients')
 def get_clients_list():
-    """Route pour rafraîchir la liste des clients, utilisée pour le polling en chaîne."""
-    print("LOG: /clients a été appelé pour rafraîchir la liste.")
-    clients, is_analysis_running = get_clients_with_reports()
-    
-    if is_analysis_running:
-        response = make_response(render_template('_client_list.html', clients=clients))
-        # Si une analyse est en cours, on déclenche le prochain poll en renvoyant un header.
-        response.headers['HX-Trigger-After-Settle'] = '{"loadClientList": {"delay": "5s"}}'
-        print("LOG: Analyse en cours détectée. Déclenchement du prochain poll dans 5s.")
-        return response
-    else:
-        print("LOG: Aucune analyse en cours. Arrêt du polling. Envoi de la liste finale et nettoyage des messages flash.")
-        # On prépare une réponse en deux parties : la liste finale et un bloc de messages vide.
-        client_list_html = render_template('_client_list.html', clients=clients)
-        flash_messages_html = render_template('_flash_messages.html') # Sera vide car les messages ont déjà été consommés
-
-        # On utilise un OOB (Out-of-Band) Swap pour mettre à jour la liste ET les messages en une seule fois.
-        response_html = f"""
-        {client_list_html}
-        <div id="flash-messages" hx-swap-oob="true">
-            {flash_messages_html}
-        </div>
-        """
-        return make_response(response_html)
+    """Route pour rafraîchir la liste des clients, utilisée par HTMX."""
+    clients = get_clients_with_reports()
+    return render_template('_client_list.html', clients=clients)
 
 @app.route('/reports/<path:filename>')
 def serve_report(filename):
