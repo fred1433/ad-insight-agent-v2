@@ -178,13 +178,17 @@ def validate_token():
     # Construction du sélecteur de compte si le token est valide et a des comptes
     ad_account_selector_html = ""
     if is_valid and ad_accounts:
-        ad_account_selector_html = '''
+        ad_account_selector_html = f'''
             <div class="form-group" style="margin-top: 15px;">
                 <label for="ad_account_id">Cuenta Publicitaria a Analizar</label>
-                <select name="ad_account_id" id="ad_account_id" class="form-control" required>
+                <select name="ad_account_id" id="ad_account_id" class="form-control" required
+                        hx-post="{url_for('unlock_submit')}"
+                        hx-target="#submit-button-container"
+                        hx-swap="innerHTML">
                     <option value="" disabled selected>Selecciona una cuenta</option>
         '''
         for account in ad_accounts:
+            # On utilise 'id' pour la valeur (ex: act_123) et 'account_id' pour l'affichage
             ad_account_selector_html += f'<option value="{account.get("id")}">{account.get("name")} ({account.get("account_id")})</option>'
         
         ad_account_selector_html += '''
@@ -199,6 +203,16 @@ def validate_token():
             {ad_account_selector_html}
         </div>
     '''
+
+@app.route('/lock-submit', methods=['GET', 'POST'])
+def lock_submit():
+    """Renvoie le bouton de soumission en état désactivé."""
+    return '<button type="submit" id="add-client-btn" class="btn btn-primary" disabled>Añadir Cliente</button>'
+
+@app.route('/unlock-submit', methods=['GET', 'POST'])
+def unlock_submit():
+    """Renvoie le bouton de soumission en état activé."""
+    return '<button type="submit" id="add-client-btn" class="btn btn-primary">Añadir Cliente</button>'
 
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
 @login_required
