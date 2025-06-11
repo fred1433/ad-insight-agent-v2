@@ -151,14 +151,22 @@ def validate_token():
     """Valide un token Facebook en temps réel."""
     token = request.form.get('facebook_token')
     if not token:
-        return ""  # Ne rien afficher si le champ est vide
+        return '<div id="token-validation-result" class="validation-message"></div>' # Renvoyer le conteneur vide
 
     is_valid, message = facebook_client.check_token_validity(token)
     
     if is_valid:
-        return f'<small class="text-success">✅ {message}</small>'
+        css_class = "text-success"
+        icon = "✅"
     else:
-        return f'<small class="text-danger">❌ {message}</small>'
+        css_class = "text-danger"
+        icon = "❌"
+        
+    return f'''
+        <div id="token-validation-result" class="validation-message">
+            <small class="{css_class}">{icon} {message}</small>
+        </div>
+    '''
 
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
 @login_required
