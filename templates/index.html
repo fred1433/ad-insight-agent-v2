@@ -19,7 +19,10 @@
             <input type="text" id="name" name="name" required>
         </div>
         <div class="form-group">
-            <label for="facebook_token">Token de Facebook</label>
+            <div class="label-with-help">
+                <label for="facebook_token">Token de Acceso de Facebook</label>
+                <span class="help-icon" title="Haz clic para obtener ayuda sobre cómo generar un token de acceso">?</span>
+            </div>
             <input type="text" id="facebook_token" name="facebook_token" required>
         </div>
          <div class="form-group">
@@ -32,4 +35,84 @@
         </div>
         <button type="submit" class="btn btn-primary">Añadir Cliente</button>
     </form>
+
+    <!-- Modal de Ayuda para el Token -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Cómo Obtener tu Token de Acceso (Guía 2025)</h2>
+            <p>Para conectar tu cuenta, necesitas un <strong>Token de Usuario de Sistema</strong>. Este tipo de token es ideal porque no caduca. Sigue estos dos grandes pasos:</p>
+            
+            <h4>Paso 1: Generar el Token con los permisos correctos</h4>
+            <ol>
+                <li><strong>Ve a la Configuración del Negocio:</strong><br>
+                    Accede a <code>Configuración del Negocio > Usuarios > Usuarios del sistema</code>.
+                </li>
+                <li><strong>Crea o Selecciona un Usuario del Sistema:</strong><br>
+                    Añade un nuevo usuario de sistema (rol "Empleado") o selecciona uno existente.
+                </li>
+                <li><strong>Genera un Nuevo Token:</strong><br>
+                    Haz clic en <strong>"Generar nuevo token"</strong>. Selecciona tu App y la caducidad "Nunca".
+                </li>
+                <li><strong>Asigna los Permisos al Token:</strong><br>
+                    En la lista de permisos, activa <strong>solamente</strong> los de lectura que necesitamos:
+                    <ul>
+                        <li><code>ads_read</code></li>
+                        <li><code>pages_read_engagement</code></li>
+                    </ul>
+                </li>
+                <li><strong>Copia el token generado</strong> y guárdalo por un momento. No cierres la ventana.</li>
+            </ol>
+
+            <h4>Paso 2: Darle acceso a la cuenta publicitaria</h4>
+            <ol start="6">
+                 <li><strong>Asigna un Activo:</strong><br>
+                    En la misma pantalla del Usuario del sistema, haz clic en <strong>"Asignar activos"</strong>.
+                </li>
+                <li><strong>Selecciona la Cuenta Publicitaria:</strong><br>
+                    Elige "Cuentas publicitarias", selecciona la cuenta a analizar, y activa el permiso <strong>"Ver rendimiento"</strong>, como se muestra en la imagen. Esto es suficiente.
+                    <img src="{{ url_for('static', filename='images/help-ver-rendimiento.png') }}" alt="Guía de permisos de Facebook" style="width: 100%; margin-top: 10px; border-radius: 5px;">
+                </li>
+                <li><strong>¡Listo!</strong><br>
+                    Ahora puedes pegar el token que copiaste en el campo de nuestra aplicación.
+                </li>
+            </ol>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Ad Insight Agent: Script chargé.");
+
+    // Lógica para la modal de ayuda
+    const helpModal = document.getElementById('help-modal');
+    const helpIcon = document.querySelector('.help-icon');
+    const closeButton = document.querySelector('.close-button');
+
+    if (helpIcon && helpModal) {
+        console.log("Ad Insight Agent: Icône d'aide et modale trouvées.");
+        helpIcon.addEventListener('click', function() {
+            console.log("Ad Insight Agent: Clic sur l'icône d'aide détecté !");
+            helpModal.style.display = 'block';
+        });
+    } else {
+        console.error("Ad Insight Agent: ERREUR - Impossible de trouver l'icône d'aide ou la modale.");
+    }
+
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            helpModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == helpModal) {
+            helpModal.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %} 
