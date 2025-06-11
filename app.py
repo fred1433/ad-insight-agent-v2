@@ -244,13 +244,12 @@ def serve_storage_file(filename):
     return send_from_directory('storage', filename)
 
 def setup_database():
-    """Initialise la base de données si elle n'existe pas."""
+    """Inicializa la base de datos si no existe."""
     db_path = database.DATABASE_FILE
     if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
         database.init_db()
-        flash("La base de données a été initialisée.", "info")
 
 if __name__ == '__main__':
-    print("Démarrage de l'application...")
+    print("Iniciando la aplicación...")
     setup_database()
     app.run(debug=True, port=5001)

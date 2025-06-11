@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DATABASE_FILE = "app_database.db"
+DATABASE_FILE = "database.db"
 
 def get_db_connection():
     """Crée et retourne une connexion à la base de données."""
@@ -10,11 +10,14 @@ def get_db_connection():
     return conn
 
 def init_db():
-    """Initialise la base de données en créant les tables nécessaires de manière idempotente."""
+    """Initialise la base de données et crée les tables si elles n'existent pas."""
+    print("Inicializando las tablas de la base de datos...")
+    
+    # Se connecter (crée le fichier s'il n'existe pas)
     conn = get_db_connection()
-    cursor = conn.cursor()
     
     # Vérifie si la table 'clients' existe déjà
+    cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='clients'")
     table_exists = cursor.fetchone()
     
@@ -60,7 +63,7 @@ def init_db():
     
     conn.commit()
     conn.close()
-    print("Base de données initialisée avec succès.")
+    print("Base de datos inicializada con éxito.")
 
 def get_all_clients():
     """Récupère tous les clients de la base de données."""
