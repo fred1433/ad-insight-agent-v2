@@ -116,10 +116,20 @@ def add_client():
     """Traite la soumission du formulaire pour ajouter un nouveau client."""
     name = request.form['name']
     token = request.form['facebook_token']
+    ad_account_id = request.form.get('ad_account_id')
     spend = request.form['spend_threshold']
     cpa = request.form['cpa_threshold']
     
-    database.add_client(name, token, spend, cpa)
+    # --- VALIDATION CÔTÉ SERVEUR ---
+    # S'assure qu'un compte publicitaire a bien été sélectionné depuis le menu déroulant.
+    if not ad_account_id or not ad_account_id.startswith('act_'):
+        flash("Por favor, verifica el token y selecciona una cuenta publicitaria válida antes de añadir el cliente.", "warning")
+        # On force un rechargement complet pour que l'utilisateur puisse recommencer le processus.
+        response = make_response()
+        response.headers['HX-Refresh'] = 'true'
+        return response
+
+    database.add_client(name, token, ad_account_id, spend, cpa)
     
     # Message de succès
     flash(f'Cliente "{name}" añadido con éxito.', 'success')
@@ -153,23 +163,40 @@ def flash_messages():
 
 @app.route('/validate-token', methods=['POST'])
 def validate_token():
-    """Valide un token Facebook en temps réel."""
+    """Valide un token Facebook et renvoie un sélecteur de compte publicitaire si valide."""
     token = request.form.get('facebook_token')
     if not token:
-        return '<div id="token-validation-result" class="validation-message"></div>' # Renvoyer le conteneur vide
+        return '<div id="token-validation-result" class="validation-message"></div>'
 
-    is_valid, message = facebook_client.check_token_validity(token)
+    is_valid, message, ad_accounts = facebook_client.check_token_validity(token)
     
-    if is_valid:
-        css_class = "text-success"
-        icon = "✅"
-    else:
-        css_class = "text-danger"
-        icon = "❌"
+    # Construction du message de statut
+    css_class = "text-success" if is_valid and ad_accounts else "text-danger"
+    icon = "✅" if is_valid and ad_accounts else "❌"
+    status_message_html = f'<small class="{css_class}">{icon} {message}</small>'
+
+    # Construction du sélecteur de compte si le token est valide et a des comptes
+    ad_account_selector_html = ""
+    if is_valid and ad_accounts:
+        ad_account_selector_html = '''
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="ad_account_id">Cuenta Publicitaria a Analizar</label>
+                <select name="ad_account_id" id="ad_account_id" class="form-control" required>
+                    <option value="" disabled selected>Selecciona una cuenta</option>
+        '''
+        for account in ad_accounts:
+            ad_account_selector_html += f'<option value="{account.get("id")}">{account.get("name")} ({account.get("account_id")})</option>'
         
+        ad_account_selector_html += '''
+                </select>
+            </div>
+        '''
+
+    # On combine les deux parties et on les enveloppe dans la div cible
     return f'''
         <div id="token-validation-result" class="validation-message">
-            <small class="{css_class}">{icon} {message}</small>
+            {status_message_html}
+            {ad_account_selector_html}
         </div>
     '''
 

@@ -49,13 +49,25 @@ WINNING_ADS_SPEND_THRESHOLD = 3000.0
 WINNING_ADS_CPA_THRESHOLD = 600.0
 
 
-def init_facebook_api():
-    """Initialise l'API Facebook avec les identifiants de configuration."""
+def init_facebook_api(access_token: Optional[str] = None, ad_account_id: Optional[str] = None):
+    """
+    Initialise l'API Facebook.
+    Privilégie les identifiants fournis en paramètres, sinon utilise la configuration globale.
+    """
+    final_access_token = access_token or config.facebook.access_token
+    
+    if not final_access_token:
+        raise ValueError("Le token d'accès Facebook est manquant.")
+
     init_params = {
-        'access_token': config.facebook.access_token,
+        'access_token': final_access_token,
+        'account_id': ad_account_id or config.facebook.ad_account_id
     }
+    
+    # L'app_secret est global et n'est pas lié à un utilisateur spécifique
     if config.facebook.app_secret:
         init_params['app_secret'] = config.facebook.app_secret
+        
     FacebookAdsApi.init(**init_params)
 
 
@@ -66,13 +78,17 @@ def _fetch_creatives_batch(ad_ids: List[str]) -> Dict[str, Dict[str, str]]:
     """
     results_map = {}
     api = FacebookAdsApi.get_default_api()
+    ad_account_id = api.get_default_ad_account_id()
+
+    if not ad_account_id:
+        raise ValueError("L'ID du compte publicitaire n'est pas initialisé.")
     
     # Découpe la liste d'IDs en morceaux de 50 pour le traitement par lots
     for i in range(0, len(ad_ids), 50):
         chunk = ad_ids[i:i+50]
         
         # Récupération en une seule fois
-        ads = AdAccount(config.facebook.ad_account_id).get_ads(
+        ads = AdAccount(ad_account_id).get_ads(
             fields=[
                 'id', 
                 'creative{id,name,image_url,video_id}'
@@ -151,8 +167,14 @@ def get_winning_ads(spend_threshold=WINNING_ADS_SPEND_THRESHOLD, cpa_threshold=W
     
     winning_ads = []
     try:
-        init_facebook_api()
-        account = AdAccount(config.facebook.ad_account_id)
+        # L'initialisation est maintenant faite en amont (ex: dans le pipeline)
+        # init_facebook_api()
+        api = FacebookAdsApi.get_default_api()
+        ad_account_id = api.get_default_ad_account_id()
+        if not ad_account_id:
+            raise ValueError("L'ID du compte publicitaire doit être initialisé avant d'appeler get_winning_ads.")
+            
+        account = AdAccount(ad_account_id)
 
         # --- Étape 2: Récupération des données par lots ---
         print("Récupération de toutes les publicités actives...")
@@ -333,36 +355,44 @@ def get_ad_by_id(ad_id: str) -> Optional[Ad]:
     print(f"Avertissement: Annonce avec ID {ad_id} non trouvée dans le cache des 'winning ads'.")
     return None 
 
-def check_token_validity(token: str) -> (bool, str):
+def check_token_validity(token: str) -> (bool, str, Optional[List[AdAccount]]):
     """
-    Valide un token en essayant de récupérer les comptes publicitaires associés.
-    C'est la méthode de validation la plus directe.
-
-    Returns:
-        (bool, str): Un tuple contenant (est_valide, message)
+    Vérifie si un token d'accès est valide et a accès à au moins un compte publicitaire.
+    Retourne un tuple: (est_valide, message, liste_comptes_pub)
     """
-    if not token:
-        return False, "El token no puede estar vacío."
-
     try:
-        # Initialisation temporaire de l'API avec le token fourni par l'utilisateur
-        temp_api = FacebookAdsApi.init(access_token=token, timeout=10)
+        # Initialise l'API temporairement avec le token fourni
+        api = FacebookAdsApi.init(access_token=token)
         
-        # Tenter de récupérer les comptes publicitaires est le meilleur test
-        user = User(fbid='me', api=temp_api)
-        ad_accounts = user.get_ad_accounts()
+        # Tente de récupérer les comptes publicitaires de l'utilisateur associé au token
+        me = User(fbid='me', api=api)
+        # On demande le nom, l'id et le statut du compte pour l'affichage et le filtrage
+        ad_accounts = list(me.get_ad_accounts(fields=[
+            AdAccount.Field.id,
+            AdAccount.Field.name, 
+            AdAccount.Field.account_id,
+            AdAccount.Field.account_status
+        ]))
         
-        # Vérifier si l'itérateur n'est pas vide
-        first_account = next(iter(ad_accounts), None)
-
-        if first_account:
-            return True, "Token válido y con acceso a cuentas publicitarias."
+        if ad_accounts:
+            # On ne garde que les comptes actifs (statut 1)
+            active_accounts = [acc for acc in ad_accounts if acc[AdAccount.Field.account_status] == 1]
+            if active_accounts:
+                return True, "Token válido y con acceso a cuentas publicitarias.", active_accounts
+            else:
+                return False, "Token válido, pero sin acceso a ninguna cuenta publicitaria activa.", []
         else:
-            return False, "Token válido, pero no tiene acceso a ninguna cuenta publicitaria."
-
+            return False, "Token válido, pero sin acceso a ninguna cuenta publicitaria.", []
+            
     except FacebookRequestError as e:
-        error_message = e.api_error_message() or "Error desconocido."
-        return False, f"Token inválido: {error_message}"
+        # L'API a renvoyé une erreur (ex: token invalide, expiré, etc.)
+        error_message = e.api_error_message()
+        return False, f"Token inválido: {error_message}", None
     except Exception as e:
+        # Autre erreur inattendue
         print(f"Error inesperado al validar el token: {e}")
-        return False, "Error inesperado en el servidor." 
+        return False, f"Error inesperado al validar el token: {e}", None
+
+# --- Test local (optionnel) ---
+if __name__ == '__main__':
+    pass 

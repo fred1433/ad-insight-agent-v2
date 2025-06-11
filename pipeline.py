@@ -132,12 +132,17 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
     total_cost = 0.0
 
     try:
-        # 1. Récupérer les infos du client
+        # 1. Récupérer les infos du client et VALIDER les pré-requis
         conn = database.get_db_connection()
         client = conn.execute('SELECT * FROM clients WHERE id = ?', (client_id,)).fetchone()
         conn.close()
         if not client:
             raise Exception(f"Client {client_id} non trouvé.")
+
+        # Garde de sécurité : vérifier que le ad_account_id est valide AVANT de continuer.
+        ad_account_id = client['ad_account_id']
+        if not ad_account_id or not ad_account_id.startswith('act_'):
+            raise ValueError(f"ID de compte publicitaire manquant ou invalide pour le client {client['name']}. Impossible de lancer l'analyse.")
 
         print(f"--- DÉBUT PIPELINE pour le client : {client['name']} (Rapport ID: {report_id}) ---")
         
@@ -150,7 +155,13 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
 
         # 2. Récupérer l'annonce la plus performante pour le type de média spécifié
         print(f"Récupération de l'annonce la plus performante de type '{media_type}'...")
-        facebook_client.init_facebook_api()
+        
+        # On initialise l'API avec le token ET le compte publicitaire spécifiques à CE client
+        facebook_client.init_facebook_api(
+            access_token=client['facebook_token'],
+            ad_account_id=ad_account_id
+        )
+        
         best_ad = facebook_client.get_specific_winning_ad(
             media_type=media_type,
             spend_threshold=client['spend_threshold'],

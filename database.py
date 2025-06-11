@@ -34,6 +34,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             facebook_token TEXT NOT NULL,
+            ad_account_id TEXT, -- Peut être null si l'ancien système est encore utilisé
             spend_threshold REAL NOT NULL DEFAULT 3000.0,
             cpa_threshold REAL NOT NULL DEFAULT 600.0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -56,7 +57,9 @@ def init_db():
 
         /*
         NOTE POUR LE DÉVELOPPEMENT :
-        Si vous modifiez ce schéma, supprimez le fichier 'app_database.db' existant.
+        Si vous modifiez ce schéma, supprimez le fichier 'app_database.db' existant
+        ou ajoutez manuellement la nouvelle colonne avec:
+        ALTER TABLE clients ADD COLUMN ad_account_id TEXT;
         Il sera recréé avec la nouvelle structure au prochain lancement de l'application.
         */
     """)
@@ -72,11 +75,11 @@ def get_all_clients():
     conn.close()
     return clients
 
-def add_client(name, token, spend_threshold, cpa_threshold):
+def add_client(name, token, ad_account_id, spend_threshold, cpa_threshold):
     """Ajoute un nouveau client dans la base de données."""
     conn = get_db_connection()
-    conn.execute('INSERT INTO clients (name, facebook_token, spend_threshold, cpa_threshold) VALUES (?, ?, ?, ?)',
-                 (name, token, spend_threshold, cpa_threshold))
+    conn.execute('INSERT INTO clients (name, facebook_token, ad_account_id, spend_threshold, cpa_threshold) VALUES (?, ?, ?, ?, ?)',
+                 (name, token, ad_account_id, spend_threshold, cpa_threshold))
     conn.commit()
     conn.close()
 
