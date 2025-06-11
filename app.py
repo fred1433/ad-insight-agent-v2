@@ -146,6 +146,20 @@ def delete_client(client_id):
     response.headers['HX-Trigger'] = 'loadFlash'
     return response
 
+@app.route('/validate-token', methods=['POST'])
+def validate_token():
+    """Valide un token Facebook en temps réel."""
+    token = request.form.get('facebook_token')
+    if not token:
+        return ""  # Ne rien afficher si le champ est vide
+
+    is_valid, message = facebook_client.check_token_validity(token)
+    
+    if is_valid:
+        return f'<small class="text-success">✅ {message}</small>'
+    else:
+        return f'<small class="text-danger">❌ {message}</small>'
+
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
 @login_required
 def run_analysis(client_id, media_type):

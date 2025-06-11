@@ -106,6 +106,15 @@ form {
     background-color: #c82333;
 }
 
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
 /* Alertes / Messages Flash */
 .alert {
     padding: 15px;
@@ -310,4 +319,32 @@ header {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
+}
+
+/* Couleurs de texte utilitaires */
+.text-success {
+    color: #155724;
+    font-weight: bold;
+}
+.text-danger {
+    color: #721c24;
+    font-weight: bold;
+}
+.text-muted {
+    color: #6c757d;
+}
+
+/* Conteneur pour le message de validation du token */
+.validation-message {
+    min-height: 20px; /* Empêche le formulaire de "sauter" quand le message apparaît */
+    margin-top: 5px;
+}
+
+/* Style pour le champ de texte avec un bouton à côté */
+.input-with-button {
+    display: flex;
+    gap: 10px;
+}
+.input-with-button input {
+    flex-grow: 1; /* L'input prend toute la place disponible */
 } 

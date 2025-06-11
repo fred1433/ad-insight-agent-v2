@@ -23,7 +23,20 @@
                 <label for="facebook_token">Token de Acceso de Facebook</label>
                 <span class="help-icon" title="Haz clic para obtener ayuda sobre cómo generar un token de acceso">?</span>
             </div>
-            <input type="text" id="facebook_token" name="facebook_token" required>
+            <div class="input-with-button">
+                <input type="text" id="facebook_token" name="facebook_token" required>
+                <button type="button" class="btn btn-secondary"
+                        hx-post="/validate-token"
+                        hx-include="[name='facebook_token']"
+                        hx-target="#token-validation-result"
+                        hx-indicator="#token-validation-indicator">
+                    Verificar
+                </button>
+            </div>
+            <div id="token-validation-result" class="validation-message"></div>
+            <div id="token-validation-indicator" class="htmx-indicator">
+                <small class="text-muted">Verificando...</small>
+            </div>
         </div>
          <div class="form-group">
             <label for="spend_threshold">Inversión Mínima ($)</label>

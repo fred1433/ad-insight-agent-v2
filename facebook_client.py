@@ -6,7 +6,10 @@ from typing import List, Dict, Optional
 from pydantic import BaseModel
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.adobjects.user import User
 from facebook_business.adobjects.ad import Ad as FBAd
+from facebook_business.exceptions import FacebookRequestError
+import requests
 
 from config import config
 
@@ -284,8 +287,7 @@ def get_winning_ads(spend_threshold=WINNING_ADS_SPEND_THRESHOLD, cpa_threshold=W
 
 def get_specific_winning_ad(media_type: str, spend_threshold: float, cpa_threshold: float) -> Optional[Ad]:
     """
-    Récupère la meilleure annonce gagnante pour un type de média spécifique ('video' ou 'image').
-    Se base sur le cache pour la rapidité.
+    Trouve la publicité la plus performante pour un client donné.
     """
     print(f"Recherche de la meilleure annonce de type '{media_type}'...")
     all_ads = get_winning_ads(spend_threshold, cpa_threshold)
@@ -330,3 +332,37 @@ def get_ad_by_id(ad_id: str) -> Optional[Ad]:
     # mais pour l'instant, on se contente de ce qui est dans le cache.
     print(f"Avertissement: Annonce avec ID {ad_id} non trouvée dans le cache des 'winning ads'.")
     return None 
+
+def check_token_validity(token: str) -> (bool, str):
+    """
+    Valide un token en essayant de récupérer les comptes publicitaires associés.
+    C'est la méthode de validation la plus directe.
+
+    Returns:
+        (bool, str): Un tuple contenant (est_valide, message)
+    """
+    if not token:
+        return False, "El token no puede estar vacío."
+
+    try:
+        # Initialisation temporaire de l'API avec le token fourni par l'utilisateur
+        temp_api = FacebookAdsApi.init(access_token=token, timeout=10)
+        
+        # Tenter de récupérer les comptes publicitaires est le meilleur test
+        user = User(fbid='me', api=temp_api)
+        ad_accounts = user.get_ad_accounts()
+        
+        # Vérifier si l'itérateur n'est pas vide
+        first_account = next(iter(ad_accounts), None)
+
+        if first_account:
+            return True, "Token válido y con acceso a cuentas publicitarias."
+        else:
+            return False, "Token válido, pero no tiene acceso a ninguna cuenta publicitaria."
+
+    except FacebookRequestError as e:
+        error_message = e.api_error_message() or "Error desconocido."
+        return False, f"Token inválido: {error_message}"
+    except Exception as e:
+        print(f"Error inesperado al validar el token: {e}")
+        return False, "Error inesperado en el servidor." 
