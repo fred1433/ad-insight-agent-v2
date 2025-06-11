@@ -29,7 +29,7 @@
                        hx-trigger="input changed delay:500ms"
                        hx-target="#submit-button-container"
                        hx-swap="innerHTML">
-                <button type="button" class="btn btn-secondary"
+                <button type="button" id="verify-token-btn" class="btn btn-secondary" disabled
                         hx-post="/validate-token"
                         hx-include="[name='facebook_token']"
                         hx-target="#token-validation-result"
@@ -106,6 +106,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Ad Insight Agent: Script chargé.");
+
+    // --- Logique de désactivation dynamique du bouton "Verificar" ---
+    const tokenInput = document.getElementById('facebook_token');
+    const verifyButton = document.getElementById('verify-token-btn');
+
+    if (tokenInput && verifyButton) {
+        // Fonction pour vérifier l'état de l'input et mettre à jour le bouton
+        const toggleVerifyButton = () => {
+            const isDisabled = tokenInput.value.trim() === '';
+            verifyButton.disabled = isDisabled;
+            if (isDisabled) {
+                verifyButton.classList.remove('btn-primary');
+                verifyButton.classList.add('btn-secondary');
+            } else {
+                verifyButton.classList.remove('btn-secondary');
+                verifyButton.classList.add('btn-primary');
+            }
+        };
+
+        // Écouter les changements dans le champ de saisie
+        tokenInput.addEventListener('input', toggleVerifyButton);
+
+        // Vérifier l'état initial au cas où le champ serait pré-rempli
+        toggleVerifyButton();
+    }
+    // --- Fin de la logique ---
 
     // Lógica para la modal de ayuda
     const helpModal = document.getElementById('help-modal');
