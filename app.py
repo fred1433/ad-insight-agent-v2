@@ -146,6 +146,11 @@ def delete_client(client_id):
     response.headers['HX-Trigger'] = 'loadFlash'
     return response
 
+@app.route('/flash-messages')
+def flash_messages():
+    """Route pour rafraîchir uniquement les messages flash."""
+    return render_template('_flash_messages.html')
+
 @app.route('/validate-token', methods=['POST'])
 def validate_token():
     """Valide un token Facebook en temps réel."""
