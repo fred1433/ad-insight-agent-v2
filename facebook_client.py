@@ -309,4 +309,24 @@ def get_specific_winning_ad(media_type: str, spend_threshold: float, cpa_thresho
     # La liste est déjà triée par CPA, donc le premier élément est le meilleur.
     best_ad = candidate_ads[0]
     print(f"Meilleure annonce de type '{media_type}' trouvée : {best_ad.name} (CPA: {best_ad.insights.cpa})")
-    return best_ad 
+    return best_ad
+
+def get_ad_by_id(ad_id: str) -> Optional[Ad]:
+    """
+    Récupère une annonce spécifique par son ID en utilisant le cache.
+    """
+    if not ad_id:
+        return None
+        
+    # On charge toutes les pubs depuis le cache (ou l'API si le cache est vide)
+    all_ads = get_winning_ads()
+    
+    # On cherche l'annonce correspondante
+    for ad in all_ads:
+        if ad.id == ad_id:
+            return ad
+            
+    # Si non trouvée dans les "winning ads", on pourrait avoir besoin de faire un fetch spécifique
+    # mais pour l'instant, on se contente de ce qui est dans le cache.
+    print(f"Avertissement: Annonce avec ID {ad_id} non trouvée dans le cache des 'winning ads'.")
+    return None 

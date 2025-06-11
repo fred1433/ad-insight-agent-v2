@@ -41,8 +41,10 @@ def init_db():
             client_id INTEGER NOT NULL,
             ad_id TEXT, -- Peut être NULL au début
             status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, RUNNING, COMPLETED, FAILED
-            report_path TEXT,
+            report_path TEXT, -- Gardé pour le chemin du média principal
             created_at TIMESTAMP NOT NULL,
+            analysis_html TEXT, -- NOUVEAU: pour stocker le HTML de l'analyse
+            script_html TEXT, -- NOUVEAU: pour stocker le HTML des concepts
             cost_analysis REAL DEFAULT 0.0,
             cost_generation REAL DEFAULT 0.0,
             total_cost REAL DEFAULT 0.0,

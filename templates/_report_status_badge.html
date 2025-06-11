@@ -1,0 +1,12 @@
+{% if report.status == 'COMPLETED' %}
+    <span class="badge bg-success">Terminé</span>
+{% elif report.status == 'RUNNING' or report.status == 'IN_PROGRESS' %}
+    <span class="badge bg-primary">En cours...</span>
+    <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+{% elif report.status == 'FAILED' %}
+    <span class="badge bg-danger">Échoué</span>
+{% else %}
+    <span class="badge bg-secondary">{{ report.status }}</span>
+{% endif %} 

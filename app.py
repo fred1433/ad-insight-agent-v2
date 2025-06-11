@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify
 from datetime import datetime
 from dateutil import parser
 import database
@@ -6,6 +6,8 @@ import threading
 import pipeline
 import pytz
 import logging
+import os
+import facebook_client
 
 # --- FILTRE DE LOGS ---
 # Filtre pour ne pas afficher les requêtes de polling dans le terminal
@@ -159,19 +161,59 @@ def get_clients_list():
     clients = get_clients_with_reports()
     return render_template('_client_list.html', clients=clients)
 
-@app.route('/reports/<path:filename>')
-def serve_report(filename):
-    """Sert un fichier de rapport depuis le dossier 'reports'."""
-    return send_from_directory('reports', filename)
+@app.route('/report/<int:report_id>')
+def view_report(report_id):
+    """Affiche un rapport spécifique depuis la base de données."""
+    conn = database.get_db_connection()
+    # On joint avec la table clients pour récupérer le nom du client
+    report = conn.execute("""
+        SELECT r.*, c.name as client_name 
+        FROM reports r 
+        JOIN clients c ON r.client_id = c.id 
+        WHERE r.id = ?
+    """, (report_id,)).fetchone()
+    conn.close()
+    
+    if report is None:
+        return "Rapport non trouvé", 404
+    
+    # On récupère l'objet Ad complet pour avoir les KPIs
+    ad = facebook_client.get_ad_by_id(report['ad_id'])
+
+    return render_template('report.html', report=report, insights=(ad.insights if ad else None))
+
+@app.route('/report/<int:report_id>/update', methods=['POST'])
+def update_report_script(report_id):
+    """Met à jour le fragment HTML du script pour un rapport."""
+    data = request.json
+    script_html = data.get('script_html')
+
+    if script_html is None:
+        return jsonify({'status': 'error', 'message': 'Contenu manquant'}), 400
+
+    try:
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET script_html = ? WHERE id = ?', (script_html, report_id))
+        conn.commit()
+        conn.close()
+        return jsonify({'status': 'success', 'message': 'Rapport mis à jour'})
+    except Exception as e:
+        print(f"Erreur lors de la mise à jour du rapport {report_id}: {e}")
+        return jsonify({'status': 'error', 'message': 'Erreur interne du serveur'}), 500
+
+@app.route('/storage/<path:filename>')
+def serve_storage_file(filename):
+    """Sert les fichiers depuis le dossier de stockage."""
+    return send_from_directory('storage', filename)
 
 def setup_database():
     """Initialise la base de données si elle n'existe pas."""
-    with app.app_context():
+    db_path = database.DATABASE_FILE
+    if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
         database.init_db()
+        flash("La base de données a été initialisée.", "info")
 
 if __name__ == '__main__':
     print("Démarrage de l'application...")
     setup_database()
-    # L'option debug=True permet de recharger automatiquement le serveur
-    # à chaque modification du code.
-    app.run(debug=True, port=5001) 
+    app.run(debug=True, port=5001)

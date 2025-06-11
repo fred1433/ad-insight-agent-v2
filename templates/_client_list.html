@@ -49,7 +49,11 @@
                             {% endif %}
 
                             {% if report.status == 'COMPLETED' and report.report_path %}
-                                <a href="{{ url_for('serve_report', filename=report.report_path.split('/')[-1]) }}" target="_blank">Voir le rapport</a>
+                                <div id="report-action-{{ report.id }}">
+                                    {% if report.status == 'COMPLETED' %}
+                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm">Voir le rapport</a>
+                                    {% endif %}
+                                </div>
                                 <span class="cost-badge" title="Analyse: ${{ '%.4f'|format(report.cost_analysis) }} | Génération: ${{ '%.4f'|format(report.cost_generation) }}">
                                     (Coût: ${{ '%.4f'|format(report.total_cost) }})
                                 </span>
