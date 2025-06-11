@@ -47,13 +47,13 @@ def login():
             session['authenticated'] = True
             return redirect(url_for('index'))
         else:
-            flash("Code d'accès invalide.", "danger")
+            flash("Código de acceso inválido.", "danger")
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
     session.pop('authenticated', None)
-    flash("Vous avez été déconnecté.", "info")
+    flash("Has cerrado sesión.", "info")
     return redirect(url_for('login'))
 # -----------------------------------------
 
@@ -122,7 +122,7 @@ def add_client():
     database.add_client(name, token, spend, cpa)
     
     # Message de succès
-    flash(f'Client "{name}" ajouté avec succès!', 'success')
+    flash(f'Cliente "{name}" añadido con éxito.', 'success')
     
     # Rafraîchissement complet de la page pour refléter l'ajout
     response = make_response()
@@ -138,7 +138,7 @@ def delete_client(client_id):
     client_name = client['name'] if client else f"ID {client_id}"
 
     database.delete_client(client_id)
-    flash(f'Client "{client_name}" supprimé avec succès!', 'danger')
+    flash(f'Cliente "{client_name}" eliminado con éxito.', 'danger')
 
     # Réponse vide pour que HTMX supprime la ligne du tableau (le <tr>)
     # On déclenche un événement pour recharger les messages flash à part
@@ -153,7 +153,7 @@ def run_analysis(client_id, media_type):
     
     analysis_code = request.form.get('analysis_code')
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
-        flash("Code d'analyse invalide ou manquant.", "danger")
+        flash("Código de análisis inválido o faltante.", "danger")
         # On renvoie juste un rechargement des messages flash
         response = make_response(render_template('_flash_messages.html'))
         return response # On renvoie 200 OK pour que HTMX fasse le swap
@@ -185,7 +185,7 @@ def run_analysis(client_id, media_type):
     )
     analysis_thread.start()
     
-    flash(f"L'analyse de type '{media_type}' pour '{client_name}' a été lancée.", "info")
+    flash(f"El análisis de tipo '{media_type}' para '{client_name}' ha comenzado.", "info")
     
     # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste (pour voir le statut PENDING).
     response = make_response(render_template('_flash_messages.html'))
@@ -226,17 +226,17 @@ def update_report_script(report_id):
     script_html = data.get('script_html')
 
     if script_html is None:
-        return jsonify({'status': 'error', 'message': 'Contenu manquant'}), 400
+        return jsonify({'status': 'error', 'message': 'Contenido faltante'}), 400
 
     try:
         conn = database.get_db_connection()
         conn.execute('UPDATE reports SET script_html = ? WHERE id = ?', (script_html, report_id))
         conn.commit()
         conn.close()
-        return jsonify({'status': 'success', 'message': 'Rapport mis à jour'})
+        return jsonify({'status': 'success', 'message': 'Rapport actualizado'})
     except Exception as e:
-        print(f"Erreur lors de la mise à jour du rapport {report_id}: {e}")
-        return jsonify({'status': 'error', 'message': 'Erreur interne du serveur'}), 500
+        print(f"Error al actualizar el informe {report_id}: {e}")
+        return jsonify({'status': 'error', 'message': 'Error interno del servidor'}), 500
 
 @app.route('/storage/<path:filename>')
 def serve_storage_file(filename):

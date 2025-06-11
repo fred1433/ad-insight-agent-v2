@@ -1,16 +1,16 @@
-<table>
+<h2>Clientes</h2>
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>Nom du Client</th>
-            <th>Seuil de Dépense</th>
-            <th>Seuil CPA</th>
-            <th>Actions</th>
-            <th>Analyse Test</th>
-            <th>Rapports d'Analyse</th>
+            <th>Nombre</th>
+            <th>Inversión Mín.</th>
+            <th>CPA Máx.</th>
+            <th>Acciones</th>
+            <th>Informes</th>
         </tr>
     </thead>
-    <tbody>
-    {% for client in clients %}
+    <tbody hx-confirm="¿Estás seguro?">
+        {% for client in clients %}
         <tr id="client-{{ client.id }}">
             <td>{{ client.name }}</td>
             <td>{{ client.spend_threshold }} $</td>
@@ -20,63 +20,50 @@
                       hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='image') }}"
                       hx-target="#flash-messages"
                       hx-swap="innerHTML">
-                    <input type="text" name="analysis_code" placeholder="Code Analyse" required>
-                    <button type="submit" class="btn btn-info btn-sm">Analyse Image</button>
+                    <input type="text" name="analysis_code" placeholder="Código Análisis" required>
+                    <button type="submit" class="btn btn-info btn-sm">Análisis Imagen</button>
                 </form>
                 <form class="run-analysis-form"
                       hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='video') }}"
                       hx-target="#flash-messages"
                       hx-swap="innerHTML">
-                    <input type="text" name="analysis_code" placeholder="Code Analyse" required>
-                    <button type="submit" class="btn btn-warning btn-sm">Analyse Vidéo</button>
+                    <input type="text" name="analysis_code" placeholder="Código Análisis" required>
+                    <button type="submit" class="btn btn-warning btn-sm">Análisis Vídeo</button>
                 </form>
                 <button class="btn btn-danger btn-sm"
                         hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
                         hx-target="closest tr"
                         hx-swap="outerHTML"
-                        hx-confirm="Êtes-vous sûr de vouloir supprimer le client {{ client.name }} ?">
-                    Supprimer
+                        hx-confirm="¿Estás seguro de que quieres eliminar al cliente {{ client.name }}?">
+                    Eliminar
                 </button>
             </td>
             <td class="reports-cell">
                 {% if client.reports %}
                     <ul>
-                    {% for report in client.reports %}
+                        {% for report in client.reports %}
                         <li>
-                            <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span> - 
+                            <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span> -
                             
-                            {% if report.status in ['IN_PROGRESS', 'RUNNING'] %}
-                                <span class="status-badge status-{{ report.status.lower() }}" 
-                                      hx-get="{{ url_for('get_report_status', report_id=report.id) }}" 
-                                      hx-trigger="every 3s"
-                                      hx-swap="none">
-                                    {{ report.status }}
-                                </span>
-                            {% else %}
-                                <span class="status-badge status-{{ report.status.lower() }}">{{ report.status }}</span>
-                            {% endif %}
+                            {% include '_report_status_badge.html' %}
 
                             {% if report.status == 'COMPLETED' and report.report_path %}
                                 <div id="report-action-{{ report.id }}">
                                     {% if report.status == 'COMPLETED' %}
-                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm">Voir le rapport</a>
+                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm">Ver informe</a>
                                     {% endif %}
                                 </div>
                                 <span class="cost-badge" title="Analyse: ${{ '%.4f'|format(report.cost_analysis) }} | Génération: ${{ '%.4f'|format(report.cost_generation) }}">
-                                    (Coût: ${{ '%.4f'|format(report.total_cost) }})
+                                    (Coste: ${{ '%.4f'|format(report.total_cost) }})
                                 </span>
                             {% endif %}
                         </li>
-                    {% endfor %}
+                        {% endfor %}
                     </ul>
                 {% else %}
-                    <p>Aucun rapport</p>
+                    <small class="text-muted">No hay informes para este cliente todavía.</small>
                 {% endif %}
             </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="6" style="text-align: center;">Aucun client trouvé.</td>
         </tr>
         {% endfor %}
     </tbody>

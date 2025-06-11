@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Accès à l'Application{% endblock %}
+{% block title %}Acceso a la Aplicación{% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <h2>Accès à l'Agent d'Analyse</h2>
-    <p>Veuillez entrer le code d'accès pour continuer.</p>
+    <h2>Acceso al Agente de Análisis</h2>
+    <p>Por favor, introduce el código de acceso para continuar.</p>
     
     <form method="POST" action="{{ url_for('login') }}">
         <div class="form-group">
-            <label for="access_code">Code d'accès</label>
+            <label for="access_code">Código de acceso</label>
             <input type="password" id="access_code" name="access_code" required autofocus>
         </div>
-        <button type="submit" class="btn btn-primary">Entrer</button>
+        <button type="submit" class="btn btn-primary">Entrar</button>
     </form>
 </div>
 
