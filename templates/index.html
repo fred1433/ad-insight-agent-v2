@@ -4,10 +4,6 @@
 
 {% block content %}
     <h1>Gestion des Clients</h1>
-    
-    <div id="flash-messages">
-        {% include '_flash_messages.html' %}
-    </div>
 
     <!-- Section pour afficher les clients existants -->
     <div id="client-list" hx-get="{{ url_for('get_clients_list') }}" hx-trigger="load, loadClientList from:body" hx-swap="innerHTML">

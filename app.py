@@ -156,7 +156,7 @@ def run_analysis(client_id, media_type):
         flash("Code d'analyse invalide ou manquant.", "danger")
         # On renvoie juste un rechargement des messages flash
         response = make_response(render_template('_flash_messages.html'))
-        return response, 403 # 403 Forbidden
+        return response # On renvoie 200 OK pour que HTMX fasse le swap
 
     if media_type not in ['video', 'image']:
         return "Type de média non valide.", 400
