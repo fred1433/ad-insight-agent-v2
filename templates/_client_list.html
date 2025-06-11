@@ -9,7 +9,7 @@
             <th>Informes</th>
         </tr>
     </thead>
-    <tbody hx-confirm="¿Estás seguro?">
+    <tbody>
         {% for client in clients %}
         <tr id="client-{{ client.id }}">
             <td>{{ client.name }}</td>

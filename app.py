@@ -182,11 +182,11 @@ def run_analysis(client_id, media_type):
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
         flash("Código de análisis inválido o faltante.", "danger")
         # On renvoie juste un rechargement des messages flash
-        response = make_response(render_template('_flash_messages.html'))
-        return response # On renvoie 200 OK pour que HTMX fasse le swap
+        return render_template('_flash_messages.html')
 
     if media_type not in ['video', 'image']:
-        return "Type de média non valide.", 400
+        flash("Tipo de média no válido.", "warning")
+        return render_template('_flash_messages.html')
 
     conn = database.get_db_connection()
     client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
