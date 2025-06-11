@@ -116,9 +116,20 @@ def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
         print("    ⏳ Subiendo el archivo de video a la API de Gemini...")
         video_file = genai.upload_file(path=video_path)
         
+        # Ajout d'un timeout de 5 minutes pour éviter une attente infinie
+        processing_start_time = time.time()
+        timeout_seconds = 300
+
         while video_file.state.name == "PROCESSING":
-            print("      Procesando video...")
+            # Log amélioré pour voir l'état actuel
+            print(f"      Esperando el procesamiento... estado actual: {video_file.state.name}")
+            
+            if time.time() - processing_start_time > timeout_seconds:
+                raise Exception(f"Timeout: El procesamiento del video superó los {timeout_seconds} segundos.")
+            
             time.sleep(10)
+            # On récupère l'état à jour du fichier
+            video_file = genai.get_file(video_file.name)
         
         if video_file.state.name == "FAILED":
             raise Exception("Falló el procesamiento del video en Gemini.")

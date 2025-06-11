@@ -381,20 +381,22 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
             # Calcul du coût de l'analyse
             cost_analysis = calculate_analysis_cost(usage_metadata)
             print(f"💰 Usage metadata from Gemini: {usage_metadata}")
+            if hasattr(usage_metadata, 'prompt_token_count'):
+                print(f"💰 Détail des tokens: Input={usage_metadata.prompt_token_count}, Output={usage_metadata.candidates_token_count}")
             print(f"💰 Coût de l'analyse Gemini estimé : ${cost_analysis:.4f}")
             
             analysis_part, script_part = (full_response_text.split("---", 1) + [""])[:2]
             
-            print("Génération des images concepts...")
+            print("Génération des images concepts (TEMPORAIREMENT DÉSACTIVÉE)...")
             prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
             generated_image_paths = []
             images_generated_count = 0
-            for i, prompt in enumerate(prompts[:3]):
-                output_filename = f"generated_concept_{best_ad.id}_{i+1}.png"
-                generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
-                if generated_path:
-                    generated_image_paths.append(generated_path)
-                    images_generated_count += count
+            # for i, prompt in enumerate(prompts[:3]):
+            #     output_filename = f"generated_concept_{best_ad.id}_{i+1}.png"
+            #     generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
+            #     if generated_path:
+            #         generated_image_paths.append(generated_path)
+            #         images_generated_count += count
             
             # Calcul du coût de la génération d'images
             cost_generation = images_generated_count * IMAGEN_PRICE_PER_IMAGE
