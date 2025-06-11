@@ -6,6 +6,7 @@
     <title>Ad Insight Agent</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='htmx.min.js') }}" defer></script>
+    {% block head_styles %}{% endblock %}
     <style>
         .cost-badge {
             font-size: 0.8em;
@@ -21,12 +22,19 @@
 <body>
     <div class="container">
         <header>
-            <div class="logo">Ad Insight Agent</div>
-            <nav>
-                {% if session.get('authenticated') %}
-                    <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
-                {% endif %}
-            </nav>
+            <div class="header-content">
+                <nav class="left-nav">
+                    {% if request.endpoint not in ['index', 'login', 'static'] %}
+                        <a href="{{ url_for('index') }}" class="back-link">&larr; Volver</a>
+                    {% endif %}
+                </nav>
+                <div class="logo">Ad Insight Agent</div>
+                <nav class="right-nav">
+                    {% if session.get('authenticated') and request.endpoint == 'index' %}
+                        <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                    {% endif %}
+                </nav>
+            </div>
         </header>
         <main>
             <div id="flash-messages" hx-get="{{ url_for('flash_messages') }}" hx-trigger="load, loadFlash from:body" hx-swap="innerHTML">
