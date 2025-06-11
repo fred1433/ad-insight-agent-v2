@@ -25,6 +25,10 @@ class ScriptConfig(BaseModel):
     """Configuration générale du script."""
     max_ads_per_run: int = 1 # Limite le nombre de pubs à traiter, -1 pour infini
 
+class AuthConfig(BaseModel):
+    app_access_code: str
+    analysis_access_code: str
+
 # Classe principale pour contenir toutes les configurations
 # Pydantic-settings est assez intelligent pour router les variables
 # en se basant sur les préfixes définis dans chaque sous-classe.
@@ -33,9 +37,17 @@ class AppSettings(BaseSettings):
     # ex: DEBUG: bool = False
     
     # On compose la configuration avec nos classes spécifiques
-    facebook: FacebookConfig = FacebookConfig()
+    facebook: FacebookConfig = FacebookConfig(
+        access_token=os.getenv("FACEBOOK_ACCESS_TOKEN"),
+        app_secret=os.getenv("FACEBOOK_APP_SECRET"),
+        ad_account_id=os.getenv("FACEBOOK_AD_ACCOUNT_ID"),
+    )
     google: GoogleConfig = GoogleConfig()
     script: ScriptConfig = ScriptConfig()
+    auth: AuthConfig = AuthConfig(
+        app_access_code=os.getenv("APP_ACCESS_CODE"),
+        analysis_access_code=os.getenv("ANALYSIS_ACCESS_CODE"),
+    )
 
 # Instance globale unique de la configuration
 config = AppSettings() 

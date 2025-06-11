@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify, session
 from datetime import datetime
 from dateutil import parser
 import database
@@ -8,6 +8,8 @@ import pytz
 import logging
 import os
 import facebook_client
+from functools import wraps
+from config import config
 
 # --- FILTRE DE LOGS ---
 # Filtre pour ne pas afficher les requêtes de polling dans le terminal
@@ -28,6 +30,32 @@ app = Flask(__name__)
 
 # Configure une clé secrète pour la gestion des sessions (utile pour les messages flash)
 app.config['SECRET_KEY'] = 'une-super-cle-secrete-a-changer-en-prod'
+
+# --- GESTION DE L'AUTHENTIFICATION ---
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form.get('access_code') == config.auth.app_access_code:
+            session['authenticated'] = True
+            return redirect(url_for('index'))
+        else:
+            flash("Code d'accès invalide.", "danger")
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('authenticated', None)
+    flash("Vous avez été déconnecté.", "info")
+    return redirect(url_for('login'))
+# -----------------------------------------
 
 def get_clients_with_reports():
     """Récupère tous les clients avec leurs rapports."""
@@ -58,6 +86,7 @@ def get_clients_with_reports():
     return clients_with_reports
 
 @app.route('/')
+@login_required
 def index():
     """Affiche la page principale."""
     return render_template('index.html')
@@ -118,9 +147,17 @@ def delete_client(client_id):
     return response
 
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
+@login_required
 def run_analysis(client_id, media_type):
     """Lance le pipeline et crée un rapport."""
     
+    analysis_code = request.form.get('analysis_code')
+    if not analysis_code or analysis_code != config.auth.analysis_access_code:
+        flash("Code d'analyse invalide ou manquant.", "danger")
+        # On renvoie juste un rechargement des messages flash
+        response = make_response(render_template('_flash_messages.html'))
+        return response, 403 # 403 Forbidden
+
     if media_type not in ['video', 'image']:
         return "Type de média non valide.", 400
 

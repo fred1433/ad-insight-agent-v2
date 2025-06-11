@@ -99,7 +99,9 @@ form {
 
 .btn-danger {
     background-color: #dc3545;
+    border-color: #dc3545;
 }
+
 .btn-danger:hover {
     background-color: #c82333;
 }
@@ -180,4 +182,39 @@ form {
 
 .reports-cell a:hover {
     text-decoration: underline;
+}
+
+/* Style pour le formulaire d'analyse */
+.run-analysis-form {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.run-analysis-form input[type="text"] {
+    width: 120px; /* Ajustez la largeur comme souhaité */
+    padding: 2px 5px;
+    font-size: 0.8rem;
+}
+
+/* Client actions alignment */
+.client-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
 } 

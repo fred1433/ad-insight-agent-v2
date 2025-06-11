@@ -15,20 +15,28 @@
             <td>{{ client.name }}</td>
             <td>{{ client.spend_threshold }} $</td>
             <td>{{ client.cpa_threshold }} $</td>
-            <td>
-                <button class="btn btn-danger" hx-delete="/delete_client/{{ client.id }}" hx-target="#client-{{ client.id }}" hx-swap="outerHTML" hx-confirm="Êtes-vous sûr de vouloir supprimer le client {{ client.name }}?">
+            <td class="client-actions">
+                <form class="run-analysis-form"
+                      hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='image') }}"
+                      hx-target="#flash-messages"
+                      hx-swap="innerHTML">
+                    <input type="text" name="analysis_code" placeholder="Code Analyse" required>
+                    <button type="submit" class="btn btn-info btn-sm">Analyse Image</button>
+                </form>
+                <form class="run-analysis-form"
+                      hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='video') }}"
+                      hx-target="#flash-messages"
+                      hx-swap="innerHTML">
+                    <input type="text" name="analysis_code" placeholder="Code Analyse" required>
+                    <button type="submit" class="btn btn-warning btn-sm">Analyse Vidéo</button>
+                </form>
+                <button class="btn btn-danger btn-sm"
+                        hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML"
+                        hx-confirm="Êtes-vous sûr de vouloir supprimer le client {{ client.name }} ?">
                     Supprimer
                 </button>
-            </td>
-            <td class="reports-cell-buttons">
-                <div class="button-group">
-                    <button class="btn btn-primary btn-sm" hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='video') }}" hx-trigger="click" hx-target="#flash-messages" hx-swap="innerHTML">
-                        Test Vidéo
-                    </button>
-                    <button class="btn btn-secondary btn-sm" hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='image') }}" hx-trigger="click" hx-target="#flash-messages" hx-swap="innerHTML">
-                        Test Image
-                    </button>
-                </div>
             </td>
             <td class="reports-cell">
                 {% if client.reports %}

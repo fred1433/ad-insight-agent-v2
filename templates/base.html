@@ -20,7 +20,18 @@
 </head>
 <body>
     <div class="container">
-        {% block content %}{% endblock %}
+        <header>
+            <div class="logo">Ad Insight Agent</div>
+            <nav>
+                {% if session.get('authenticated') %}
+                    <a href="{{ url_for('logout') }}">Déconnexion</a>
+                {% endif %}
+            </nav>
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+        </main>
     </div>
+    <script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
 </body>
 </html> 
