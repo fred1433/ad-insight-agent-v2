@@ -8,6 +8,13 @@ from pydantic import BaseModel
 project_root = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(project_root, '.env'))
 
+# --- Constantes de l'application ---
+# Ces valeurs définissent la logique métier pour identifier une "winning ad"
+WINNING_ADS_SPEND_THRESHOLD = 3000.0  # Dépense minimale pour être considérée
+WINNING_ADS_CPA_THRESHOLD = 600.0     # Coût par acquisition maximal
+CACHE_DURATION_HOURS = 24             # Durée de validité du cache en heures
+FACEBOOK_CACHE_DIR = "data/facebook_cache" # Dossier pour les caches par compte
+
 class FacebookConfig(BaseSettings):
     access_token: str
     app_secret: Optional[str] = None # Rendu optionnel pour plus de flexibilité

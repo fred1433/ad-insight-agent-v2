@@ -163,6 +163,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         )
         
         best_ad = facebook_client.get_specific_winning_ad(
+            ad_account_id=ad_account_id,
             media_type=media_type,
             spend_threshold=client['spend_threshold'],
             cpa_threshold=client['cpa_threshold']

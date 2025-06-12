@@ -14,4 +14,4 @@ __pycache__/
 .env
 /data/
 *.db 
-analysis_cache.json 
+analysis_cache.json data/facebook_cache/

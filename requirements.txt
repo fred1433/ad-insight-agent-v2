@@ -1,6 +1,6 @@
 # --- Core Application Dependencies ---
 Flask
-facebook-business
+facebook-business>=19.0.0,<20.0.0
 pydantic
 pydantic-settings
 python-dotenv
