@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify, session
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil import parser
 import database
 import threading
@@ -235,12 +235,12 @@ def run_analysis(client_id, media_type):
     print(f"LOG: Requête reçue pour lancer l'analyse du client: {client_name}")
 
     # Étape 1: Créer l'enregistrement du rapport avec le statut 'IN_PROGRESS'
-    utc_now = pytz.utc.localize(datetime.utcnow())
+    utc_now = datetime.now(timezone.utc)
     mexico_tz = pytz.timezone("America/Mexico_City")
     mexico_now = utc_now.astimezone(mexico_tz)
     
     cursor = conn.execute('INSERT INTO reports (client_id, status, created_at) VALUES (?, ?, ?)', 
-                          (client_id, 'IN_PROGRESS', mexico_now))
+                          (client_id, 'IN_PROGRESS', mexico_now.isoformat()))
     report_id = cursor.lastrowid
     conn.commit()
     conn.close()
