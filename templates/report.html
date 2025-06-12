@@ -45,49 +45,49 @@
             <!-- Colonne KPIs -->
             <div>
                 <h3>Indicadores de Rendimiento (KPIs)</h3>
-                {% if insights %}
+                {% if ad and ad.insights %}
                     <table class="table table-striped">
                         <tbody>
                             <tr>
                                 <td><strong>Inversión</strong></td>
-                                <td class="text-end">{{"${:,.2f}".format(insights.spend)}}</td>
+                                <td class="text-end">{{"${:,.2f}".format(ad.insights.spend)}}</td>
                             </tr>
                             <tr>
                                 <td><strong>CPA (Costo por Adquisición)</strong></td>
-                                <td class="text-end">{{"${:,.2f}".format(insights.cpa)}}</td>
+                                <td class="text-end">{{"${:,.2f}".format(ad.insights.cpa)}}</td>
                             </tr>
                             <tr>
                                 <td><strong>Compras</strong></td>
-                                <td class="text-end">{{ insights.website_purchases }}</td>
+                                <td class="text-end">{{ ad.insights.website_purchases }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Valor de Compras</strong></td>
-                                <td class="text-end">{{"${:,.2f}".format(insights.website_purchases_value)}}</td>
+                                <td class="text-end">{{"${:,.2f}".format(ad.insights.website_purchases_value)}}</td>
                             </tr>
                             <tr>
                                 <td><strong>ROAS</strong></td>
-                                <td class="text-end">{{ "{:.2f}x".format(insights.roas) }}</td>
+                                <td class="text-end">{{ "{:.2f}x".format(ad.insights.roas) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>CPM</strong></td>
-                                <td class="text-end">{{"${:,.2f}".format(insights.cpm)}}</td>
+                                <td class="text-end">{{"${:,.2f}".format(ad.insights.cpm)}}</td>
                             </tr>
                             <tr>
                                 <td><strong>CTR (único)</strong></td>
-                                <td class="text-end">{{ "{:.2f} %".format(insights.unique_ctr) }}</td>
+                                <td class="text-end">{{ "{:.2f} %".format(ad.insights.unique_ctr) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Frecuencia</strong></td>
-                                <td class="text-end">{{ "{:.2f}".format(insights.frequency) }}</td>
+                                <td class="text-end">{{ "{:.2f}".format(ad.insights.frequency) }}</td>
                             </tr>
-                            {% if insights.hook_rate is not none and insights.hold_rate is not none %}
+                            {% if ad.insights.hook_rate is not none and ad.insights.hold_rate is not none %}
                             <tr>
                                 <td><strong>Tasa de Enganche (Hook Rate)</strong></td>
-                                <td class="text-end">{{ "{:.2f} %".format(insights.hook_rate) }}</td>
+                                <td class="text-end">{{ "{:.2f} %".format(ad.insights.hook_rate) }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Tasa de Retención (Hold Rate)</strong></td>
-                                <td class="text-end">{{ "{:.2f} %".format(insights.hold_rate) }}</td>
+                                <td class="text-end">{{ "{:.2f} %".format(ad.insights.hold_rate) }}</td>
                             </tr>
                             {% endif %}
                         </tbody>

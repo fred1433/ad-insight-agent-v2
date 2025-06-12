@@ -309,29 +309,39 @@ def get_specific_winning_ad(ad_account_id: str, media_type: str, spend_threshold
     print(f"Meilleure annonce de type '{media_type}' trouvée : {best_ad.name} (CPA: {best_ad.insights.cpa})")
     return best_ad
 
-def get_ad_by_id(ad_id: str) -> Optional[Ad]:
+def get_ad_by_id(ad_id: str, ad_account_id: str) -> Optional[Ad]:
     """
-    Récupère une annonce spécifique par son ID en utilisant le cache.
+    Récupère une publicité spécifique par son ID en utilisant le cache des "winning ads".
+    Nécessite le ad_account_id pour localiser le bon fichier de cache.
     """
-    if not ad_id:
-        return None
-        
-    # On charge toutes les pubs depuis le cache (ou l'API si le cache est vide)
-    all_ads = get_winning_ads()
+    # On réutilise get_winning_ads qui contient la logique de cache.
+    # On met des seuils très bas pour s'assurer de récupérer toutes les pubs
+    # possibles du cache, car on ne connaît pas les seuils du rapport original.
+    all_cached_ads = get_winning_ads(ad_account_id, spend_threshold=0, cpa_threshold=99999)
     
-    # On cherche l'annonce correspondante
-    for ad in all_ads:
+    # On cherche l'annonce spécifique dans la liste chargée.
+    for ad in all_cached_ads:
         if ad.id == ad_id:
             return ad
             
-    # Si non trouvée dans les "winning ads", on pourrait avoir besoin de faire un fetch spécifique
-    # mais pour l'instant, on se contente de ce qui est dans le cache.
-    print(f"Avertissement: Annonce avec ID {ad_id} non trouvée dans le cache des 'winning ads'.")
-    return None 
+    # Si non trouvée dans le cache, on tente un appel direct à l'API (fallback)
+    print(f"⚠️ Annonce {ad_id} non trouvée dans le cache, tentative de récupération directe via l'API...")
+    try:
+        ad_object = FBAd(ad_id).api_get(fields=['id', 'name', 'creative{id,image_url,video_id}'])
+        return Ad(
+            id=ad_object['id'],
+            name=ad_object['name'],
+            creative_id=ad_object.get('creative', {}).get('id'),
+            video_id=ad_object.get('creative', {}).get('video_id'),
+            image_url=ad_object.get('creative', {}).get('image_url'),
+        )
+    except FacebookRequestError:
+        print(f"❌ Échec de la récupération directe de l'annonce {ad_id}.")
+        return None
 
 def check_token_validity(token: str) -> Tuple[bool, str, Optional[List[AdAccount]]]:
     """
-    Vérifie si un token d'accès est valide et a accès à au moins un compte publicitaire.
+    Vérifie si un token d'accès Facebook est valide et peut accéder à des comptes publicitaires.
     Retourne un tuple: (est_valide, message, liste_comptes_pub)
     """
     try:

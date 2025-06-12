@@ -267,27 +267,36 @@ def get_clients_list():
     return render_template('_client_list.html', clients=clients)
 
 @app.route('/report/<int:report_id>')
+@login_required
 def view_report(report_id):
-    """Affiche un rapport spécifique depuis la base de données."""
+    """Affiche un rapport HTML spécifique."""
     conn = database.get_db_connection()
-    # On joint avec la table clients pour récupérer le nom du client
-    report = conn.execute("""
-        SELECT r.*, c.name as client_name 
-        FROM reports r 
-        JOIN clients c ON r.client_id = c.id 
+    # On récupère le rapport ET les infos du client associé en une seule requête
+    report = conn.execute('''
+        SELECT r.*, c.name as client_name, c.ad_account_id
+        FROM reports r
+        JOIN clients c ON r.client_id = c.id
         WHERE r.id = ?
-    """, (report_id,)).fetchone()
+    ''', (report_id,)).fetchone()
     conn.close()
-    
-    if report is None:
-        return "Rapport non trouvé", 404
-    
-    # On récupère l'objet Ad complet pour avoir les KPIs
-    ad = facebook_client.get_ad_by_id(report['ad_id'])
 
-    return render_template('report.html', report=report, insights=(ad.insights if ad else None))
+    if not report:
+        return "Rapport non trouvé", 404
+
+    # On récupère les détails de l'annonce pour les afficher dans l'en-tête du rapport
+    # On initialise l'API AVANT de faire un appel
+    facebook_client.init_facebook_api() 
+    ad = facebook_client.get_ad_by_id(report['ad_id'], report['ad_account_id'])
+
+    return render_template(
+        'report.html', 
+        report=report, 
+        ad=ad, 
+        client_name=report['client_name']
+    )
 
 @app.route('/report/<int:report_id>/update', methods=['POST'])
+@login_required
 def update_report_script(report_id):
     """Met à jour le fragment HTML du script pour un rapport."""
     data = request.json
