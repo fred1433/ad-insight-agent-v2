@@ -28,18 +28,30 @@ GEMINI_INPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_INPUT_PRICE_PER_
 GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS", "7.50"))
 IMAGEN_PRICE_PER_IMAGE = float(os.getenv("IMAGEN_PRICE_PER_IMAGE", "0.03"))
 
-# Le nom du fichier de cache d'analyse (doit être spécifique au client à l'avenir)
-CACHE_FILE = "analysis_cache.json"
+# Le nom du fichier de cache d'analyse est maintenant dynamique et géré dans le pipeline.
+# CACHE_FILE = "analysis_cache.json" # Ancienne constante globale supprimée
 
-def load_cache():
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+ANALYSIS_CACHE_DIR = "data/analysis_cache"
+
+def load_cache(cache_path: str):
+    """Charge les données depuis un fichier de cache JSON."""
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            return {}  # Retourne un cache vide en cas d'erreur
     return {}
 
-def save_cache(cache_data):
-    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
-        json.dump(cache_data, f, indent=4)
+def save_cache(cache_path: str, cache_data):
+    """Sauvegarde les données dans un fichier de cache JSON."""
+    try:
+        # S'assure que le répertoire de cache existe
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            json.dump(cache_data, f, indent=4)
+    except IOError as e:
+        print(f"Erreur lors de la sauvegarde du cache sur {cache_path}: {e}")
 
 def calculate_analysis_cost(usage_metadata: dict) -> float:
     """Calcule le coût d'un appel à l'API Gemini à partir de ses métadonnées d'utilisation."""
@@ -126,6 +138,9 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
     Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client pour un type de média donné.
     Met à jour un enregistrement de rapport existant.
     """
+    # --- Définition du chemin de cache spécifique à cette exécution ---
+    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}.json")
+
     # Initialisation des coûts
     cost_analysis = 0.0
     cost_generation = 0.0
@@ -180,9 +195,9 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         conn.close()
 
         # 4. Logique d'analyse complète (extraite de main.py) pour cette seule annonce
-        cache = load_cache()
+        cache = load_cache(cache_path)
         if best_ad.id in cache and all(os.path.exists(p) for p in cache[best_ad.id].get('generated_image_paths', [])):
-             print("Annonce déjà dans le cache complet, on utilise le cache.")
+             print(f"Annonce trouvée dans le cache ({cache_path}), on utilise les données.")
              analyzed_ad_data = cache[best_ad.id]
              cost_analysis = analyzed_ad_data.get('cost_analysis', 0.0) # Récupérer le coût du cache
              cost_generation = analyzed_ad_data.get('cost_generation', 0.0)
@@ -255,18 +270,18 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
             print(f"💰 Coût de la génération d'images estimé : ${cost_generation:.4f}")
 
             analyzed_ad_data = {
-                "ad": best_ad.model_dump(),
+                "ad_id": best_ad.id,
+                "media_type": media_type,
+                "media_path": local_media_path,
                 "analysis_text": analysis_part.strip(),
                 "script_text": script_part.strip(),
-                "media_path": local_media_path,
-                "media_type": media_type,
                 "generated_image_paths": generated_image_paths,
-                "cost_analysis": cost_analysis, # Sauvegarder les coûts dans le cache
-                "cost_generation": cost_generation
+                "cost_analysis": cost_analysis,
+                "cost_generation": cost_generation # Sera 0 si désactivé
             }
-            # On ne sauvegarde pas le coût dans le cache fichier pour l'instant
             cache[best_ad.id] = analyzed_ad_data
-            save_cache(cache)
+            save_cache(cache_path, cache)
+            print(f"Analyse sauvegardée dans le cache : {cache_path}")
         
         # 5. Déplacer le média vers le stockage permanent et générer les fragments HTML
         print("Génération des fragments de rapport et déplacement du média...")

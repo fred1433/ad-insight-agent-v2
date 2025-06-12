@@ -1,17 +1,30 @@
+# Fichiers système
 .DS_Store
+
 # Fichiers générés par le projet
 reports/
 tmp/
-facebook_cache.json
 *.mp4
 *.png
 *.jpg
+*.db
+
+# Dossiers de cache
+# Ignore complètement le contenu de ces dossiers
+data/facebook_cache/
+data/analysis_cache/
+
+# Fichiers de cache spécifiques à ignorer (legacy)
+facebook_cache.json
+analysis_cache.json
+
+# Fichiers de test
 test_*.py
 
+# Environnement Python
 .venv/
 __pycache__/
 *.pyc
+
+# Fichiers de configuration sensibles
 .env
-/data/
-*.db 
-analysis_cache.json data/facebook_cache/

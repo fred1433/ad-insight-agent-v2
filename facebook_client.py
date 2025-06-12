@@ -40,9 +40,9 @@ class Ad(BaseModel):
     image_url: Optional[str] = None
     insights: Optional[AdInsights] = None
 
-# --- Configuration du Cache ---
-CACHE_FILE = "facebook_cache.json"
-# -----------------------------
+# La gestion du cache est maintenant dynamique dans get_winning_ads.
+# Cette constante globale n'est plus utilisée.
+# CACHE_FILE = "facebook_cache.json"
 
 
 def init_facebook_api(access_token: Optional[str] = None, ad_account_id: Optional[str] = None):
