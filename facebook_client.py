@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import json
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from pydantic import BaseModel
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
@@ -355,7 +355,7 @@ def get_ad_by_id(ad_id: str) -> Optional[Ad]:
     print(f"Avertissement: Annonce avec ID {ad_id} non trouvée dans le cache des 'winning ads'.")
     return None 
 
-def check_token_validity(token: str) -> (bool, str, Optional[List[AdAccount]]):
+def check_token_validity(token: str) -> Tuple[bool, str, Optional[List[AdAccount]]]:
     """
     Vérifie si un token d'accès est valide et a accès à au moins un compte publicitaire.
     Retourne un tuple: (est_valide, message, liste_comptes_pub)
