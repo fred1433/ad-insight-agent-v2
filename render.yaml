@@ -5,7 +5,6 @@ services:
     # Indique à Render d'utiliser l'environnement Docker
     env: docker
     # Branche à déployer automatiquement
-    repo: https://github.com/fred1433/ad_insight_agent_v2 # Assurez-vous que c'est le bon URL de dépôt
     branch: main
     # Active le déploiement automatique à chaque push sur la branche 'main'
     autoDeploy: true
