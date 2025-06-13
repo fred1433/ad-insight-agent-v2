@@ -134,34 +134,15 @@ def create_image_grid_html(image_paths):
     grid_html += "</div>"
     return grid_html
 
-def _generate_top5_report_html(analyzed_ads_data: list, client_name: str) -> str:
-    """Génère le HTML pour un rapport consolidé de plusieurs annonces."""
+def _generate_top5_report_content_html(analyzed_ads_data: list, client_name: str) -> str:
+    """Génère le contenu HTML pour un rapport consolidé de plusieurs annonces."""
     
-    css_style = """
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
-        .main-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        .report-title { font-size: 2.8em; text-align: center; margin-bottom: 10px; border-bottom: 2px solid #dee2e6; padding-bottom: 20px; color: #0056b3;}
-        .client-name { font-size: 1.5em; text-align: center; margin-bottom: 40px; color: #6c757d; }
-        .ad-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
-        h2, h3, h4 { color: #0056b3; }
-        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
-        h3 { font-size: 1.5em; border-bottom: none; }
-        h4 { font-size: 1.2em; color: #343a40; margin-top: 25px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: top; }
-        th { background-color: #e9ecef; font-weight: 600; }
-        .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
-        .analysis { margin-top: 20px; line-height: 1.6; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
-        .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
-        .generated-images-grid img, td img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        video, .ad-media-img { max-width: 100%; height: auto; border-radius: 8px; }
-        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
-    </style>
+    # On ne génère plus de page complète, seulement les sections des annonces.
+    ad_sections_html = f"""
+    <h1 class="report-title">Informe de Análisis de Rendimiento</h1>
+    <p class="client-name">Cliente: {client_name}</p>
     """
 
-    ad_sections_html = ""
     for item in analyzed_ads_data:
         ad = facebook_client.Ad(**item['ad'])
         analysis_html = markdown.markdown(item['analysis_text'], extensions=['tables'])
@@ -233,24 +214,7 @@ def _generate_top5_report_html(analyzed_ads_data: list, client_name: str) -> str
         </div>
         """
 
-    return f"""
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Informe de Análisis Top 5 - {client_name}</title>
-        {css_style}
-    </head>
-    <body>
-        <div class="main-container">
-            <h1 class="report-title">Informe de Análisis de Rendimiento</h1>
-            <p class="client-name">Cliente: {client_name}</p>
-            {ad_sections_html}
-        </div>
-    </body>
-    </html>
-    """
+    return ad_sections_html
 
 def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
     """
@@ -419,7 +383,7 @@ def run_top5_analysis_for_client(client_id: int, report_id: int):
             save_cache(cache_path, cache) # Sauvegarde après chaque analyse
         
         print("Toutes les analyses sont terminées. Génération du rapport consolidé...")
-        final_html_report = _generate_top5_report_html(analyzed_ads_data, client['name'])
+        final_html_report = _generate_top5_report_content_html(analyzed_ads_data, client['name'])
         
         total_cost = total_cost_analysis + total_cost_generation
         conn = database.get_db_connection()

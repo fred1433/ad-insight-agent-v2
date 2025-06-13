@@ -338,8 +338,8 @@ def view_report(report_id):
     # --- NUEVA LÓGICA PARA LOS INFORMES TOP 5 ---
     if report['media_type'] == 'top5':
         if report['status'] == 'COMPLETED' and report['analysis_html']:
-            # El informe Top 5 es una página HTML completa y autónoma
-            return report['analysis_html']
+            # On utilise maintenant un template pour afficher le contenu
+            return render_template('top5_report.html', report=report)
         elif report['status'] in ('IN_PROGRESS', 'RUNNING', 'PENDING'):
              # Gérer el caso donde el informe está en proceso de generación
             return render_template('report_pending.html', client_name=report['client_name'], report_id=report_id)
