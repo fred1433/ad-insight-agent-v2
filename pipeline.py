@@ -359,7 +359,7 @@ def run_top5_analysis_for_client(client_id: int, report_id: int):
             ad_account_id=ad_account_id,
             spend_threshold=client['spend_threshold'],
             cpa_threshold=client['cpa_threshold']
-        )[:2] # On prend les 2 premiers pour un test rapide
+        )[:5]
 
         if not top_ads:
             raise Exception("Aucune annonce performante trouvée pour ce client.")
