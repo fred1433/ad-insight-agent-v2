@@ -29,7 +29,7 @@ class MediaDownloader:
     """Télécharge des médias (vidéos, images) en utilisant des stratégies adaptées."""
 
     def __init__(self):
-        self.download_folder = "tmp/media"
+        self.download_folder = "data/storage"
         os.makedirs(self.download_folder, exist_ok=True)
 
     def download_image_locally(self, image_url: str, ad_id: str) -> Optional[str]:
