@@ -175,13 +175,14 @@ form {
     color: white;
     font-weight: bold;
     text-transform: uppercase;
+    white-space: nowrap; /* Empêche le passage à la ligne */
 }
 
 .status-completed {
     background-color: #28a745; /* Vert */
 }
 
-.status-running {
+.status-in_progress, .status-running {
     background-color: #007bff; /* Bleu */
 }
 
