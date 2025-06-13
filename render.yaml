@@ -20,7 +20,17 @@ services:
         sync: false # 'sync: false' signifie que la valeur est gérée uniquement dans le dashboard
       - key: ANALYSIS_ACCESS_CODE
         sync: false
-      - key: GOOGLE_PROJECT_ID
+      - key: GEMINI_API_KEY
         sync: false
+      - key: GEMINI_INPUT_PRICE_PER_MILLION_TOKENS
+        value: "2.50"
+      - key: GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS
+        value: "7.50"
+      - key: IMAGEN_PRICE_PER_IMAGE
+        value: "0.03"
+      - key: GEMINI_MODEL_NAME
+        value: "gemini-1.5-pro-latest"
+      - key: IMAGEN_MODEL_NAME
+        value: "imagen-3.0-generate-002"
       # Note: FACEBOOK_ACCESS_TOKEN et FACEBOOK_AD_ACCOUNT_ID ne sont plus nécessaires ici
       # car ils sont gérés via l'interface utilisateur de l'application. 

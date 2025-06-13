@@ -23,10 +23,6 @@ class FacebookConfig(BaseSettings):
     class Config:
         env_prefix = 'FACEBOOK_'
 
-class GoogleConfig(BaseModel):
-    project_id: str = os.getenv("GOOGLE_PROJECT_ID")
-    gvi_language_code: str = "es-MX" # Code langue pour l'analyse GVI
-
 class ScriptConfig(BaseModel):
     """Configuration générale du script."""
     max_ads_per_run: int = 1 # Limite le nombre de pubs à traiter, -1 pour infini
@@ -44,7 +40,6 @@ class AppSettings(BaseSettings):
     
     # On compose la configuration avec nos classes spécifiques
     facebook: FacebookConfig = FacebookConfig()
-    google: GoogleConfig = GoogleConfig()
     script: ScriptConfig = ScriptConfig()
     auth: AuthConfig = AuthConfig(
         app_access_code=os.getenv("APP_ACCESS_CODE"),
