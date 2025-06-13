@@ -28,6 +28,9 @@ log.addFilter(SuppressReportStatusFilter())
 # Crée l'application Flask
 app = Flask(__name__)
 
+# Appel pour s'assurer que la base de données est initialisée au démarrage
+database.init_db()
+
 # Configure une clé secrète pour la gestion des sessions (utile pour les messages flash)
 app.config['SECRET_KEY'] = 'une-super-cle-secrete-a-changer-en-prod'
 
@@ -318,16 +321,9 @@ def update_report_script(report_id):
 
 @app.route('/storage/<path:filename>')
 def serve_storage_file(filename):
-    """Sert les fichiers depuis le dossier de stockage."""
-    return send_from_directory('storage', filename)
+    """Sert les fichiers depuis le répertoire de stockage (rapports HTML)."""
+    return send_from_directory(os.path.join('data', 'storage'), filename)
 
-def setup_database():
-    """Inicializa la base de datos si no existe."""
-    db_path = database.DATABASE_FILE
-    if not os.path.exists(db_path) or os.path.getsize(db_path) == 0:
-        database.init_db()
-
+# Point d'entrée pour le développement local
 if __name__ == '__main__':
-    print("Iniciando la aplicación...")
-    setup_database()
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5000, host='0.0.0.0')
