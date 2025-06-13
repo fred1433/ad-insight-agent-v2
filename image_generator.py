@@ -14,7 +14,7 @@ load_dotenv()
 
 # Configuration de l'API Gemini directement avec la clé.
 # Cette ligne doit être exécutée après load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_image_from_prompt(prompt: str, output_filename: str) -> Tuple[str | None, int]:
     """
@@ -31,6 +31,9 @@ def generate_image_from_prompt(prompt: str, output_filename: str) -> Tuple[str |
     enhanced_prompt = f"Photographie hyper-réaliste et détaillée de : '{prompt}'. Style cinématique. IMPORTANT : L'image ne doit contenir absolument aucun texte, mot, lettre ou logo."
 
     try:
+        # Configuration de l'API ici, juste avant son utilisation
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
         # Assure que le répertoire de sortie existe
         output_dir = "tmp"
         if not os.path.exists(output_dir):

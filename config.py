@@ -42,8 +42,8 @@ class AppSettings(BaseSettings):
     facebook: FacebookConfig = FacebookConfig()
     script: ScriptConfig = ScriptConfig()
     auth: AuthConfig = AuthConfig(
-        app_access_code=os.getenv("APP_ACCESS_CODE"),
-        analysis_access_code=os.getenv("ANALYSIS_ACCESS_CODE"),
+        app_access_code=os.getenv("APP_ACCESS_CODE", "").strip('\'"'),
+        analysis_access_code=os.getenv("ANALYSIS_ACCESS_CODE", "").strip('\'"'),
     )
 
 # Instance globale unique de la configuration
