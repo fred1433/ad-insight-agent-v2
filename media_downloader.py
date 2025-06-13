@@ -12,7 +12,7 @@ from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
-from google.cloud import storage
+# from google.cloud import storage # Vestige de l'ancienne intégration GCS, supprimé
 
 # Selenium Imports
 from selenium import webdriver
