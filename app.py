@@ -173,19 +173,19 @@ def flash_messages():
 
 @app.route('/validate-token', methods=['POST'])
 def validate_token():
-    """Valide un token Facebook et renvoie un sélecteur de compte publicitaire si valide."""
+    """Valide un token Facebook et renvoie un sélecteur de cuenta publicitaria si valide."""
     token = request.form.get('facebook_token')
     if not token:
         return '<div id="token-validation-result" class="validation-message"></div>'
 
     is_valid, message, ad_accounts = facebook_client.check_token_validity(token)
     
-    # Construction du message de statut
+    # Construction del mensaje de estado
     css_class = "text-success" if is_valid and ad_accounts else "text-danger"
     icon = "✅" if is_valid and ad_accounts else "❌"
     status_message_html = f'<small class="{css_class}">{icon} {message}</small>'
 
-    # Construction du sélecteur de compte si le token est valide et a des comptes
+    # Construction del selector de cuenta si el token es valido y tiene cuentas
     ad_account_selector_html = ""
     if is_valid and ad_accounts:
         ad_account_selector_html = f'''
@@ -198,7 +198,7 @@ def validate_token():
                     <option value="" disabled selected>Selecciona una cuenta</option>
         '''
         for account in ad_accounts:
-            # On utilise 'id' pour la valeur (ex: act_123) et 'account_id' pour l'affichage
+            # On utiliza 'id' para el valor (ex: act_123) y 'account_id' para el display
             ad_account_selector_html += f'<option value="{account.get("id")}">{account.get("name")} ({account.get("account_id")})</option>'
         
         ad_account_selector_html += '''
@@ -206,7 +206,7 @@ def validate_token():
             </div>
         '''
 
-    # On combine les deux parties et on les enveloppe dans la div cible
+    # On combina las dos partes y las envuelve en la div objetivo
     return f'''
         <div id="token-validation-result" class="validation-message">
             {status_message_html}
@@ -216,18 +216,18 @@ def validate_token():
 
 @app.route('/lock-submit', methods=['GET', 'POST'])
 def lock_submit():
-    """Renvoie le bouton de soumission en état désactivé."""
+    """Renvoie el botón de envío en estado desactivado."""
     return '<button type="submit" id="add-client-btn" class="btn btn-primary" disabled>Añadir Cliente</button>'
 
 @app.route('/unlock-submit', methods=['GET', 'POST'])
 def unlock_submit():
-    """Renvoie le bouton de soumission en état activé."""
+    """Renvoie el botón de envío en estado activado."""
     return '<button type="submit" id="add-client-btn" class="btn btn-primary">Añadir Cliente</button>'
 
 @app.route('/run_analysis/<int:client_id>/<string:media_type>', methods=['POST'])
 @login_required
 def run_analysis(client_id, media_type):
-    """Lance le pipeline et crée un rapport."""
+    """Lance el pipeline y crea un informe."""
     
     analysis_code = request.form.get('analysis_code')
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
@@ -236,15 +236,15 @@ def run_analysis(client_id, media_type):
         return render_template('_flash_messages.html')
 
     if media_type not in ['video', 'image']:
-        flash("Tipo de média no válido.", "warning")
+        flash("Tipo de medio no válido.", "warning")
         return render_template('_flash_messages.html')
 
     conn = database.get_db_connection()
     client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
     client_name = client['name'] if client else f"ID {client_id}"
-    print(f"LOG: Requête reçue pour lancer l'analyse du client: {client_name}")
+    print(f"LOG: Requête reçue pour lancer l'analyse del cliente: {client_name}")
 
-    # Étape 1: Créer l'enregistrement du rapport avec le statut 'IN_PROGRESS'
+    # Étape 1: Crear el registro del informe con el estado 'IN_PROGRESS'
     utc_now = datetime.now(timezone.utc)
     mexico_tz = pytz.timezone("America/Mexico_City")
     mexico_now = utc_now.astimezone(mexico_tz)
@@ -254,9 +254,9 @@ def run_analysis(client_id, media_type):
     report_id = cursor.lastrowid
     conn.commit()
     conn.close()
-    print(f"LOG: Tâche pré-enregistrée dans la DB. Rapport ID: {report_id} avec statut IN_PROGRESS")
+    print(f"LOG: Tarea pre-registrada en la DB. Informe ID: {report_id} con estado IN_PROGRESS")
     
-    # Étape 2: Lancer l'analyse en arrière-plan. Plus besoin de queue.
+    # Étape 2: Lanzar la analítica en segundo plano. No se necesita cola.
     analysis_thread = threading.Thread(
         target=pipeline.run_analysis_for_client, 
         args=(client_id, report_id, media_type)
@@ -265,7 +265,7 @@ def run_analysis(client_id, media_type):
     
     flash(f"El análisis de tipo '{media_type}' para '{client_name}' ha comenzado.", "info")
     
-    # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste (pour voir le statut PENDING).
+    # Étape 3: Renvoyer la respuesta que actualiza los mensajes flash y recarga la lista (para ver el estado PENDING).
     response = make_response(render_template('_flash_messages.html'))
     response.headers['HX-Trigger'] = 'loadClientList'
     return response
@@ -273,7 +273,7 @@ def run_analysis(client_id, media_type):
 @app.route('/run_top5_analysis/<int:client_id>', methods=['POST'])
 @login_required
 def run_top5_analysis(client_id):
-    """Lance le pipeline pour le Top 5 et crée un rapport consolidé."""
+    """Lance el pipeline para el Top 5 y crea un informe consolidado."""
     
     analysis_code = request.form.get('analysis_code')
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
@@ -283,9 +283,9 @@ def run_top5_analysis(client_id):
     conn = database.get_db_connection()
     client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
     client_name = client['name'] if client else f"ID {client_id}"
-    print(f"LOG: Requête reçue pour lancer l'analyse du Top 5 pour le client: {client_name}")
+    print(f"LOG: Requête reçue pour lancer l'analyse del Top 5 para el cliente: {client_name}")
 
-    # Étape 1: Créer l'enregistrement du rapport avec le statut 'IN_PROGRESS' et le type 'top5'
+    # Étape 1: Crear el registro del informe con el estado 'IN_PROGRESS' y el tipo 'top5'
     utc_now = datetime.now(timezone.utc)
     mexico_tz = pytz.timezone("America/Mexico_City")
     mexico_now = utc_now.astimezone(mexico_tz)
@@ -295,34 +295,34 @@ def run_top5_analysis(client_id):
     report_id = cursor.lastrowid
     conn.commit()
     conn.close()
-    print(f"LOG: Tâche pré-enregistrée dans la DB. Rapport ID: {report_id} avec statut IN_PROGRESS pour analyse Top 5")
+    print(f"LOG: Tarea pre-registrada en la DB. Informe ID: {report_id} con estado IN_PROGRESS para análisis Top 5")
     
-    # Étape 2: Lancer l'analyse en arrière-plan.
+    # Étape 2: Lanzar la analítica en segundo plano.
     analysis_thread = threading.Thread(
         target=pipeline.run_top5_analysis_for_client, 
         args=(client_id, report_id)
     )
     analysis_thread.start()
     
-    flash(f"L'analyse du Top 5 pour '{client_name}' a commencé.", "info")
+    flash(f"El análisis Top 5 para '{client_name}' ha comenzado.", "info")
     
-    # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste.
+    # Étape 3: Renvoyer la respuesta que actualiza los mensajes flash y recarga la lista.
     response = make_response(render_template('_flash_messages.html'))
     response.headers['HX-Trigger'] = 'loadClientList'
     return response
 
 @app.route('/clients')
 def get_clients_list():
-    """Route pour rafraîchir la liste des clients, utilisée par HTMX."""
+    """Route para recargar la lista de clientes, utilizada por HTMX."""
     clients = get_clients_with_reports()
     return render_template('_client_list.html', clients=clients)
 
 @app.route('/report/<int:report_id>')
 @login_required
 def view_report(report_id):
-    """Affiche un rapport HTML spécifique."""
+    """Affiche un informe HTML específico."""
     conn = database.get_db_connection()
-    # On récupère le rapport ET les infos du client associé en une seule requête
+    # On récupère le rapport ET les infos del cliente asocié en una sola requête
     report = conn.execute('''
         SELECT r.*, c.name as client_name, c.ad_account_id
         FROM reports r
@@ -332,24 +332,24 @@ def view_report(report_id):
     conn.close()
 
     if not report:
-        flash("Rapport non trouvé.", "danger")
-        return "Rapport non trouvé", 404
+        flash("Informe no encontrado.", "danger")
+        return "Informe no encontrado", 404
 
-    # --- NOUVELLE LOGIQUE POUR LES RAPPORTS TOP 5 ---
+    # --- NUEVA LÓGICA PARA LOS INFORMES TOP 5 ---
     if report['media_type'] == 'top5':
         if report['status'] == 'COMPLETED' and report['analysis_html']:
-            # Le rapport Top 5 est une page HTML complète et autonome
+            # El informe Top 5 es una página HTML completa y autónoma
             return report['analysis_html']
         elif report['status'] in ('IN_PROGRESS', 'RUNNING', 'PENDING'):
-             # Gérer le cas où le rapport est en cours de génération
+             # Gérer el caso donde el informe está en proceso de generación
             return render_template('report_pending.html', client_name=report['client_name'], report_id=report_id)
         else:
-            flash("Le contenu de ce rapport n'a pas pu être généré.", "danger")
+            flash("El contenido de este informe no ha podido ser generado.", "danger")
             return redirect(url_for('index'))
 
-    # --- LOGIQUE EXISTANTE POUR LES RAPPORTS SIMPLES ---
-    # On récupère les détails de l'annonce pour les afficher dans l'en-tête du rapport
-    # On initialise l'API AVANT de faire un appel
+    # --- LÓGICA EXISTENTE PARA LOS INFORMES SIMPLES ---
+    # On récupère les détails de la anuncio para los mostrar en la cabecera del informe
+    # On inicializa la API ANTES de hacer un llamado
     # facebook_client.init_facebook_api()
     ad = facebook_client.get_ad_by_id(report['ad_id'], report['ad_account_id'])
 
@@ -363,7 +363,7 @@ def view_report(report_id):
 @app.route('/report/<int:report_id>/update', methods=['POST'])
 @login_required
 def update_report_script(report_id):
-    """Met à jour le fragment HTML du script pour un rapport."""
+    """Met à jour le fragment HTML del script para un informe."""
     data = request.json
     script_html = data.get('script_html')
 
@@ -375,16 +375,16 @@ def update_report_script(report_id):
         conn.execute('UPDATE reports SET script_html = ? WHERE id = ?', (script_html, report_id))
         conn.commit()
         conn.close()
-        return jsonify({'status': 'success', 'message': 'Rapport actualizado'})
+        return jsonify({'status': 'success', 'message': 'Informe actualizado'})
     except Exception as e:
         print(f"Error al actualizar el informe {report_id}: {e}")
         return jsonify({'status': 'error', 'message': 'Error interno del servidor'}), 500
 
 @app.route('/storage/<path:filename>')
 def serve_storage_file(filename):
-    """Sert les fichiers depuis le répertoire de stockage (rapports HTML)."""
+    """Sert les fichiers depuis el directorio de almacenamiento (informes HTML)."""
     return send_from_directory(os.path.join('data', 'storage'), filename)
 
-# Point d'entrée pour le développement local
+# Point d'entrée para el desarrollo local
 if __name__ == '__main__':
     app.run(debug=True, port=5001, host='0.0.0.0')

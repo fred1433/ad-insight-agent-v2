@@ -2,33 +2,41 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Nombre</th>
-            <th>Inversión Mín.</th>
-            <th>CPA Máx.</th>
-            <th>Acciones</th>
-            <th>Informes</th>
+            <th scope="col">#</th>
+            <th scope="col">Nombre del Cliente</th>
+            <th scope="col">Spend Threshold</th>
+            <th scope="col">CPA Threshold</th>
+            <th scope="col" style="width: 30%;">Análisis</th>
+            <th scope="col">Acciones</th>
+            <th scope="col">Informes</th>
         </tr>
     </thead>
     <tbody>
         {% for client in clients %}
         <tr id="client-{{ client.id }}">
+            <th scope="row">{{ loop.index }}</th>
             <td>{{ client.name }}</td>
             <td>{{ client.spend_threshold }} $</td>
             <td>{{ client.cpa_threshold }} $</td>
             <td class="client-actions">
-                <form class="run-analysis-form"
+                <form class="run-analysis-form d-flex"
                       hx-post="{{ url_for('run_top5_analysis', client_id=client.id) }}"
                       hx-target="#flash-messages"
                       hx-swap="innerHTML">
-                    <input type="text" name="analysis_code" placeholder="Código Análisis" required>
-                    <button type="submit" class="btn btn-primary btn-sm">Analyser le Top 5</button>
+                    <input type="text" name="analysis_code" class="form-control form-control-sm me-2" placeholder="Código Análisis" required>
+                    <button type="submit" class="btn btn-primary btn-sm">Analizar Top 5</button>
                 </form>
-                <button class="btn btn-danger btn-sm mt-2"
+            </td>
+            <td>
+                <button class="btn btn-outline-danger btn-sm"
+                        title="Eliminar cliente"
                         hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
                         hx-target="closest tr"
                         hx-swap="outerHTML"
                         hx-confirm="¿Estás seguro de que quieres eliminar al cliente {{ client.name }}?">
-                    Eliminar
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                    </svg>
                 </button>
             </td>
             <td class="reports-cell">

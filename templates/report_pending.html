@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Rapport en cours - {{ client_name }}{% endblock %}
+{% block title %}Informe en progreso - {{ client_name }}{% endblock %}
 
 {% block content %}
 <div class="container mt-5 text-center">
-    <h1>Génération de votre rapport en cours...</h1>
-    <p class="lead">Le rapport pour le client <strong>{{ client_name }}</strong> est en cours de création.</p>
-    <p>Cette page se rafraîchira automatiquement une fois le rapport terminé.</p>
+    <h1>Generando su informe...</h1>
+    <p class="lead">El informe para el cliente <strong>{{ client_name }}</strong> se está creando.</p>
+    <p>Esta página se actualizará automáticamente cuando el informe esté completo.</p>
 
     <div 
         id="status-poller"
@@ -17,11 +17,11 @@
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
-        <p class="mt-2">Vérification du statut...</p>
+        <p class="mt-2">Verificando estado...</p>
     </div>
 
     <div class="mt-4">
-        <a href="{{ url_for('index') }}" class="btn btn-secondary">Retour à la liste des clients</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver a la lista de clientes</a>
     </div>
 
 </div>

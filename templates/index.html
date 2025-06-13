@@ -105,14 +105,14 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Ad Insight Agent: Script chargé.");
+    console.log("Ad Insight Agent: Script cargado.");
 
-    // --- Logique de désactivation dynamique du bouton "Verificar" ---
+    // --- Lógica de desactivación dinámica del botón "Verificar" ---
     const tokenInput = document.getElementById('facebook_token');
     const verifyButton = document.getElementById('verify-token-btn');
 
     if (tokenInput && verifyButton) {
-        // Fonction pour vérifier l'état de l'input et mettre à jour le bouton
+        // Función para verificar el estado del input y actualizar el botón
         const toggleVerifyButton = () => {
             const isDisabled = tokenInput.value.trim() === '';
             verifyButton.disabled = isDisabled;
@@ -125,13 +125,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        // Écouter les changements dans le champ de saisie
+        // Escuchar los cambios en el campo de entrada
         tokenInput.addEventListener('input', toggleVerifyButton);
 
-        // Vérifier l'état initial au cas où le champ serait pré-rempli
+        // Verificar el estado inicial por si el campo está pre-rellenado
         toggleVerifyButton();
     }
-    // --- Fin de la logique ---
+    // --- Fin de la lógica ---
 
     // Lógica para la modal de ayuda
     const helpModal = document.getElementById('help-modal');
@@ -139,13 +139,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeButton = document.querySelector('.close-button');
 
     if (helpIcon && helpModal) {
-        console.log("Ad Insight Agent: Icône d'aide et modale trouvées.");
+        console.log("Ad Insight Agent: Ícono de ayuda y modal encontrados.");
         helpIcon.addEventListener('click', function() {
-            console.log("Ad Insight Agent: Clic sur l'icône d'aide détecté !");
+            console.log("Ad Insight Agent: ¡Clic en el ícono de ayuda detectado!");
             helpModal.style.display = 'block';
         });
     } else {
-        console.error("Ad Insight Agent: ERREUR - Impossible de trouver l'icône d'aide ou la modale.");
+        console.error("Ad Insight Agent: ERROR - No se pudo encontrar el ícono de ayuda o la modal.");
     }
 
     if (closeButton) {
