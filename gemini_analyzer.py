@@ -15,7 +15,7 @@ load_dotenv()
 
 # --- CONFIGURATION ---
 # Le nom du modèle est chargé depuis les variables d'environnement pour plus de flexibilité.
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-pro-latest")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-pro-latest").strip('\'"')
 # --- FIN CONFIGURATION ---
 
 def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
@@ -51,7 +51,7 @@ def analyze_image(image_path: str, ad_data: Ad) -> Tuple[str, Dict]:
     """
     print(f"  🧠 Iniciando análisis de marketing para la imagen del anuncio '{ad_data.name}'...")
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
         
         # Le nom du modèle est maintenant lu depuis la variable de configuration
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
@@ -111,7 +111,7 @@ def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
     video_file = None
 
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
         
         print("    ⏳ Subiendo el archivo de video a la API de Gemini...")
         video_file = genai.upload_file(path=video_path)

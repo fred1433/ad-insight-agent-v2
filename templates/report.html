@@ -80,7 +80,7 @@
                                 <td><strong>Frecuencia</strong></td>
                                 <td class="text-end">{{ "{:.2f}".format(ad.insights.frequency) }}</td>
                             </tr>
-                            {% if ad.insights.hook_rate is not none and ad.insights.hold_rate is not none %}
+                            {% if report.media_type == 'video' and ad.insights.hook_rate is not none and ad.insights.hold_rate is not none %}
                             <tr>
                                 <td><strong>Tasa de Enganche (Hook Rate)</strong></td>
                                 <td class="text-end">{{ "{:.2f} %".format(ad.insights.hook_rate) }}</td>
