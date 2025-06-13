@@ -17,20 +17,13 @@
             <td>{{ client.cpa_threshold }} $</td>
             <td class="client-actions">
                 <form class="run-analysis-form"
-                      hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='image') }}"
+                      hx-post="{{ url_for('run_top5_analysis', client_id=client.id) }}"
                       hx-target="#flash-messages"
                       hx-swap="innerHTML">
                     <input type="text" name="analysis_code" placeholder="Código Análisis" required>
-                    <button type="submit" class="btn btn-info btn-sm">Análisis Imagen</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Analyser le Top 5</button>
                 </form>
-                <form class="run-analysis-form"
-                      hx-post="{{ url_for('run_analysis', client_id=client.id, media_type='video') }}"
-                      hx-target="#flash-messages"
-                      hx-swap="innerHTML">
-                    <input type="text" name="analysis_code" placeholder="Código Análisis" required>
-                    <button type="submit" class="btn btn-warning btn-sm">Análisis Vídeo</button>
-                </form>
-                <button class="btn btn-danger btn-sm"
+                <button class="btn btn-danger btn-sm mt-2"
                         hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
                         hx-target="closest tr"
                         hx-swap="outerHTML"
@@ -47,12 +40,8 @@
                             
                             {% include '_report_status_badge.html' %}
 
-                            {% if report.status == 'COMPLETED' and report.report_path %}
-                                <div id="report-action-{{ report.id }}">
-                                    {% if report.status == 'COMPLETED' %}
-                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm">Ver informe</a>
-                                    {% endif %}
-                                </div>
+                            {% if report.status == 'COMPLETED' %}
+                                <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm" style="margin-left: 5px;">Ver informe</a>
                                 <span class="cost-badge" title="Analyse: ${{ '%.4f'|format(report.cost_analysis) }} | Génération: ${{ '%.4f'|format(report.cost_generation) }}">
                                     (Coste: ${{ '%.4f'|format(report.total_cost) }})
                                 </span>

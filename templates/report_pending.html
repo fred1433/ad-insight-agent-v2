@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Rapport en cours - {{ client_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1>Génération de votre rapport en cours...</h1>
+    <p class="lead">Le rapport pour le client <strong>{{ client_name }}</strong> est en cours de création.</p>
+    <p>Cette page se rafraîchira automatiquement une fois le rapport terminé.</p>
+
+    <div 
+        id="status-poller"
+        hx-get="{{ url_for('get_report_status', report_id=report_id, source='pending_page') }}"
+        hx-trigger="every 3s"
+        hx-swap="none">
+        
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Vérification du statut...</p>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Retour à la liste des clients</a>
+    </div>
+
+</div>
+{% endblock %} 

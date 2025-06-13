@@ -43,7 +43,8 @@ def init_db():
         CREATE TABLE reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER NOT NULL,
-            ad_id TEXT, -- Peut être NULL au début
+            ad_id TEXT, -- Peut être NULL au début ou une liste CSV pour les rapports 'top5'
+            media_type TEXT, -- 'image', 'video', ou 'top5'
             status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, RUNNING, COMPLETED, FAILED
             report_path TEXT, -- Gardé pour le chemin du média principal
             created_at TIMESTAMP NOT NULL,

@@ -134,49 +134,343 @@ def create_image_grid_html(image_paths):
     grid_html += "</div>"
     return grid_html
 
-def run_analysis_for_client(client_id, report_id, media_type: str):
+def _generate_top5_report_html(analyzed_ads_data: list, client_name: str) -> str:
+    """Génère le HTML pour un rapport consolidé de plusieurs annonces."""
+    
+    css_style = """
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f8f9fa; color: #212529; }
+        .main-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .report-title { font-size: 2.8em; text-align: center; margin-bottom: 10px; border-bottom: 2px solid #dee2e6; padding-bottom: 20px; color: #0056b3;}
+        .client-name { font-size: 1.5em; text-align: center; margin-bottom: 40px; color: #6c757d; }
+        .ad-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
+        h2, h3, h4 { color: #0056b3; }
+        h2 { font-size: 2em; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }
+        h3 { font-size: 1.5em; border-bottom: none; }
+        h4 { font-size: 1.2em; color: #343a40; margin-top: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: top; }
+        th { background-color: #e9ecef; font-weight: 600; }
+        .kpi-value { text-align: right; font-weight: bold; font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .analysis { margin-top: 20px; line-height: 1.6; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;}
+        .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
+        .generated-images-grid img, td img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        video, .ad-media-img { max-width: 100%; height: auto; border-radius: 8px; }
+        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
+    </style>
     """
-    Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client pour un type de média donné.
-    Met à jour un enregistrement de rapport existant.
-    """
-    # --- Définition du chemin de cache spécifique à cette exécution ---
-    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}.json")
 
-    # Initialisation des coûts
+    ad_sections_html = ""
+    for item in analyzed_ads_data:
+        ad = facebook_client.Ad(**item['ad'])
+        analysis_html = markdown.markdown(item['analysis_text'], extensions=['tables'])
+        script_html = markdown.markdown(item['script_text'], extensions=['tables'])
+        
+        final_media_path = item.get('final_media_path')
+        media_type = item['media_type']
+        
+        media_html = ""
+        if final_media_path:
+            filename = os.path.basename(final_media_path)
+            # Utilise un chemin relatif vers le point de service des fichiers
+            media_url = f"/storage/{filename}"
+            if media_type == 'video':
+                media_html = f'<video controls width="100%"><source src="{media_url}" type="video/mp4">Tu navegador no soporta la etiqueta de video.</video>'
+            elif media_type == 'image':
+                media_html = f'<img src="{media_url}" alt="Anuncio" class="ad-media-img">'
+        
+        # Le script de génération des concepts (pour les rapports single-ad) peut contenir des images en base64
+        # On doit les gérer ici.
+        if 'script_with_images_html' in item:
+             script_html = item['script_with_images_html']
+
+        proposals_title = "Propuestas de Nuevos Guiones" if media_type == 'video' else "Propuestas de Imágenes Alternativas"
+        
+        video_metrics_html = ""
+        if media_type == 'video' and ad.insights:
+            video_metrics_html = f"""
+            <tr><td><b>Tasa de Enganche (Hook Rate)</b></td><td class="kpi-value"><b>{ad.insights.hook_rate:.2f} %</b></td></tr>
+            <tr><td><b>Tasa de Retención (Hold Rate)</b></td><td class="kpi-value"><b>{ad.insights.hold_rate:.2f} %</b></td></tr>
+            """
+
+        kpi_table = f"""
+        <table>
+            <tr><th>Métrica</th><th class="kpi-value">Valor</th></tr>
+            <tr><td>Inversión (Spend)</td><td class="kpi-value">{ad.insights.spend:,.2f} $</td></tr>
+            <tr><td>Costo por Compra (CPA)</td><td class="kpi-value">{ad.insights.cpa:,.2f} $</td></tr>
+            <tr><td>Número de Compras</td><td class="kpi-value">{ad.insights.website_purchases}</td></tr>
+            <tr><td>Valor de las Compras</td><td class="kpi-value">{ad.insights.website_purchases_value:,.2f} $</td></tr>
+            <tr><td>ROAS</td><td class="kpi-value">{ad.insights.roas:.2f}x</td></tr>
+            <tr><td>CPM</td><td class="kpi-value">{ad.insights.cpm:,.2f} $</td></tr>
+            <tr><td>CTR (único)</td><td class="kpi-value">{ad.insights.unique_ctr:.2f} %</td></tr>
+            <tr><td>Frecuencia</td><td class="kpi-value">{ad.insights.frequency:.2f}</td></tr>
+            {video_metrics_html}
+        </table>
+        """
+
+        ad_sections_html += f"""
+        <div class="ad-container">
+            <h2>{ad.name} (ID: {ad.id})</h2>
+            <div class="grid-container">
+                <div>
+                    <h3>Creatividad del Anuncio</h3>
+                    {media_html}
+                </div>
+                <div>
+                    <h3>Indicadores Clave (KPIs)</h3>
+                    {kpi_table}
+                </div>
+            </div>
+            <div>
+                <h3>Análisis Cualitativo del Experto IA</h3>
+                <div class="analysis">{analysis_html}</div>
+            </div>
+            <div>
+                <h3>{proposals_title}</h3>
+                <div class="analysis">{script_html}</div>
+            </div>
+        </div>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Informe de Análisis Top 5 - {client_name}</title>
+        {css_style}
+    </head>
+    <body>
+        <div class="main-container">
+            <h1 class="report-title">Informe de Análisis de Rendimiento</h1>
+            <p class="client-name">Cliente: {client_name}</p>
+            {ad_sections_html}
+        </div>
+    </body>
+    </html>
+    """
+
+def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
+    """
+    Exécute le pipeline d'analyse complet (téléchargement, analyse, génération) pour une seule publicité.
+    Utilise et met à jour un dictionnaire de cache fourni.
+    Retourne un dictionnaire contenant toutes les données et les coûts de l'analyse.
+    """
+    print(f"--- Début de l'analyse pour l'annonce : {ad.name} ({ad.id}) ---")
+    
     cost_analysis = 0.0
     cost_generation = 0.0
-    total_cost = 0.0
+    
+    # Vérification du cache pour cette annonce spécifique
+    if ad.id in cache and all(os.path.exists(p) for p in cache[ad.id].get('generated_image_paths', [])):
+         print(f"Annonce trouvée dans le cache, on utilise les données.")
+         analyzed_ad_data = cache[ad.id]
+         cost_analysis = analyzed_ad_data.get('cost_analysis', 0.0)
+         cost_generation = analyzed_ad_data.get('cost_generation', 0.0)
+
+         print("Re-téléchargement du média au cas où le chemin temporaire serait invalide...")
+         downloader = MediaDownloader()
+         local_media_path = None
+         if ad.video_id:
+             local_media_path = downloader.download_video_locally(ad.video_id, ad.id)
+         elif ad.image_url:
+             local_media_path = downloader.download_image_locally(ad.image_url, ad.id)
+         
+         if not local_media_path:
+             raise Exception("Échec du re-téléchargement du média.")
+             
+         analyzed_ad_data['media_path'] = local_media_path
+    else:
+        print("Analyse complète de l'annonce requise...")
+        downloader = MediaDownloader()
+        local_media_path, media_type = (None, None)
+        
+        if ad.video_id:
+            media_type = 'video'
+            local_media_path = downloader.download_video_locally(ad.video_id, ad.id)
+        elif ad.image_url:
+            media_type = 'image'
+            local_media_path = downloader.download_image_locally(ad.image_url, ad.id)
+
+        if not local_media_path:
+            raise Exception("Échec du téléchargement du média.")
+
+        full_response_text, usage_metadata = "", {}
+        if media_type == 'video':
+            full_response_text, usage_metadata = gemini_analyzer.analyze_video(local_media_path, ad)
+        else:
+            full_response_text, usage_metadata = gemini_analyzer.analyze_image(local_media_path, ad)
+
+        cost_analysis = calculate_analysis_cost(usage_metadata)
+        print(f"💰 Coût de l'analyse Gemini estimé : ${cost_analysis:.4f}")
+        
+        analysis_part, script_part = (full_response_text.split("---", 1) + [""])[:2]
+        
+        print("Génération des images concepts...")
+        prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
+        generated_image_paths = []
+        images_generated_count = 0
+        for i, prompt in enumerate(prompts[:3]):
+            output_filename = f"generated_concept_{ad.id}_{i+1}.png"
+            # La fonction de génération d'image a été modifiée pour renvoyer le chemin et le nombre d'images
+            generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
+            if generated_path:
+                generated_image_paths.append(generated_path)
+                images_generated_count += count
+        
+        cost_generation = images_generated_count * IMAGEN_PRICE_PER_IMAGE
+        print(f"💰 Coût de la génération d'images estimé : ${cost_generation:.4f}")
+
+        analyzed_ad_data = {
+            "ad": ad.model_dump(), # Sauvegarde l'objet Ad complet au format dict
+            "media_type": media_type,
+            "media_path": local_media_path,
+            "analysis_text": analysis_part.strip(),
+            "script_text": script_part.strip(),
+            "generated_image_paths": generated_image_paths,
+            "cost_analysis": cost_analysis,
+            "cost_generation": cost_generation
+        }
+        # Met à jour le cache externe (passé par référence)
+        cache[ad.id] = analyzed_ad_data
+    
+    # Déplacer les médias (principal et générés) vers le stockage final
+    # et retourner les chemins finaux pour la génération du rapport.
+    destination_folder = os.path.join('data', 'storage')
+    os.makedirs(destination_folder, exist_ok=True)
+    
+    final_media_path = None
+    if analyzed_ad_data.get('media_path') and os.path.exists(analyzed_ad_data['media_path']):
+        filename = os.path.basename(analyzed_ad_data['media_path'])
+        final_media_path = os.path.join(destination_folder, filename)
+        shutil.move(analyzed_ad_data['media_path'], final_media_path)
+        analyzed_ad_data['final_media_path'] = final_media_path
+        print(f"Média principal déplacé vers : {final_media_path}")
+    
+    final_generated_image_paths = []
+    if analyzed_ad_data.get('generated_image_paths'):
+        for temp_path in analyzed_ad_data['generated_image_paths']:
+            if os.path.exists(temp_path):
+                filename = os.path.basename(temp_path)
+                final_path = os.path.join(destination_folder, filename)
+                shutil.move(temp_path, final_path)
+                final_generated_image_paths.append(final_path)
+    analyzed_ad_data['final_generated_image_paths'] = final_generated_image_paths
+
+    return analyzed_ad_data
+
+def run_top5_analysis_for_client(client_id: int, report_id: int):
+    """
+    Exécute le pipeline d'analyse pour les 5 MEILLEURES annonces d'un client,
+    génère un rapport HTML consolidé et met à jour un enregistrement de rapport existant.
+    """
+    print(f"--- DÉBUT PIPELINE TOP 5 pour le client ID: {client_id} (Rapport ID: {report_id}) ---")
+    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}_top5.json")
+    
+    total_cost_analysis = 0.0
+    total_cost_generation = 0.0
 
     try:
-        # 1. Récupérer les infos du client et VALIDER les pré-requis
         conn = database.get_db_connection()
         client = conn.execute('SELECT * FROM clients WHERE id = ?', (client_id,)).fetchone()
         conn.close()
         if not client:
             raise Exception(f"Client {client_id} non trouvé.")
 
-        # Garde de sécurité : vérifier que le ad_account_id est valide AVANT de continuer.
         ad_account_id = client['ad_account_id']
         if not ad_account_id or not ad_account_id.startswith('act_'):
-            raise ValueError(f"ID de compte publicitaire manquant ou invalide pour le client {client['name']}. Impossible de lancer l'analyse.")
+            raise ValueError(f"ID de compte publicitaire manquant ou invalide pour le client {client['name']}.")
 
-        print(f"--- DÉBUT PIPELINE pour le client : {client['name']} (Rapport ID: {report_id}) ---")
-        
-        # Mettre à jour le statut du rapport à RUNNING
         conn = database.get_db_connection()
         conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('RUNNING', report_id))
         conn.commit()
         conn.close()
-        print(f"LOG: Statut du rapport {report_id} mis à jour à RUNNING.")
 
-        # 2. Récupérer l'annonce la plus performante pour le type de média spécifié
-        print(f"Récupération de l'annonce la plus performante de type '{media_type}'...")
+        print("Récupération des 5 annonces les plus performantes...")
+        facebook_client.init_facebook_api(client['facebook_token'], ad_account_id)
         
-        # On initialise l'API avec le token ET le compte publicitaire spécifiques à CE client
-        facebook_client.init_facebook_api(
-            access_token=client['facebook_token'],
-            ad_account_id=ad_account_id
+        top_ads = facebook_client.get_winning_ads(
+            ad_account_id=ad_account_id,
+            spend_threshold=client['spend_threshold'],
+            cpa_threshold=client['cpa_threshold']
+        )[:2] # On prend les 2 premiers pour un test rapide
+
+        if not top_ads:
+            raise Exception("Aucune annonce performante trouvée pour ce client.")
+
+        print(f"{len(top_ads)} annonces performantes trouvées. Lancement des analyses...")
+        
+        ad_ids = [ad.id for ad in top_ads]
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET ad_id = ? WHERE id = ?', (','.join(ad_ids), report_id))
+        conn.commit()
+        conn.close()
+
+        analyzed_ads_data = []
+        cache = load_cache(cache_path)
+        
+        for ad in top_ads:
+            analysis_result = _perform_single_ad_analysis(ad, cache)
+            analyzed_ads_data.append(analysis_result)
+            total_cost_analysis += analysis_result.get('cost_analysis', 0.0)
+            total_cost_generation += analysis_result.get('cost_generation', 0.0)
+            save_cache(cache_path, cache) # Sauvegarde après chaque analyse
+        
+        print("Toutes les analyses sont terminées. Génération du rapport consolidé...")
+        final_html_report = _generate_top5_report_html(analyzed_ads_data, client['name'])
+        
+        total_cost = total_cost_analysis + total_cost_generation
+        conn = database.get_db_connection()
+        conn.execute(
+            """
+            UPDATE reports 
+            SET status = ?, analysis_html = ?, cost_analysis = ?, cost_generation = ?, total_cost = ?
+            WHERE id = ?
+            """,
+            ('COMPLETED', final_html_report, total_cost_analysis, total_cost_generation, total_cost, report_id)
         )
+        conn.commit()
+        conn.close()
+        
+        print(f"--- FIN PIPELINE TOP 5 pour le client : {client['name']}. Coût total: ${total_cost:.4f} ---")
+
+    except Exception as e:
+        print(f"ERREUR dans le pipeline TOP 5 pour le rapport {report_id}: {e}")
+        traceback.print_exc()
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('FAILED', report_id))
+        conn.commit()
+        conn.close()
+
+def run_analysis_for_client(client_id, report_id, media_type: str):
+    """
+    Exécute le pipeline d'analyse pour la MEILLEURE annonce d'un client pour un type de média donné.
+    Met à jour un enregistrement de rapport existant.
+    """
+    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}.json")
+
+    try:
+        conn = database.get_db_connection()
+        client = conn.execute('SELECT * FROM clients WHERE id = ?', (client_id,)).fetchone()
+        conn.close()
+        if not client:
+            raise Exception(f"Client {client_id} non trouvé.")
+
+        ad_account_id = client['ad_account_id']
+        if not ad_account_id or not ad_account_id.startswith('act_'):
+            raise ValueError(f"ID de compte publicitaire manquant ou invalide pour le client {client['name']}.")
+
+        print(f"--- DÉBUT PIPELINE '{media_type}' pour le client : {client['name']} (Rapport ID: {report_id}) ---")
+        
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('RUNNING', report_id))
+        conn.commit()
+        conn.close()
+
+        print(f"Récupération de l'annonce la plus performante de type '{media_type}'...")
+        facebook_client.init_facebook_api(client['facebook_token'], ad_account_id)
         
         best_ad = facebook_client.get_specific_winning_ad(
             ad_account_id=ad_account_id,
@@ -187,149 +481,49 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         if not best_ad:
             raise Exception(f"Aucune annonce gagnante trouvée pour le type '{media_type}'.")
         
-        print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id}) avec un CPA de {best_ad.insights.cpa:.2f}")
+        print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id})")
 
-        # 3. Mettre à jour l'enregistrement du rapport avec l'ID de l'annonce
         conn = database.get_db_connection()
         conn.execute('UPDATE reports SET ad_id = ? WHERE id = ?', (best_ad.id, report_id))
         conn.commit()
         conn.close()
 
-        # 4. Logique d'analyse complète (extraite de main.py) pour cette seule annonce
         cache = load_cache(cache_path)
-        if best_ad.id in cache and all(os.path.exists(p) for p in cache[best_ad.id].get('generated_image_paths', [])):
-             print(f"Annonce trouvée dans le cache ({cache_path}), on utilise les données.")
-             analyzed_ad_data = cache[best_ad.id]
-             cost_analysis = analyzed_ad_data.get('cost_analysis', 0.0) # Récupérer le coût du cache
-             cost_generation = analyzed_ad_data.get('cost_generation', 0.0)
+        analyzed_ad_data = _perform_single_ad_analysis(best_ad, cache)
+        save_cache(cache_path, cache)
 
-             # CORRECTIF: On doit retélécharger le média car le chemin dans le cache est temporaire et peut ne plus exister.
-             print("Le chemin du média dans le cache est obsolète, re-téléchargement...")
-             downloader = MediaDownloader()
-             local_media_path, _ = (None, None)
-             if best_ad.video_id:
-                 local_media_path = downloader.download_video_locally(best_ad.video_id, best_ad.id)
-             elif best_ad.image_url:
-                 local_media_path = downloader.download_image_locally(best_ad.image_url, best_ad.id)
-             
-             if not local_media_path:
-                 raise Exception("Échec du re-téléchargement du média depuis le cache.")
-                 
-             # On met à jour le chemin dans les données que nous allons utiliser
-             analyzed_ad_data['media_path'] = local_media_path
-        else:
-            print("Analyse de l'annonce requise...")
-            downloader = MediaDownloader()
-            local_media_path, media_type = (None, None)
-            
-            if best_ad.video_id:
-                media_type = 'video'
-                local_media_path = downloader.download_video_locally(best_ad.video_id, best_ad.id)
-            elif best_ad.image_url:
-                media_type = 'image'
-                local_media_path = downloader.download_image_locally(best_ad.image_url, best_ad.id)
+        print("Génération des fragments de rapport...")
+        analysis_html, script_html_with_images = generate_report_fragments(analyzed_ad_data)
 
-            if not local_media_path:
-                raise Exception("Échec du téléchargement du média.")
+        final_media_path = analyzed_ad_data.get('final_media_path')
+        cost_analysis = analyzed_ad_data.get('cost_analysis', 0.0)
+        cost_generation = analyzed_ad_data.get('cost_generation', 0.0)
+        total_cost = cost_analysis + cost_generation
 
-            full_response_text, usage_metadata = "", {}
-            if media_type == 'video':
-                full_response_text, usage_metadata = gemini_analyzer.analyze_video(local_media_path, best_ad)
-            else:
-                full_response_text, usage_metadata = gemini_analyzer.analyze_image(local_media_path, best_ad)
-
-            # >>>>>>>>>>>> LOGGING TEMPORAIRE AJOUTÉ <<<<<<<<<<<<
-            print("\n" + "="*80)
-            print("RAW RESPONSE FROM GEMINI (START):")
-            print(full_response_text)
-            print("RAW RESPONSE FROM GEMINI (END):")
-            print("="*80 + "\n")
-            # >>>>>>>>>>>> FIN DU LOGGING TEMPORAIRE <<<<<<<<<<<<
-
-            # Calcul du coût de l'analyse
-            cost_analysis = calculate_analysis_cost(usage_metadata)
-            print(f"💰 Usage metadata from Gemini: {usage_metadata}")
-            if hasattr(usage_metadata, 'prompt_token_count'):
-                print(f"💰 Détail des tokens: Input={usage_metadata.prompt_token_count}, Output={usage_metadata.candidates_token_count}")
-            print(f"💰 Coût de l'analyse Gemini estimé : ${cost_analysis:.4f}")
-            
-            analysis_part, script_part = (full_response_text.split("---", 1) + [""])[:2]
-            
-            print("Génération des images concepts (TEMPORAIREMENT DÉSACTIVÉE)...")
-            prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
-            generated_image_paths = []
-            images_generated_count = 0
-            # for i, prompt in enumerate(prompts[:3]):
-            #     output_filename = f"generated_concept_{best_ad.id}_{i+1}.png"
-            #     generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
-            #     if generated_path:
-            #         generated_image_paths.append(generated_path)
-            #         images_generated_count += count
-            
-            # Calcul du coût de la génération d'images
-            cost_generation = images_generated_count * IMAGEN_PRICE_PER_IMAGE
-            print(f"💰 Coût de la génération d'images estimé : ${cost_generation:.4f}")
-
-            analyzed_ad_data = {
-                "ad_id": best_ad.id,
-                "media_type": media_type,
-                "media_path": local_media_path,
-                "analysis_text": analysis_part.strip(),
-                "script_text": script_part.strip(),
-                "generated_image_paths": generated_image_paths,
-                "cost_analysis": cost_analysis,
-                "cost_generation": cost_generation # Sera 0 si désactivé
-            }
-            cache[best_ad.id] = analyzed_ad_data
-            save_cache(cache_path, cache)
-            print(f"Analyse sauvegardée dans le cache : {cache_path}")
-        
-        # 5. Générer les fragments HTML et sauvegarder le rapport final
-        print("Génération des fragments de rapport et déplacement du média...")
-        analysis_html, script_html = generate_report_fragments(analyzed_ad_data)
-
-        # Déplacer le média téléchargé (qui est dans un dossier temporaire) vers le dossier de stockage final
-        final_media_path = None
-        if local_media_path and os.path.exists(local_media_path):
-            filename = os.path.basename(local_media_path)
-            # Le dossier de destination est 'data/storage', servi par la route /storage
-            destination_folder = os.path.join('data', 'storage')
-            os.makedirs(destination_folder, exist_ok=True)
-            final_media_path = os.path.join(destination_folder, filename)
-            shutil.move(local_media_path, final_media_path)
-            print(f"Média déplacé vers : {final_media_path}")
-        
-        # Mettre à jour la base de données avec TOUTES les informations
         conn = database.get_db_connection()
         conn.execute(
             """
             UPDATE reports 
             SET status = ?, report_path = ?, analysis_html = ?, script_html = ?, 
-                cost_analysis = ?, cost_generation = ?, total_cost = ?
+                cost_analysis = ?, cost_generation = ?, total_cost = ?, media_type = ?
             WHERE id = ?
             """,
-            ('COMPLETED', final_media_path, analysis_html, script_html, 
-             cost_analysis, cost_generation, total_cost, report_id)
+            ('COMPLETED', final_media_path, analysis_html, script_html_with_images, 
+             cost_analysis, cost_generation, total_cost, media_type, report_id)
         )
         conn.commit()
         conn.close()
         
-        print(f"LOG: Rapport {report_id} finalisé et sauvegardé dans la base de données avec un coût total de ${total_cost:.4f}")
-        
-        # Sauvegarder les résultats dans le cache pour éviter de refaire le travail
-        save_cache(cache_path, analyzed_ad_data)
-        
-        print(f"--- FIN PIPELINE pour le client : {client['name']} ---")
+        print(f"--- FIN PIPELINE '{media_type}' pour le client : {client['name']}. Coût: ${total_cost:.4f} ---")
 
     except Exception as e:
         print(f"ERREUR dans le pipeline pour le rapport {report_id}: {e}")
         traceback.print_exc()
-        if report_id:
-            conn = database.get_db_connection()
-            conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('FAILED', report_id))
-            conn.commit()
-            conn.close()
-            print(f"LOG: Statut du rapport {report_id} mis à jour à FAILED.")
+        conn = database.get_db_connection()
+        conn.execute('UPDATE reports SET status = ?, media_type = ? WHERE id = ?', ('FAILED', media_type, report_id))
+        conn.commit()
+        conn.close()
+        print(f"LOG: Statut du rapport {report_id} mis à jour à FAILED.")
 
 if __name__ == '__main__':
     import sys

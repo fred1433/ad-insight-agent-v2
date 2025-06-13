@@ -107,11 +107,18 @@ def get_report_status(report_id):
         return "", 204
     else:
         # Le rapport est terminé (ou a échoué).
-        # On renvoie une réponse vide, mais avec un header qui déclenche le 
-        # rechargement de toute la liste des clients. Le polling s'arrêtera 
-        # car le badge qui le déclenchait sera remplacé.
+        source = request.args.get('source')
         response = make_response("")
-        response.headers['HX-Trigger'] = 'loadClientList'
+        
+        if source == 'pending_page':
+            # On est sur la page d'attente, on la rafraîchit complètement
+            # pour afficher le rapport final (ou une erreur).
+            response.headers['HX-Refresh'] = 'true'
+        else:
+            # On est sur la page principale, on recharge juste la liste
+            # des clients pour mettre à jour le statut.
+            response.headers['HX-Trigger'] = 'loadClientList'
+            
         return response
 
 @app.route('/add_client', methods=['POST'])
@@ -242,8 +249,8 @@ def run_analysis(client_id, media_type):
     mexico_tz = pytz.timezone("America/Mexico_City")
     mexico_now = utc_now.astimezone(mexico_tz)
     
-    cursor = conn.execute('INSERT INTO reports (client_id, status, created_at) VALUES (?, ?, ?)', 
-                          (client_id, 'IN_PROGRESS', mexico_now.isoformat()))
+    cursor = conn.execute('INSERT INTO reports (client_id, status, created_at, media_type) VALUES (?, ?, ?, ?)', 
+                          (client_id, 'IN_PROGRESS', mexico_now.isoformat(), media_type))
     report_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -259,6 +266,47 @@ def run_analysis(client_id, media_type):
     flash(f"El análisis de tipo '{media_type}' para '{client_name}' ha comenzado.", "info")
     
     # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste (pour voir le statut PENDING).
+    response = make_response(render_template('_flash_messages.html'))
+    response.headers['HX-Trigger'] = 'loadClientList'
+    return response
+
+@app.route('/run_top5_analysis/<int:client_id>', methods=['POST'])
+@login_required
+def run_top5_analysis(client_id):
+    """Lance le pipeline pour le Top 5 et crée un rapport consolidé."""
+    
+    analysis_code = request.form.get('analysis_code')
+    if not analysis_code or analysis_code != config.auth.analysis_access_code:
+        flash("Código de análisis inválido o faltante.", "danger")
+        return render_template('_flash_messages.html')
+
+    conn = database.get_db_connection()
+    client = conn.execute('SELECT name FROM clients WHERE id = ?', (client_id,)).fetchone()
+    client_name = client['name'] if client else f"ID {client_id}"
+    print(f"LOG: Requête reçue pour lancer l'analyse du Top 5 pour le client: {client_name}")
+
+    # Étape 1: Créer l'enregistrement du rapport avec le statut 'IN_PROGRESS' et le type 'top5'
+    utc_now = datetime.now(timezone.utc)
+    mexico_tz = pytz.timezone("America/Mexico_City")
+    mexico_now = utc_now.astimezone(mexico_tz)
+    
+    cursor = conn.execute('INSERT INTO reports (client_id, status, created_at, media_type) VALUES (?, ?, ?, ?)', 
+                          (client_id, 'IN_PROGRESS', mexico_now.isoformat(), 'top5'))
+    report_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    print(f"LOG: Tâche pré-enregistrée dans la DB. Rapport ID: {report_id} avec statut IN_PROGRESS pour analyse Top 5")
+    
+    # Étape 2: Lancer l'analyse en arrière-plan.
+    analysis_thread = threading.Thread(
+        target=pipeline.run_top5_analysis_for_client, 
+        args=(client_id, report_id)
+    )
+    analysis_thread.start()
+    
+    flash(f"L'analyse du Top 5 pour '{client_name}' a commencé.", "info")
+    
+    # Étape 3: Renvoyer la réponse qui met à jour les messages flash et recharge la liste.
     response = make_response(render_template('_flash_messages.html'))
     response.headers['HX-Trigger'] = 'loadClientList'
     return response
@@ -287,6 +335,19 @@ def view_report(report_id):
         flash("Rapport non trouvé.", "danger")
         return "Rapport non trouvé", 404
 
+    # --- NOUVELLE LOGIQUE POUR LES RAPPORTS TOP 5 ---
+    if report['media_type'] == 'top5':
+        if report['status'] == 'COMPLETED' and report['analysis_html']:
+            # Le rapport Top 5 est une page HTML complète et autonome
+            return report['analysis_html']
+        elif report['status'] in ('IN_PROGRESS', 'RUNNING', 'PENDING'):
+             # Gérer le cas où le rapport est en cours de génération
+            return render_template('report_pending.html', client_name=report['client_name'], report_id=report_id)
+        else:
+            flash("Le contenu de ce rapport n'a pas pu être généré.", "danger")
+            return redirect(url_for('index'))
+
+    # --- LOGIQUE EXISTANTE POUR LES RAPPORTS SIMPLES ---
     # On récupère les détails de l'annonce pour les afficher dans l'en-tête du rapport
     # On initialise l'API AVANT de faire un appel
     # facebook_client.init_facebook_api()
@@ -326,4 +387,4 @@ def serve_storage_file(filename):
 
 # Point d'entrée pour le développement local
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=5001, host='0.0.0.0')
