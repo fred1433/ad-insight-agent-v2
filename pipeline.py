@@ -308,17 +308,17 @@ def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
         
         analysis_part, script_part = (full_response_text.split("---", 1) + [""])[:2]
         
-        print("Génération des images concepts...")
-        prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
+        print("Génération des images concepts... (Désactivée)")
+        # prompts = re.findall(r"PROMPT_IMG: (.*)", full_response_text)
         generated_image_paths = []
         images_generated_count = 0
-        for i, prompt in enumerate(prompts[:3]):
-            output_filename = f"generated_concept_{ad.id}_{i+1}.png"
-            # La fonction de génération d'image a été modifiée pour renvoyer le chemin et le nombre d'images
-            generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
-            if generated_path:
-                generated_image_paths.append(generated_path)
-                images_generated_count += count
+        # for i, prompt in enumerate(prompts[:3]):
+        #     output_filename = f"generated_concept_{ad.id}_{i+1}.png"
+        #     # La fonction de génération d'image a été modifiée pour renvoyer le chemin et le nombre d'images
+        #     generated_path, count = image_generator.generate_image_from_prompt(prompt, output_filename)
+        #     if generated_path:
+        #         generated_image_paths.append(generated_path)
+        #         images_generated_count += count
         
         cost_generation = images_generated_count * IMAGEN_PRICE_PER_IMAGE
         print(f"💰 Coût de la génération d'images estimé : ${cost_generation:.4f}")
