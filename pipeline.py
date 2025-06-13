@@ -284,34 +284,41 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
             save_cache(cache_path, cache)
             print(f"Analyse sauvegardée dans le cache : {cache_path}")
         
-        # 5. Déplacer le média vers le stockage permanent et générer les fragments HTML
+        # 5. Générer les fragments HTML et sauvegarder le rapport final
         print("Génération des fragments de rapport et déplacement du média...")
-
-        # Créer le dossier storage s'il n'existe pas
-        storage_dir = "storage"
-        os.makedirs(storage_dir, exist_ok=True)
-            
-        # Déplacer le fichier et obtenir son nouveau chemin permanent
-        permanent_media_path = os.path.join(storage_dir, os.path.basename(analyzed_ad_data['media_path']))
-        shutil.move(analyzed_ad_data['media_path'], permanent_media_path)
-        print(f"Média déplacé vers : {permanent_media_path}")
-
         analysis_html, script_html = generate_report_fragments(analyzed_ad_data)
 
-        # 6. Mettre à jour le rapport dans la DB avec les fragments et le statut final
-        total_cost = cost_analysis + cost_generation
+        # Déplacer le média téléchargé (qui est dans un dossier temporaire) vers le dossier de stockage final
+        final_media_path = None
+        if local_media_path and os.path.exists(local_media_path):
+            filename = os.path.basename(local_media_path)
+            # Le dossier de destination est 'data/storage', servi par la route /storage
+            destination_folder = os.path.join('data', 'storage')
+            os.makedirs(destination_folder, exist_ok=True)
+            final_media_path = os.path.join(destination_folder, filename)
+            shutil.move(local_media_path, final_media_path)
+            print(f"Média déplacé vers : {final_media_path}")
+        
+        # Mettre à jour la base de données avec TOUTES les informations
         conn = database.get_db_connection()
         conn.execute(
-            """UPDATE reports 
-               SET status = ?, report_path = ?, analysis_html = ?, script_html = ?, 
-                   cost_analysis = ?, cost_generation = ?, total_cost = ? 
-               WHERE id = ?""",
-            ('COMPLETED', permanent_media_path, analysis_html, script_html, 
+            """
+            UPDATE reports 
+            SET status = ?, report_path = ?, analysis_html = ?, script_html = ?, 
+                cost_analysis = ?, cost_generation = ?, total_cost = ?
+            WHERE id = ?
+            """,
+            ('COMPLETED', final_media_path, analysis_html, script_html, 
              cost_analysis, cost_generation, total_cost, report_id)
         )
         conn.commit()
         conn.close()
+        
         print(f"LOG: Rapport {report_id} finalisé et sauvegardé dans la base de données avec un coût total de ${total_cost:.4f}")
+        
+        # Sauvegarder les résultats dans le cache pour éviter de refaire le travail
+        save_cache(cache_path, analyzed_ad_data)
+        
         print(f"--- FIN PIPELINE pour le client : {client['name']} ---")
 
     except Exception as e:
