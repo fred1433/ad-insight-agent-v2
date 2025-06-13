@@ -38,7 +38,7 @@ def load_cache(cache_path: str):
     if os.path.exists(cache_path):
         try:
             with open(cache_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                return json.load(f)  # <-- Indentation ici
         except (json.JSONDecodeError, IOError):
             return {}  # Retourne un cache vide en cas d'erreur
     return {}
@@ -49,7 +49,7 @@ def save_cache(cache_path: str, cache_data):
         # S'assure que le répertoire de cache existe
         os.makedirs(os.path.dirname(cache_path), exist_ok=True)
         with open(cache_path, 'w', encoding='utf-8') as f:
-            json.dump(cache_data, f, indent=4)
+            json.dump(cache_data, f, indent=4)  # <-- Indentation ici
     except IOError as e:
         print(f"Erreur lors de la sauvegarde du cache sur {cache_path}: {e}")
 
@@ -238,11 +238,11 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
                 full_response_text, usage_metadata = gemini_analyzer.analyze_image(local_media_path, best_ad)
 
             # >>>>>>>>>>>> LOGGING TEMPORAIRE AJOUTÉ <<<<<<<<<<<<
-            print("\\n" + "="*80)
+            print("\n" + "="*80)
             print("RAW RESPONSE FROM GEMINI (START):")
             print(full_response_text)
             print("RAW RESPONSE FROM GEMINI (END):")
-            print("="*80 + "\\n")
+            print("="*80 + "\n")
             # >>>>>>>>>>>> FIN DU LOGGING TEMPORAIRE <<<<<<<<<<<<
 
             # Calcul du coût de l'analyse

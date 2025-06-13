@@ -16,16 +16,15 @@ CACHE_DURATION_HOURS = 24             # Durée de validité du cache en heures
 FACEBOOK_CACHE_DIR = "data/facebook_cache" # Dossier pour les caches par compte
 
 class FacebookConfig(BaseSettings):
-    access_token: str
-    app_secret: Optional[str] = None # Rendu optionnel pour plus de flexibilité
-    ad_account_id: str
+    access_token: Optional[str] = None # Rendu optionnel car fourni via l'UI
+    app_secret: Optional[str] = None
+    ad_account_id: Optional[str] = None # Rendu optionnel car fourni via l'UI
 
     class Config:
         env_prefix = 'FACEBOOK_'
 
 class GoogleConfig(BaseModel):
     project_id: str = os.getenv("GOOGLE_PROJECT_ID")
-    gcs_bucket_name: str = os.getenv("GCS_BUCKET_NAME")
     gvi_language_code: str = "es-MX" # Code langue pour l'analyse GVI
 
 class ScriptConfig(BaseModel):
@@ -44,11 +43,7 @@ class AppSettings(BaseSettings):
     # ex: DEBUG: bool = False
     
     # On compose la configuration avec nos classes spécifiques
-    facebook: FacebookConfig = FacebookConfig(
-        access_token=os.getenv("FACEBOOK_ACCESS_TOKEN"),
-        app_secret=os.getenv("FACEBOOK_APP_SECRET"),
-        ad_account_id=os.getenv("FACEBOOK_AD_ACCOUNT_ID"),
-    )
+    facebook: FacebookConfig = FacebookConfig()
     google: GoogleConfig = GoogleConfig()
     script: ScriptConfig = ScriptConfig()
     auth: AuthConfig = AuthConfig(

@@ -281,11 +281,12 @@ def view_report(report_id):
     conn.close()
 
     if not report:
+        flash("Rapport non trouvé.", "danger")
         return "Rapport non trouvé", 404
 
     # On récupère les détails de l'annonce pour les afficher dans l'en-tête du rapport
     # On initialise l'API AVANT de faire un appel
-    facebook_client.init_facebook_api() 
+    # facebook_client.init_facebook_api()
     ad = facebook_client.get_ad_by_id(report['ad_id'], report['ad_account_id'])
 
     return render_template(

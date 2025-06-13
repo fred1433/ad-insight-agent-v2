@@ -138,7 +138,7 @@ def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESH
 
         if not active_ad_ids:
             return []
-
+            
         # --- Étape 2: Récupérer les détails des pubs par lots de 50 ---
         print("\\nRécupération groupée des détails et des créatives...")
         ad_data_map = {}
@@ -171,7 +171,7 @@ def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESH
         if not ad_ids_with_creatives:
             print("Aucune des publicités actives n'a de créative associée.")
             return []
-
+        
         # --- Étape 3: Récupération des insights (inchangée) ---
         print(f"\\nRécupération groupée des métriques pour {len(ad_ids_with_creatives)} publicités...")
         insights_map = _fetch_insights_batch(account, ad_ids_with_creatives)
@@ -186,7 +186,7 @@ def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESH
 
             if not creative_info or not insight_data:
                 continue
-                
+
             # (Le reste de la logique de traitement est identique et correcte)
             spend = float(insight_data.get('spend', 0))
             cpm = float(insight_data.get('cpm', 0))
@@ -279,7 +279,7 @@ def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESH
             except Exception as cache_e:
                 print(f"⚠️ Erreur lors de la sauvegarde du cache : {cache_e}")
 
-    return winning_ads
+    return winning_ads 
 
 def get_specific_winning_ad(ad_account_id: str, media_type: str, spend_threshold: float, cpa_threshold: float) -> Optional[Ad]:
     """
@@ -337,7 +337,7 @@ def get_ad_by_id(ad_id: str, ad_account_id: str) -> Optional[Ad]:
         )
     except FacebookRequestError:
         print(f"❌ Échec de la récupération directe de l'annonce {ad_id}.")
-        return None
+    return None
 
 def check_token_validity(token: str) -> Tuple[bool, str, Optional[List[AdAccount]]]:
     """
