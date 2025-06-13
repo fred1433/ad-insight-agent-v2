@@ -6,8 +6,8 @@ services:
     env: docker
     # Branche à déployer automatiquement
     repo: https://github.com/fred1433/ad_insight_agent_v2 # Assurez-vous que c'est le bon URL de dépôt
-    branch: master
-    # Active le déploiement automatique à chaque push sur la branche 'master'
+    branch: main
+    # Active le déploiement automatique à chaque push sur la branche 'main'
     autoDeploy: true
     # Configure la vérification de santé pour s'assurer que l'app est bien lancée
     healthCheckPath: /login
