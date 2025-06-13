@@ -24,9 +24,10 @@ load_dotenv()
 # --- CONFIGURATION DES COÛTS (chargée depuis les variables d'environnement) ---
 # Tarifs basés sur Gemini 1.5 Pro et Imagen 3 (vérifier les tarifs officiels)
 # Prix par MILLION de tokens
-GEMINI_INPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_INPUT_PRICE_PER_MILLION_TOKENS", "2.50"))
-GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS", "7.50"))
-IMAGEN_PRICE_PER_IMAGE = float(os.getenv("IMAGEN_PRICE_PER_IMAGE", "0.03"))
+# On nettoie la valeur des guillemets potentiels avant de la convertir en float
+GEMINI_INPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_INPUT_PRICE_PER_MILLION_TOKENS", "2.50").strip('\'"'))
+GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS = float(os.getenv("GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS", "7.50").strip('\'"'))
+IMAGEN_PRICE_PER_IMAGE = float(os.getenv("IMAGEN_PRICE_PER_IMAGE", "0.03").strip('\'"'))
 
 # Le nom du fichier de cache d'analyse est maintenant dynamique et géré dans le pipeline.
 # CACHE_FILE = "analysis_cache.json" # Ancienne constante globale supprimée
