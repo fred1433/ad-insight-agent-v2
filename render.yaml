@@ -1,0 +1,27 @@
+services:
+  # Nom du service web sur Render
+  - type: web
+    name: ad-insight-agent
+    # Indique à Render d'utiliser l'environnement Docker
+    env: docker
+    # Branche à déployer automatiquement
+    repo: https://github.com/fred1433/ad_insight_agent_v2 # Assurez-vous que c'est le bon URL de dépôt
+    branch: master
+    # Active le déploiement automatique à chaque push sur la branche 'master'
+    autoDeploy: true
+    # Configure la vérification de santé pour s'assurer que l'app est bien lancée
+    healthCheckPath: /login
+    # Section pour les variables d'environnement (vos secrets)
+    # Vous devrez remplir les valeurs directement dans le dashboard Render
+    # sous l'onglet 'Environment' de votre service.
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: APP_ACCESS_CODE
+        sync: false # 'sync: false' signifie que la valeur est gérée uniquement dans le dashboard
+      - key: ANALYSIS_ACCESS_CODE
+        sync: false
+      - key: GOOGLE_PROJECT_ID
+        sync: false
+      # Note: FACEBOOK_ACCESS_TOKEN et FACEBOOK_AD_ACCOUNT_ID ne sont plus nécessaires ici
+      # car ils sont gérés via l'interface utilisateur de l'application. 
