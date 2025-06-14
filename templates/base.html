@@ -99,8 +99,6 @@
                 <p style="font-size: 0.9em; color: #6c757d;">Las análisis tienen un coste asociado. Se requiere un código para evitar lanzamientos accidentales.</p>
                 <form id="analysis-modal-form" 
                       hx-post="${formAction}" 
-                      hx-target="body" 
-                      hx-swap="outerHTML" 
                       style="margin-top: 20px;">
                     <div class="form-group">
                         <label for="top_n_to_analyze">Top N a analizar:</label>
@@ -130,6 +128,11 @@
             if (event.target.matches('.close-button') || event.target === modal) {
                 closeModal();
             }
+        });
+
+        // Écouteur pour l'événement personnalisé qui ferme la modale
+        document.body.addEventListener('closeModal', function() {
+            closeModal();
         });
     </script>
 </body>

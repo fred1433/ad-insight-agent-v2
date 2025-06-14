@@ -187,7 +187,11 @@ def run_top_n_analysis(client_id):
     flash(f"Análisis Top {top_n} para '{client_name}' ha comenzado. El informe aparecerá aquí en breve.", 'info')
 
     response = make_response("")
-    response.headers['HX-Trigger'] = 'loadClientList'
+    response.headers['HX-Trigger'] = json.dumps({
+        "loadClientList": None,
+        "loadFlash": None,
+        "closeModal": None
+    })
     return response
 
 @app.route('/clients')
