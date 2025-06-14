@@ -1,7 +1,32 @@
 import sqlite3
 import os
+from pydantic import BaseModel, Field
+from typing import List, Optional
+import json
+from datetime import datetime
 
 DATABASE_FILE = "database.db"
+
+class AdScript(BaseModel):
+    id: int
+    report_id: int
+    ad_id: str
+    original_script_html: Optional[str] = None
+    edited_script_html: Optional[str] = None
+
+class Report(BaseModel):
+    id: int
+    client_id: int
+    client_name: str # Ajouté pour l'affichage
+    status: str
+    report_path: Optional[str] = None
+    created_at: datetime
+    analyzed_ads_data: Optional[str] = None # Renommé pour plus de clarté
+    num_analyzed: Optional[int] = None # Pour savoir combien d'annonces ont été analysées
+    cost_analysis: Optional[float] = None
+    cost_generation: Optional[float] = None
+    total_cost: Optional[float] = None
+    scripts: List[AdScript] = [] # Une liste pour contenir tous les scripts liés
 
 def get_db_connection():
     """Crée et retourne une connexion à la base de données."""
@@ -83,6 +108,80 @@ def delete_client(client_id):
     # On supprime d'abord les rapports pour respecter la contrainte de clé étrangère
     conn.execute('DELETE FROM analyses WHERE client_id = ?', (client_id,))
     conn.execute('DELETE FROM clients WHERE id = ?', (client_id,))
+    conn.commit()
+    conn.close()
+
+def get_report_by_id(report_id: int) -> Optional[Report]:
+    """
+    Récupère un rapport complet par son ID, incluant les données du client et les scripts associés.
+    """
+    report_data = None
+    scripts_data = []
+    
+    conn = get_db_connection()
+    
+    # 1. Récupérer les données du rapport et le nom du client
+    report_row = conn.execute(
+        """
+        SELECT r.*, c.name as client_name 
+        FROM analyses r 
+        JOIN clients c ON r.client_id = c.id 
+        WHERE r.id = ?
+        """, (report_id,)
+    ).fetchone()
+    
+    if report_row:
+        # 2. Récupérer tous les scripts associés à ce rapport
+        scripts_rows = conn.execute(
+            'SELECT * FROM ad_scripts WHERE report_id = ?', (report_id,)
+        ).fetchall()
+        
+        for row in scripts_rows:
+            scripts_data.append(AdScript(**row))
+            
+        # 3. Construire l'objet Report
+        report_dict = dict(report_row)
+        report_dict['scripts'] = scripts_data
+        
+        # Renommer 'analysis_html' en 'analyzed_ads_data' pour correspondre au modèle
+        if 'analysis_html' in report_dict:
+            report_dict['analyzed_ads_data'] = report_dict.pop('analysis_html')
+
+        # Gérer le cas où num_analyzed n'est pas dans la DB pour les anciens rapports
+        if 'num_analyzed' not in report_dict or report_dict['num_analyzed'] is None:
+            if report_dict.get('analyzed_ads_data'):
+                try:
+                    report_dict['num_analyzed'] = len(json.loads(report_dict['analyzed_ads_data']))
+                except (json.JSONDecodeError, TypeError):
+                    report_dict['num_analyzed'] = 0
+            else:
+                 report_dict['num_analyzed'] = 0
+
+
+        report_data = Report(**report_dict)
+
+    conn.close()
+    return report_data
+
+def get_ad_script(report_id: int, ad_id: str) -> Optional[AdScript]:
+    """Récupère un script spécifique par report_id et ad_id."""
+    conn = get_db_connection()
+    script_row = conn.execute(
+        'SELECT * FROM ad_scripts WHERE report_id = ? AND ad_id = ?',
+        (report_id, ad_id)
+    ).fetchone()
+    conn.close()
+    if script_row:
+        return AdScript(**script_row)
+    return None
+
+def update_ad_script(report_id: int, ad_id: str, script_html: str):
+    """Met à jour le contenu d'un script édité."""
+    conn = get_db_connection()
+    conn.execute(
+        'UPDATE ad_scripts SET edited_script_html = ? WHERE report_id = ? AND ad_id = ?',
+        (script_html, report_id, ad_id)
+    )
     conn.commit()
     conn.close()
 

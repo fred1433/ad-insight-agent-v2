@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify, session, abort
 from datetime import datetime, timezone
 from dateutil import parser
 import database
+from database import get_report_by_id, get_ad_script, update_ad_script
 import threading
 import pipeline
 import pytz
@@ -223,34 +224,18 @@ def get_clients_list():
 @app.route('/report/<int:report_id>')
 @login_required
 def view_report(report_id):
-    conn = database.get_db_connection()
-    report_data = conn.execute(
-        "SELECT r.*, c.name as client_name FROM analyses r JOIN clients c ON r.client_id = c.id WHERE r.id = ?", (report_id,)
-    ).fetchone()
-    conn.close()
-
-    if not report_data:
-        flash("Informe no encontrado.", "danger")
-        return redirect(url_for('index'))
-
-    if report_data['status'] != 'COMPLETED':
-        return render_template('report_pending.html', client_name=report_data['client_name'], report_id=report_data['id'])
+    report = get_report_by_id(report_id)
+    if not report:
+        abort(404)
     
-    try:
-        analyzed_ads_data = json.loads(report_data['analysis_html'])
-    except (json.JSONDecodeError, TypeError):
-        analyzed_ads_data = []
-    
-    conn = database.get_db_connection()
-    scripts_cursor = conn.execute('SELECT ad_id, original_script_html, edited_script_html FROM ad_scripts WHERE report_id = ?', (report_id,))
-    scripts_data = {row['ad_id']: dict(row) for row in scripts_cursor.fetchall()}
-    conn.close()
+    analyzed_ads_data = json.loads(report.analyzed_ads_data) if report.analyzed_ads_data else []
+    scripts_data = {script.ad_id: script for script in report.scripts}
 
-    return render_template('top5_report.html', 
-                           report=report_data, 
+    return render_template('analysis_report.html',
+                           report=report,
                            analyzed_ads_data=analyzed_ads_data,
                            scripts_data=scripts_data,
-                           num_analyzed=len(analyzed_ads_data))
+                           num_analyzed=report.num_analyzed)
 
 @app.route('/report/<int:report_id>/ad/<string:ad_id>/update_script', methods=['POST'])
 @login_required
