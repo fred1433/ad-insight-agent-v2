@@ -26,15 +26,21 @@
                     <button type="submit" class="btn btn-sm btn-primary">Lanzar Top N</button>
                 </form>
             </td>
-            <td>
-                <button hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
-                        hx-target="#client-row-{{ client.id }}"
-                        hx-swap="outerHTML"
-                        hx-confirm="¿Estás seguro de que quieres eliminar a {{ client.name }}?"
-                        class="btn btn-sm btn-danger"
-                        title="Eliminar cliente">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+            <td class="text-center">
+                <div class="actions-menu">
+                    <button class="btn btn-sm btn-secondary" title="Acciones">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="actions-menu-content">
+                        <button class="actions-menu-item"
+                                hx-delete="{{ url_for('delete_client', client_id=client.id) }}"
+                                hx-target="#client-row-{{ client.id }}"
+                                hx-swap="outerHTML"
+                                hx-confirm="¿Estás seguro de que quieres eliminar a {{ client.name }}?">
+                            <i class="fas fa-trash-alt"></i> Eliminar Cliente
+                        </button>
+                    </div>
+                </div>
             </td>
             <td class="reports-cell">
                 {% if client.reports %}

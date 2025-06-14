@@ -389,8 +389,54 @@ header {
 
 /* Style pour les boutons désactivés */
 .btn:disabled {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    opacity: 0.65;
+    background-color: #cccccc;
     cursor: not-allowed;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* --- Menu d'actions (Dropdown) --- */
+.actions-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.actions-menu-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 100;
+    border-radius: 5px;
+    overflow: hidden; /* Pour que le border-radius s'applique aux enfants */
+}
+
+.actions-menu:hover .actions-menu-content {
+    display: block;
+}
+
+.actions-menu-item {
+    color: #212529;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+    font-size: 0.9em;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.actions-menu-item:hover {
+    background-color: #f1f1f1;
+}
+
+.actions-menu-item i {
+    margin-right: 10px;
+    color: #6c757d;
 } 
