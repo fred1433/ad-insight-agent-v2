@@ -19,8 +19,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Étape 4: Copier tout le reste du code de l'application
 COPY . .
 
-# Étape 5: Commande pour lancer l'application avec Gunicorn
-# Render définit automatiquement la variable d'environnement $PORT.
-# Nous lions Gunicorn à l'adresse 0.0.0.0 pour qu'il soit accessible de l'extérieur du conteneur.
-# Le format 'app:app' signifie "dans le fichier app.py, utilise l'objet app (Flask)".
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--timeout", "90", "app:app"] 
+# Variables d'environnement pour s'assurer que Python affiche les logs immédiatement
+ENV PYTHONUNBUFFERED=1
+
+# Exposition du port (sera surchargé par Gunicorn ou Flask)
+EXPOSE 10000
+
+# Commande par défaut pour la production (utilisée par Render)
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"] 

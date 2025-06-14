@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5001:10000"
+    volumes:
+      # Synchronise tout le répertoire du projet avec le répertoire /app dans le conteneur
+      - .:/app
+      # Assure que le répertoire des logs de webdriver-manager est persistant et partagé
+      # Cela évite de retélécharger le driver à chaque redémarrage
+      - webdriver_cache:/root/.wdm
+    # Charge les variables d'environnement depuis le fichier .env à la racine
+    env_file:
+      - .env
+    # Nom du conteneur pour une gestion facile
+    container_name: ad_insight_dev
+    # Surcharge la commande par défaut du Dockerfile pour lancer le serveur de développement
+    command: ["flask", "--app", "app.py", "run", "--host=0.0.0.0", "--port=10000", "--debug"]
+
+volumes:
+  webdriver_cache: 
