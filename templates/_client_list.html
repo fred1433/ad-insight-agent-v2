@@ -43,15 +43,22 @@
                     <ul>
                         {% for report in client.reports %}
                         <li>
-                            <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span> -
-                            
-                            {% include '_report_status_badge.html' %}
+                            <div class="report-item-line">
+                                <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                            </div>
+                            <div class="report-item-line">
+                                {% include '_report_status_badge.html' %}
+                            </div>
 
                             {% if report.status == 'COMPLETED' %}
-                                <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm" style="margin-left: 5px;">Ver informe</a>
+                            <div class="report-item-line">
+                                <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn-link">Ver informe</a>
+                            </div>
+                            <div class="report-item-line">
                                 <span class="cost-badge" title="Análisis: ${{ '%.4f'|format(report.cost_analysis) }} | Generación: ${{ '%.4f'|format(report.cost_generation) }}">
-                                    (Coste: ${{ '%.4f'|format(report.total_cost) }})
+                                    Coste: ${{ '%.4f'|format(report.total_cost) }}
                                 </span>
+                            </div>
                             {% endif %}
                         </li>
                         {% endfor %}
