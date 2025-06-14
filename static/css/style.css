@@ -48,8 +48,8 @@ tr:hover {
     background-color: #f1f1f1;
 }
 
-/* Formulaires */
-form {
+/* Formulaires de type "carte" (ex: ajout de client) */
+.card-form {
     background: #ffffff;
     padding: 25px;
     border-radius: 8px;
@@ -208,14 +208,20 @@ form {
 /* Style pour le formulaire d'analyse */
 .run-analysis-form {
     display: flex;
-    gap: 5px;
-    margin-bottom: 5px;
+    align-items: center;
+    gap: 8px; /* Espace uniforme entre les éléments */
 }
 
-.run-analysis-form input[type="text"] {
-    width: 120px; /* Ajustez la largeur comme souhaité */
-    padding: 2px 5px;
-    font-size: 0.8rem;
+.run-analysis-form label {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.run-analysis-form input[type="text"],
+.run-analysis-form input[type="number"] {
+    padding: 5px 8px;
+    font-size: 0.9em;
 }
 
 /* Client actions alignment */
@@ -266,28 +272,26 @@ form {
     height: 100%;
     overflow: auto; 
     background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto;
-    padding: 30px;
+    margin: 15% auto; 
+    padding: 20px;
     border: 1px solid #888;
     width: 80%;
-    max-width: 700px;
+    max-width: 500px;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative;
-    animation: fadeIn 0.3s;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
 }
 
 .close-button {
     color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 25px;
+    float: right;
     font-size: 28px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .close-button:hover,
@@ -439,4 +443,5 @@ header {
 .actions-menu-item i {
     margin-right: 10px;
     color: #6c757d;
-} 
+}
+

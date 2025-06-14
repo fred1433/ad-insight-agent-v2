@@ -16,15 +16,11 @@
             <td>{{ client.name }}</td>
             <td>{{ client.spend_threshold }} $</td>
             <td>{{ client.cpa_threshold }} $</td>
-            <td class="client-actions">
-                <form class="run-analysis-form d-flex align-items-center"
-                      hx-post="{{ url_for('run_top_n_analysis', client_id=client.id) }}"
-                      hx-target="#flash-messages"
-                      hx-swap="innerHTML">
-                    <input type="number" name="top_n_to_analyze" class="form-control form-control-sm me-2" value="5" min="1" max="50" style="width: 75px;" title="Top N a analizar" required>
-                    <input type="text" name="analysis_code" class="form-control form-control-sm me-2" placeholder="Código Análisis" required>
-                    <button type="submit" class="btn btn-sm btn-primary">Lanzar Top N</button>
-                </form>
+            <td>
+                <button class="btn btn-sm btn-primary" 
+                        onclick="showAnalysisModal('{{ client.id }}', '{{ url_for('run_top_n_analysis', client_id=client.id) }}')">
+                    <i class="fas fa-play"></i> Lanzar Análisis
+                </button>
             </td>
             <td class="text-center">
                 <div class="actions-menu">

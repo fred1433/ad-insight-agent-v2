@@ -12,8 +12,8 @@
     </div>
 
     <!-- Section pour ajouter un nouveau client -->
-    <h2>Añadir Nuevo Cliente</h2>
-    <form hx-post="{{ url_for('add_client') }}" hx-target="body" hx-swap="outerHTML">
+    <h2 class="form-title">Añadir Nuevo Cliente</h2>
+    <form id="add-client-form" hx-post="{{ url_for('add_client') }}" hx-target="#add-client-form" hx-swap="outerHTML" class="card-form">
         <div class="form-group">
             <label for="name">Nombre del Cliente</label>
             <input type="text" id="name" name="name" required>
