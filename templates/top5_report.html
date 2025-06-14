@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Informe de Análisis Top 5 - {{ report.client_name }}{% endblock %}
+{% block title %}Informe de Análisis Top {{ num_analyzed }} - {{ report.client_name }}{% endblock %}
 
 {% block head_styles %}
 <style>
@@ -45,8 +45,8 @@
 
 {% block content %}
 <div class="report-header">
-    <h1>Análisis Top 3 para {{ report.client_name }}</h1>
-    <p class="lead text-muted">Este informe detalla el análisis de las 3 mejores creatividades, basado en su rendimiento.</p>
+    <h1>Análisis Top {{ num_analyzed }} para {{ report.client_name }}</h1>
+    <p class="lead text-muted">Este informe detalla el análisis de las {{ num_analyzed }} mejores creatividades, basado en su rendimiento.</p>
 </div>
 
 {% if analyzed_ads_data %}

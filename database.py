@@ -13,16 +13,24 @@ def init_db():
     """Initialise la base de données et crée les tables si elles n'existent pas."""
     print("Inicializando las tablas de la base de datos...")
     conn = get_db_connection()
+    cursor = conn.cursor()
     
+    # Vérification et ajout de la colonne 'ad_account_id' à la table 'clients'
+    cursor.execute("PRAGMA table_info(clients)")
+    columns = [column[1] for column in cursor.fetchall()]
+    if 'ad_account_id' not in columns:
+        cursor.execute('ALTER TABLE clients ADD COLUMN ad_account_id TEXT')
+
     # Création de la table 'clients'
     conn.execute('''
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
             facebook_token TEXT NOT NULL,
             ad_account_id TEXT,
             spend_threshold REAL NOT NULL DEFAULT 50,
-            cpa_threshold REAL NOT NULL DEFAULT 10
+            cpa_threshold REAL NOT NULL DEFAULT 10,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
@@ -68,11 +76,13 @@ def get_all_clients():
     conn.close()
     return clients
 
-def add_client(name, token, ad_account_id, spend_threshold, cpa_threshold):
-    """Ajoute un nouveau client dans la base de données."""
+def add_client(name, token, ad_account_id, spend, cpa):
+    """Ajoute un nouveau client à la base de données."""
     conn = get_db_connection()
-    conn.execute('INSERT INTO clients (name, facebook_token, ad_account_id, spend_threshold, cpa_threshold) VALUES (?, ?, ?, ?, ?)',
-                 (name, token, ad_account_id, spend_threshold, cpa_threshold))
+    conn.execute(
+        'INSERT INTO clients (name, facebook_token, ad_account_id, spend_threshold, cpa_threshold) VALUES (?, ?, ?, ?, ?)',
+        (name, token, ad_account_id, spend, cpa)
+    )
     conn.commit()
     conn.close()
 

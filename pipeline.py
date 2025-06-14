@@ -240,13 +240,13 @@ def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
 
     return analyzed_ad_data
 
-def run_top5_analysis_for_client(client_id: int, report_id: int):
+def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
     """
-    Exécute le pipeline d'analyse pour les 5 MEILLEURES annonces d'un client,
+    Exécute le pipeline d'analyse pour les N MEILLEURES annonces d'un client,
     génère un rapport HTML consolidé et met à jour un enregistrement de rapport existant.
     """
-    print(f"--- DÉBUT PIPELINE TOP 5 pour le client ID: {client_id} (Rapport ID: {report_id}) ---")
-    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}_top5.json")
+    print(f"--- DÉBUT PIPELINE TOP {num_ads} pour le client ID: {client_id} (Rapport ID: {report_id}) ---")
+    cache_path = os.path.join(ANALYSIS_CACHE_DIR, f"analysis_{client_id}_{report_id}_top{num_ads}.json")
     
     total_cost_analysis = 0.0
     total_cost_generation = 0.0
@@ -267,14 +267,16 @@ def run_top5_analysis_for_client(client_id: int, report_id: int):
         conn.commit()
         conn.close()
 
-        print("Récupération des 5 annonces les plus performantes...")
+        print(f"Récupération des {num_ads} annonces les plus performantes...")
         facebook_client.init_facebook_api(client['facebook_token'], ad_account_id)
         
-        top_ads = facebook_client.get_winning_ads(
+        all_winning_ads = facebook_client.get_winning_ads(
             ad_account_id=ad_account_id,
             spend_threshold=client['spend_threshold'],
             cpa_threshold=client['cpa_threshold']
-        )[:3]
+        )
+        
+        top_ads = all_winning_ads[:num_ads]
 
         if not top_ads:
             raise Exception("Aucune annonce performante trouvée pour ce client.")
@@ -343,10 +345,10 @@ def run_top5_analysis_for_client(client_id: int, report_id: int):
         conn.commit()
         conn.close()
         
-        print(f"--- FIN PIPELINE TOP 5 pour le client : {client['name']}. Coût total: ${total_cost:.4f} ---")
+        print(f"--- FIN PIPELINE TOP {num_ads} pour le client : {client['name']}. Coût total: ${total_cost:.4f} ---")
 
     except Exception as e:
-        print(f"ERREUR dans le pipeline TOP 5 pour le rapport {report_id}: {e}")
+        print(f"ERREUR dans le pipeline TOP {num_ads} pour le rapport {report_id}: {e}")
         traceback.print_exc()
         conn = database.get_db_connection()
         conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('FAILED', report_id))
