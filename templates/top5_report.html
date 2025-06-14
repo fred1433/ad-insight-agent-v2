@@ -30,6 +30,14 @@
     .generated-images-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px; }
     .generated-images-grid img, td img { width: 100%; max-width: 250px; height: auto; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     video, .ad-media-img { max-width: 100%; height: auto; border-radius: 8px; }
+    
+    /* Style spécifique pour le bouton Sauvegarder dans le rapport */
+    .save-script-btn.btn-success {
+        background-color: #198754 !important; /* Vert Bootstrap standard */
+        border-color: #198754 !important;
+        color: white !important;
+    }
+
     @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
