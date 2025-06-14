@@ -10,6 +10,7 @@ import os
 import facebook_client
 from functools import wraps
 from config import config
+import json
 
 # --- FILTRE DE LOGS ---
 # Filtre pour ne pas afficher les requêtes de polling dans le terminal
@@ -320,45 +321,72 @@ def get_clients_list():
 @app.route('/report/<int:report_id>')
 @login_required
 def view_report(report_id):
-    """Affiche un informe HTML específico."""
+    """Affiche un rapport d'analyse spécifique, qu'il soit simple ou consolidé."""
     conn = database.get_db_connection()
-    # On récupère le rapport ET les infos del cliente asocié en una sola requête
-    report = conn.execute('''
-        SELECT r.*, c.name as client_name, c.ad_account_id
-        FROM reports r
-        JOIN clients c ON r.client_id = c.id
-        WHERE r.id = ?
-    ''', (report_id,)).fetchone()
-    conn.close()
-
+    report = conn.execute('SELECT * FROM reports WHERE id = ?', (report_id,)).fetchone()
+    
     if not report:
         flash("Informe no encontrado.", "danger")
-        return "Informe no encontrado", 404
+        return redirect(url_for('index'))
 
-    # --- NUEVA LÓGICA PARA LOS INFORMES TOP 5 ---
-    if report['media_type'] == 'top5':
-        if report['status'] == 'COMPLETED' and report['analysis_html']:
-            # On utilise maintenant un template pour afficher le contenu
-            return render_template('top5_report.html', report=report)
-        elif report['status'] in ('IN_PROGRESS', 'RUNNING', 'PENDING'):
-             # Gérer el caso donde el informe está en proceso de generación
-            return render_template('report_pending.html', client_name=report['client_name'], report_id=report_id)
-        else:
-            flash("El contenido de este informe no ha podido ser generado.", "danger")
-            return redirect(url_for('index'))
+    # Pour les anciens rapports ou les analyses simples
+    ad = None
+    if report['media_type'] != 'top5':
+        if report['ad_id']:
+            try:
+                # Initialisation de l'API nécessaire pour récupérer les détails de l'annonce
+                client = conn.execute('SELECT facebook_token, ad_account_id FROM clients WHERE id = ?', (report['client_id'],)).fetchone()
+                facebook_client.init_facebook_api(client['facebook_token'], client['ad_account_id'])
+                ad = facebook_client.get_ad_details(report['ad_id'])
+            except Exception as e:
+                print(f"No se pudo obtener detalles del anuncio {report['ad_id']}: {e}")
+                ad = None # Assure que 'ad' est None si la récupération échoue
+        conn.close()
+        return render_template('report.html', report=dict(report), ad=ad)
+    
+    # --- NOUVELLE LOGIQUE POUR LES RAPPORTS TOP 5 ---
+    else:
+        # L'analyse est stockée en JSON
+        try:
+            analyzed_ads_data = json.loads(report['analysis_html'])
+        except (json.JSONDecodeError, TypeError):
+            analyzed_ads_data = []
 
-    # --- LÓGICA EXISTENTE PARA LOS INFORMES SIMPLES ---
-    # On récupère les détails de la anuncio para los mostrar en la cabecera del informe
-    # On inicializa la API ANTES de hacer un llamado
-    # facebook_client.init_facebook_api()
-    ad = facebook_client.get_ad_by_id(report['ad_id'], report['ad_account_id'])
+        # On récupère tous les scripts associés à ce rapport
+        scripts_cursor = conn.execute('SELECT * FROM ad_scripts WHERE report_id = ?', (report_id,))
+        scripts_data = {row['ad_id']: dict(row) for row in scripts_cursor.fetchall()}
+        
+        conn.close()
+        
+        # On passe la structure JSON et les données des scripts au template
+        return render_template(
+            'top5_report.html', 
+            report=dict(report), 
+            analyzed_ads_data=analyzed_ads_data,
+            scripts_data=scripts_data
+        )
 
-    return render_template(
-        'report.html', 
-        report=report, 
-        ad=ad, 
-        client_name=report['client_name']
-    )
+@app.route('/report/<int:report_id>/ad/<string:ad_id>/update_script', methods=['POST'])
+@login_required
+def update_ad_script(report_id, ad_id):
+    """Met à jour le contenu HTML d'un script spécifique pour une annonce dans un rapport."""
+    data = request.get_json()
+    updated_html = data.get('script_html')
+    if updated_html is None:
+        return jsonify({"status": "error", "message": "Contenido faltante."}), 400
+
+    try:
+        conn = database.get_db_connection()
+        conn.execute(
+            "UPDATE ad_scripts SET edited_script_html = ? WHERE report_id = ? AND ad_id = ?",
+            (updated_html, report_id, ad_id)
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        print(f"Error al actualizar el script: {e}")
+        return jsonify({"status": "error", "message": "Error interno del servidor."}), 500
 
 @app.route('/report/<int:report_id>/update', methods=['POST'])
 @login_required

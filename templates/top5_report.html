@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Informe Top 5 - {{ report.client_name }}{% endblock %}
+{% block title %}Rapport d'Analyse Top 5 - {{ report.client_name }}{% endblock %}
 
 {% block head_styles %}
 <style>
@@ -28,7 +28,151 @@
 
 
 {% block content %}
-<div class="main-container">
-    {{ report.analysis_html | safe }}
+<div class="report-header">
+    <h1>Analyse Top 3 pour {{ report.client_name }}</h1>
+    <p class="lead text-muted">Ce rapport détaille l'analyse des 3 meilleures créativités, basé sur leur rendement.</p>
 </div>
+
+{% if analyzed_ads_data %}
+    {% for item in analyzed_ads_data %}
+        {% set ad = item.ad %}
+        {% set ad_script = scripts_data.get(ad.id) %}
+        <div class="report-section">
+            <h2>{{ ad.name }} (ID: {{ ad.id }})</h2>
+            
+            {% if item.is_fallback %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Atención:</strong> 
+                L'analyse pour cette créativité a été générée avec un modèle de secours ('{{ item.model_used }}').
+            </div>
+            {% endif %}
+
+            <div class="grid-container">
+                <div>
+                    <h3>Créativité de l'Annonce</h3>
+                    {% if item.final_media_path %}
+                        {% set filename = item.final_media_path.split('/')[-1] %}
+                        {% if item.media_type == 'video' %}
+                            <video controls style="width:100%; max-width:500px; border-radius: 8px;"><source src="{{ url_for('serve_storage_file', filename=filename) }}" type="video/mp4"></video>
+                        {% else %}
+                            <img src="{{ url_for('serve_storage_file', filename=filename) }}" alt="Anuncio" style="width:100%; max-width:500px; border-radius: 8px;">
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div>
+                    <h3>Indicateurs Clave (KPIs)</h3>
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <tr><td>Inversión (Spend)</td><td class="text-end">{{ "{:,.2f}".format(ad.insights.spend) }} $</td></tr>
+                            <tr><td>Costo por Compra (CPA)</td><td class="text-end">{{ "{:,.2f}".format(ad.insights.cpa) }} $</td></tr>
+                            <tr><td>Número de Compras</td><td class="text-end">{{ ad.insights.website_purchases }}</td></tr>
+                            <tr><td>Valor de las Compras</td><td class="text-end">{{ "{:,.2f}".format(ad.insights.website_purchases_value) }} $</td></tr>
+                            <tr><td>ROAS</td><td class="text-end">{{ "{:.2f}x".format(ad.insights.roas) }}</td></tr>
+                            <tr><td>CPM</td><td class="text-end">{{ "{:,.2f}".format(ad.insights.cpm) }} $</td></tr>
+                            <tr><td>CTR (único)</td><td class="text-end">{{ "{:.2f} %".format(ad.insights.unique_ctr) }}</td></tr>
+                            <tr><td>Frecuencia</td><td class="text-end">{{ "{:.2f}".format(ad.insights.frequency) }}</td></tr>
+                            {% if item.media_type == 'video' and ad.insights.hook_rate is not none and ad.insights.hold_rate is not none %}
+                            <tr><td>Tasa de Enganche (Hook Rate)</td><td class="text-end"><b>{{ "{:.2f} %".format(ad.insights.hook_rate) }}</b></td></tr>
+                            <tr><td>Tasa de Retención (Hold Rate)</td><td class="text-end"><b>{{ "{:.2f} %".format(ad.insights.hold_rate) }}</b></td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <h3>Analyse Qualitative de l'IA</h3>
+                <div class="analysis">{{ item.analysis_html|safe }}</div>
+            </div>
+            <div>
+                <h3>Propositions de Nouveaux Concepts</h3>
+                {% if ad_script %}
+                    <div class="editable-section">
+                        <button class="btn btn-sm btn-primary edit-script-btn mb-2">Activer l'Édition</button>
+                        <button class="btn btn-sm btn-success save-script-btn mb-2" style="display:none;"
+                                data-report-id="{{ report.id }}"
+                                data-ad-id="{{ ad.id }}">
+                            Sauvegarder
+                        </button>
+                        <div class="save-status mt-2"></div>
+                        <div class="script-content" contenteditable="false">
+                            {{ ad_script.edited_script_html|safe if ad_script.edited_script_html else ad_script.original_script_html|safe }}
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Aucun script disponible pour cette annonce.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-danger">Le contenu de ce rapport n'a pas pu être chargé.</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.edit-script-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const section = this.closest('.editable-section');
+            const scriptContent = section.querySelector('.script-content');
+            const saveBtn = section.querySelector('.save-script-btn');
+            
+            scriptContent.setAttribute('contenteditable', 'true');
+            scriptContent.style.border = '2px solid #0d6efd';
+            scriptContent.style.padding = '10px';
+            scriptContent.focus();
+            
+            this.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        });
+    });
+
+    document.querySelectorAll('.save-script-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const section = this.closest('.editable-section');
+            const scriptContent = section.querySelector('.script-content');
+            const editBtn = section.querySelector('.edit-script-btn');
+            const saveStatus = section.querySelector('.save-status');
+            const updatedHtml = scriptContent.innerHTML;
+
+            const reportId = this.dataset.reportId;
+            const adId = this.dataset.adId;
+            
+            this.disabled = true;
+            this.textContent = 'Sauvegarde...';
+
+            fetch(`/report/${reportId}/ad/${adId}/update_script`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script_html: updatedHtml })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    scriptContent.setAttribute('contenteditable', 'false');
+                    scriptContent.style.border = 'none';
+                    scriptContent.style.padding = '0';
+                    editBtn.style.display = 'inline-block';
+                    this.style.display = 'none';
+                    saveStatus.className = 'save-status alert alert-success mt-2';
+                    saveStatus.textContent = 'Sauvegardé !';
+                } else {
+                    saveStatus.className = 'save-status alert alert-danger mt-2';
+                    saveStatus.textContent = 'Erreur: ' + data.message;
+                }
+            })
+            .catch(error => {
+                saveStatus.className = 'save-status alert alert-danger mt-2';
+                saveStatus.textContent = 'Erreur de communication.';
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.textContent = 'Sauvegarder';
+                setTimeout(() => { saveStatus.textContent = ''; saveStatus.className='save-status mt-2'; }, 3000);
+            });
+        });
+    });
+});
+</script>
 {% endblock %} 

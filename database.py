@@ -12,62 +12,54 @@ def get_db_connection():
 def init_db():
     """Initialise la base de données et crée les tables si elles n'existent pas."""
     print("Inicializando las tablas de la base de datos...")
-    
-    # Se connecter (crée le fichier s'il n'existe pas)
     conn = get_db_connection()
     
-    # Vérifie si la table 'clients' existe déjà
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='clients'")
-    table_exists = cursor.fetchone()
-    
-    if table_exists:
-        print("La base de données et les tables existent déjà.")
-        conn.close()
-        return
-        
-    print("Initialisation des tables de la base de données...")
-    
-    # On pourrait mettre le schéma dans un fichier .sql séparé si'l grandit
-    conn.executescript("""
-        CREATE TABLE clients (
+    # Création de la table 'clients'
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             facebook_token TEXT NOT NULL,
-            ad_account_id TEXT, -- Peut être null si l'ancien système est encore utilisé
-            spend_threshold REAL NOT NULL DEFAULT 3000.0,
-            cpa_threshold REAL NOT NULL DEFAULT 600.0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+            ad_account_id TEXT,
+            spend_threshold REAL NOT NULL DEFAULT 50,
+            cpa_threshold REAL NOT NULL DEFAULT 10
+        )
+    ''')
 
-        CREATE TABLE reports (
+    # Création de la table 'reports'
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS reports (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            client_id INTEGER NOT NULL,
-            ad_id TEXT, -- Peut être NULL au début ou une liste CSV pour les rapports 'top5'
+            client_id INTEGER,
+            ad_id TEXT, -- Peut être une liste d'IDs pour les rapports consolidés
+            status TEXT,
+            report_path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            analysis_html TEXT,
+            script_html TEXT, -- Gardé pour les anciens rapports, peut être déprécié
+            cost_analysis REAL,
+            cost_generation REAL,
+            total_cost REAL,
             media_type TEXT, -- 'image', 'video', ou 'top5'
-            status TEXT NOT NULL DEFAULT 'PENDING', -- PENDING, IN_PROGRESS, RUNNING, COMPLETED, FAILED
-            report_path TEXT, -- Gardé pour le chemin du média principal
-            created_at TIMESTAMP NOT NULL,
-            analysis_html TEXT, -- NOUVEAU: pour stocker le HTML de l'analyse
-            script_html TEXT, -- NOUVEAU: pour stocker le HTML des concepts
-            cost_analysis REAL DEFAULT 0.0,
-            cost_generation REAL DEFAULT 0.0,
-            total_cost REAL DEFAULT 0.0,
-            FOREIGN KEY (client_id) REFERENCES clients (id)
-        );
+            FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
+        )
+    ''')
 
-        /*
-        NOTE POUR LE DÉVELOPPEMENT :
-        Si vous modifiez ce schéma, supprimez le fichier 'app_database.db' existant
-        ou ajoutez manuellement la nouvelle colonne avec:
-        ALTER TABLE clients ADD COLUMN ad_account_id TEXT;
-        Il sera recréé avec la nouvelle structure au prochain lancement de l'application.
-        */
-    """)
-    
+    # Nouvelle table pour stocker les scripts éditables par annonce
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS ad_scripts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_id INTEGER NOT NULL,
+            ad_id TEXT NOT NULL,
+            original_script_html TEXT,
+            edited_script_html TEXT,
+            FOREIGN KEY (report_id) REFERENCES reports (id) ON DELETE CASCADE
+        )
+    ''')
+
     conn.commit()
     conn.close()
-    print("Base de datos inicializada con éxito.")
+    print("La base de données et les tables existent déjà ou ont été créées.")
 
 def get_all_clients():
     """Récupère tous les clients de la base de données."""
