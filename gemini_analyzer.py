@@ -16,6 +16,8 @@ load_dotenv()
 # --- CONFIGURATION ---
 # Le nom du modèle est chargé depuis les variables d'environnement pour plus de flexibilité.
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-pro-latest").strip('\'"')
+MODEL_FALLBACK_1 = os.getenv("MODEL_FALLBACK_1")
+MODEL_FALLBACK_2 = os.getenv("MODEL_FALLBACK_2")
 # --- FIN CONFIGURATION ---
 
 def _format_ad_metrics_for_prompt(ad_data: Ad) -> str:
@@ -95,20 +97,28 @@ def analyze_image(image_path: str, ad_data: Ad) -> Tuple[str, Dict]:
         return f"Error durante el análisis de la imagen: {e}", {}
 
 
-def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
+def analyze_video(video_path: str, ad_data: Ad) -> Dict:
     """
-    Analiza un video y sus métricas para proporcionar una explicación textual de su rendimiento.
+    Analiza un video y sus métricas usando una cadena de modelos de fallback.
 
     Args:
         video_path: La ruta local al archivo de video.
-        ad_data: El objeto que contiene los datos del anuncio (nombre, insights, etc.).
+        ad_data: El objeto que contiene los datos del anuncio.
 
     Returns:
-        Un tuple contenant l'analyse marketing et les métadonnées d'utilisation, 
-        ou un message d'erreur et un dictionnaire vide.
+        Un dictionnaire contenant 'analysis_text', 'usage_metadata', 'model_used', 
+        et 'is_fallback' ou un message d'erreur.
     """
     print(f"  🧠 Iniciando análisis de marketing para el anuncio '{ad_data.name}'...")
     video_file = None
+
+    models_to_try = [
+        GEMINI_MODEL_NAME,
+        MODEL_FALLBACK_1,
+        MODEL_FALLBACK_2
+    ]
+    # Filtrer les modèles non définis dans .env
+    models_to_try = [model for model in models_to_try if model]
 
     try:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
@@ -116,28 +126,19 @@ def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
         print("    ⏳ Subiendo el archivo de video a la API de Gemini...")
         video_file = genai.upload_file(path=video_path)
         
-        # Ajout d'un timeout de 5 minutes pour éviter une attente infinie
         processing_start_time = time.time()
         timeout_seconds = 300
-
         while video_file.state.name == "PROCESSING":
-            # Log amélioré pour voir l'état actuel
             print(f"      Esperando el procesamiento... estado actual: {video_file.state.name}")
-            
             if time.time() - processing_start_time > timeout_seconds:
                 raise Exception(f"Timeout: El procesamiento del video superó los {timeout_seconds} segundos.")
-            
             time.sleep(10)
-            # On récupère l'état à jour du fichier
             video_file = genai.get_file(video_file.name)
         
         if video_file.state.name == "FAILED":
             raise Exception("Falló el procesamiento del video en Gemini.")
             
         print("    ✅ Video subido y procesado.")
-        
-        # Le nom du modèle est maintenant lu depuis la variable de configuration
-        model = genai.GenerativeModel(GEMINI_MODEL_NAME)
         
         ad_metrics_text = _format_ad_metrics_for_prompt(ad_data)
         
@@ -165,21 +166,47 @@ def analyze_video(video_path: str, ad_data: Ad) -> Tuple[str, Dict]:
         2. Después del análisis, inserta una línea separadora: `---`
         3. Inmediatamente después del separador, inserta la tabla Markdown con los guiones (Parte 2). No añadas ningún texto introductorio antes de la tabla.
         """
-
-        print("    ▶️ Enviando prompt en español y video al modelo...")
-        response = model.generate_content([prompt, video_file])
-
-        print("    ✅ Respuesta recibida.")
         
-        genai.delete_file(video_file.name)
+        last_error = None
+        for i, model_name in enumerate(models_to_try):
+            try:
+                print(f"    ▶️ Tentative #{i+1} avec le modèle '{model_name}'...")
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(
+                    [prompt, video_file],
+                    request_options={"timeout": 150}  # Timeout de 2.5 minutes
+                )
+                print(f"    ✅ Réponse reçue avec '{model_name}'.")
+                genai.delete_file(video_file.name)
+                return {
+                    "analysis_text": response.text.strip(),
+                    "usage_metadata": response.usage_metadata,
+                    "model_used": model_name,
+                    "is_fallback": i > 0
+                }
+            except Exception as e:
+                print(f"    ⚠️ L'appel avec '{model_name}' a échoué: {e}")
+                last_error = e
+                # Si c'est une erreur "Deadline Exceeded" ou "Socket closed", on continue au prochain modèle
+                if "Deadline Exceeded" in str(e) or "Socket closed" in str(e):
+                    continue
+                # Pour les autres erreurs (ex: auth, not found), on arrête tout
+                else:
+                    raise e
         
-        return response.text.strip(), response.usage_metadata
+        # Si la boucle se termine sans succès
+        raise Exception(f"Toutes les tentatives ont échoué. Dernière erreur: {last_error}")
 
     except Exception as e:
-        print(f"    ❌ Ocurrió un error durante el análisis de Gemini: {e}")
+        print(f"    ❌ Ocurrió un error irrécupérable durante el análisis de Gemini: {e}")
         if video_file:
             try:
                 genai.delete_file(video_file.name)
             except Exception as delete_error:
                 print(f"      Falló el intento de limpieza del archivo remoto: {delete_error}")
-        return f"Error durante el análisis: {e}", {} 
+        return {
+            "analysis_text": f"Error durante el análisis: {e}", 
+            "usage_metadata": {}, 
+            "model_used": "N/A", 
+            "is_fallback": False
+        } 

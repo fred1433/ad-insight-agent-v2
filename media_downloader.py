@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager # Plus nécessaire avec l'installation via apt
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -115,17 +115,20 @@ class MediaDownloader:
         print(f"ℹ️ [Selenium] Navigation vers : {watch_url}")
         
         options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--window-size=1920,1080')
+        # Chemins pour l'environnement Docker avec Chromium
+        options.binary_location = "/usr/bin/chromium"
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--window-size=1920,1080")
         options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36")
         options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
         
         driver = None
         try:
-            service = ChromeService(ChromeDriverManager().install())
+            # Chemin pour l'environnement Docker avec Chromium
+            service = ChromeService(executable_path="/usr/bin/chromedriver")
             driver = webdriver.Chrome(service=service, options=options)
             driver.get(watch_url)
 

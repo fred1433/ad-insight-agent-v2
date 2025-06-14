@@ -4,6 +4,12 @@ FROM python:3.11-slim
 # Étape 2: Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies for Chromium (for Selenium on ARM/M1)
+RUN apt-get update && apt-get install -y chromium chromium-driver sqlite3 --no-install-recommends
+
 # Étape 3: Copier le fichier des dépendances et les installer
 # Copier uniquement ce fichier d'abord permet de profiter du cache de Docker
 # si les dépendances ne changent pas entre les builds.

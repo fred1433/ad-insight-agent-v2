@@ -15,7 +15,6 @@ pydantic-settings
 moviepy
 
 selenium
-webdriver-manager
 
 # --- Outils de Développement et Linters ---
 black
@@ -27,3 +26,11 @@ oauth2client
 # --- Dépendances potentiellement en conflit ---
 # google-generativeai==0.5.4 # Commenté pour éviter conflits pour l'instant
 # selenium-wire # Remplacé par la méthode de logging de Selenium natif 
+
+trio-websocket
+typing-extensions
+typing-inspection
+urllib3
+websocket-client
+Werkzeug
+yarl 
