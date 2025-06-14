@@ -263,7 +263,7 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
             raise ValueError(f"ID de compte publicitaire manquant ou invalide pour le client {client['name']}.")
 
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('RUNNING', report_id))
+        conn.execute('UPDATE analyses SET status = ? WHERE id = ?', ('RUNNING', report_id))
         conn.commit()
         conn.close()
 
@@ -271,9 +271,7 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         facebook_client.init_facebook_api(client['facebook_token'], ad_account_id)
         
         all_winning_ads = facebook_client.get_winning_ads(
-            ad_account_id=ad_account_id,
-            spend_threshold=client['spend_threshold'],
-            cpa_threshold=client['cpa_threshold']
+            ad_account_id=ad_account_id
         )
         
         top_ads = all_winning_ads[:num_ads]
@@ -285,7 +283,7 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         
         ad_ids = [ad.id for ad in top_ads]
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET ad_id = ? WHERE id = ?', (','.join(ad_ids), report_id))
+        conn.execute('UPDATE analyses SET ad_id = ? WHERE id = ?', (','.join(ad_ids), report_id))
         conn.commit()
         conn.close()
 
@@ -336,7 +334,7 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         conn = database.get_db_connection()
         conn.execute(
             """
-            UPDATE reports 
+            UPDATE analyses 
             SET status = ?, analysis_html = ?, cost_analysis = ?, cost_generation = ?, total_cost = ?
             WHERE id = ?
             """,
@@ -351,7 +349,7 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         print(f"ERREUR dans le pipeline TOP {num_ads} pour le rapport {report_id}: {e}")
         traceback.print_exc()
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('FAILED', report_id))
+        conn.execute('UPDATE analyses SET status = ? WHERE id = ?', ('FAILED', report_id))
         conn.commit()
         conn.close()
 
@@ -376,7 +374,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         print(f"--- DÉBUT PIPELINE '{media_type}' pour le client : {client['name']} (Rapport ID: {report_id}) ---")
         
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET status = ? WHERE id = ?', ('RUNNING', report_id))
+        conn.execute('UPDATE analyses SET status = ? WHERE id = ?', ('RUNNING', report_id))
         conn.commit()
         conn.close()
 
@@ -386,8 +384,8 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         best_ad = facebook_client.get_specific_winning_ad(
             ad_account_id=ad_account_id,
             media_type=media_type,
-            spend_threshold=client['spend_threshold'],
-            cpa_threshold=client['cpa_threshold']
+            spend_threshold=0, # On laisse 0 et 99999 pour l'instant
+            cpa_threshold=99999
         )
         if not best_ad:
             raise Exception(f"Aucune annonce gagnante trouvée pour le type '{media_type}'.")
@@ -395,7 +393,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         print(f"Meilleure annonce trouvée : {best_ad.name} (ID: {best_ad.id})")
 
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET ad_id = ? WHERE id = ?', (best_ad.id, report_id))
+        conn.execute('UPDATE analyses SET ad_id = ? WHERE id = ?', (best_ad.id, report_id))
         conn.commit()
         conn.close()
 
@@ -414,7 +412,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         conn = database.get_db_connection()
         conn.execute(
             """
-            UPDATE reports 
+            UPDATE analyses 
             SET status = ?, report_path = ?, analysis_html = ?, script_html = ?, 
                 cost_analysis = ?, cost_generation = ?, total_cost = ?, media_type = ?
             WHERE id = ?
@@ -431,7 +429,7 @@ def run_analysis_for_client(client_id, report_id, media_type: str):
         print(f"ERREUR dans le pipeline pour le rapport {report_id}: {e}")
         traceback.print_exc()
         conn = database.get_db_connection()
-        conn.execute('UPDATE reports SET status = ?, media_type = ? WHERE id = ?', ('FAILED', media_type, report_id))
+        conn.execute('UPDATE analyses SET status = ?, media_type = ? WHERE id = ?', ('FAILED', media_type, report_id))
         conn.commit()
         conn.close()
         print(f"LOG: Statut du rapport {report_id} mis à jour à FAILED.")

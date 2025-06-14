@@ -59,7 +59,7 @@ def index():
 @app.route('/report_status/<int:report_id>')
 def get_report_status(report_id):
     conn = database.get_db_connection()
-    report = conn.execute('SELECT status FROM reports WHERE id = ?', (report_id,)).fetchone()
+    report = conn.execute('SELECT status FROM analyses WHERE id = ?', (report_id,)).fetchone()
     conn.close()
 
     if report and report['status'] in ('IN_PROGRESS', 'RUNNING'):
@@ -79,8 +79,6 @@ def add_client():
     name = request.form['name']
     token = request.form['facebook_token']
     ad_account_id = request.form.get('ad_account_id')
-    spend = request.form['spend_threshold']
-    cpa = request.form['cpa_threshold']
 
     if not ad_account_id or not ad_account_id.startswith('act_'):
         flash("Por favor, verifica el token y selecciona una cuenta publicitaria válida.", "warning")
@@ -88,7 +86,7 @@ def add_client():
         response.headers['HX-Refresh'] = 'true'
         return response
 
-    database.add_client(name, token, ad_account_id, spend, cpa)
+    database.add_client(name, token, ad_account_id)
     flash(f'Cliente "{name}" añadido con éxito.', 'success')
     response = make_response()
     response.headers['HX-Refresh'] = 'true'
@@ -174,7 +172,7 @@ def run_top_n_analysis(client_id):
     conn = database.get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO reports (client_id, status, report_type, created_at) VALUES (?, ?, ?, ?)",
+        "INSERT INTO analyses (client_id, status, media_type, created_at) VALUES (?, ?, ?, ?)",
         (client_id, 'IN_PROGRESS', f'Top {top_n}', created_at_local.strftime('%Y-%m-%d %H:%M:%S'))
     )
     report_id = cursor.lastrowid
@@ -197,38 +195,37 @@ def run_top_n_analysis(client_id):
 @app.route('/clients')
 def get_clients_list():
     conn = database.get_db_connection()
-    clients_list = conn.execute('SELECT * FROM clients ORDER BY name').fetchall()
+    clients_list = conn.execute('SELECT id, name, ad_account_id FROM clients ORDER BY name').fetchall()
     
-    clients_with_reports = []
+    clients_with_analyses = []
     for client in clients_list:
         client_dict = dict(client)
-        reports_cursor = conn.execute(
-            'SELECT * FROM reports WHERE client_id = ? ORDER BY created_at DESC', (client['id'],)
+        analyses_cursor = conn.execute(
+            'SELECT * FROM analyses WHERE client_id = ? ORDER BY created_at DESC', (client['id'],)
         )
         
-        reports_list = []
-        for row in reports_cursor.fetchall():
-            report_dict = dict(row)
-            if report_dict.get('created_at') and isinstance(report_dict['created_at'], str):
+        analyses_list = []
+        for row in analyses_cursor.fetchall():
+            analysis_dict = dict(row)
+            if analysis_dict.get('created_at') and isinstance(analysis_dict['created_at'], str):
                 try:
-                    report_dict['created_at'] = parser.parse(report_dict['created_at'])
+                    analysis_dict['created_at'] = parser.parse(analysis_dict['created_at'])
                 except parser.ParserError:
-                    # Gérer le cas où la date ne serait pas dans un format valide
-                    report_dict['created_at'] = None 
-            reports_list.append(report_dict)
+                    analysis_dict['created_at'] = None 
+            analyses_list.append(analysis_dict)
 
-        client_dict['reports'] = reports_list
-        clients_with_reports.append(client_dict)
+        client_dict['analyses'] = analyses_list
+        clients_with_analyses.append(client_dict)
     conn.close()
     
-    return render_template('_client_list.html', clients=clients_with_reports)
+    return render_template('_client_list.html', clients=clients_with_analyses)
 
 @app.route('/report/<int:report_id>')
 @login_required
 def view_report(report_id):
     conn = database.get_db_connection()
     report_data = conn.execute(
-        "SELECT r.*, c.name as client_name FROM reports r JOIN clients c ON r.client_id = c.id WHERE r.id = ?", (report_id,)
+        "SELECT r.*, c.name as client_name FROM analyses r JOIN clients c ON r.client_id = c.id WHERE r.id = ?", (report_id,)
     ).fetchone()
     conn.close()
 

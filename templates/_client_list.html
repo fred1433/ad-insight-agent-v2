@@ -2,9 +2,8 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th scope="col" style="width: 20%;">Nombre del Cliente</th>
-            <th scope="col" style="width: 15%;">Inversión Mínima ($)</th>
-            <th scope="col" style="width: 15%;">CPA Máximo ($)</th>
+            <th scope="col" style="width: 25%;">Nombre del Cliente</th>
+            <th scope="col" style="width: 25%;">ID de Cuenta Publicitaria</th>
             <th scope="col" style="width: 15%; text-align: center;">Análisis</th>
             <th scope="col" style="width: 10%; text-align: center;">Acciones</th>
             <th scope="col" style="width: 25%;">Informes</th>
@@ -14,8 +13,7 @@
         {% for client in clients %}
         <tr id="client-row-{{ client.id }}">
             <td>{{ client.name }}</td>
-            <td>{{ client.spend_threshold }} $</td>
-            <td>{{ client.cpa_threshold }} $</td>
+            <td>{{ client.ad_account_id }}</td>
             <td class="text-center">
                 <button class="btn btn-sm btn-primary" 
                         onclick="showAnalysisModal('{{ client.id }}', '{{ url_for('run_top_n_analysis', client_id=client.id) }}')">
@@ -39,9 +37,9 @@
                 </div>
             </td>
             <td class="reports-cell">
-                {% if client.reports %}
+                {% if client.analyses %}
                     <ul>
-                        {% for report in client.reports %}
+                        {% for report in client.analyses %}
                         <li>
                             <div class="report-item-line">
                                 <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
@@ -70,7 +68,7 @@
         </tr>
         {% else %}
         <tr>
-            <td colspan="6" class="text-center p-4">
+            <td colspan="5" class="text-center p-4">
                 <i class="fas fa-info-circle"></i> Aún no hay clientes. ¡Añade el primero utilizando el formulario de abajo para comenzar!
             </td>
         </tr>

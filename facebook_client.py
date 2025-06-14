@@ -102,7 +102,7 @@ def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Di
     return insights_map
 
 
-def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESHOLD, cpa_threshold=WINNING_ADS_CPA_THRESHOLD) -> List[Ad]:
+def get_winning_ads(ad_account_id: str) -> List[Ad]:
     """
     Récupère les publicités performantes via une stratégie en 2 étapes pour éviter le rate-limiting :
     1. Récupère les IDs de toutes les pubs actives.
@@ -235,58 +235,55 @@ def get_winning_ads(ad_account_id: str, spend_threshold=WINNING_ADS_SPEND_THRESH
             hook_rate = (video_3s_views / impressions * 100) if impressions > 0 else 0
             hold_rate = (thru_plays / video_3s_views * 100) if video_3s_views > 0 else 0
 
-            if spend >= spend_threshold and cpa <= cpa_threshold and cpa > 0:
-                ad_obj = Ad(
-                    id=ad_id,
-                    name=ad_data['name'],
-                    creative_id=creative_info['creative_id'],
-                    video_id=creative_info.get('video_id'),
-                    image_url=creative_info.get('image_url'),
-                    insights=AdInsights(
-                        spend=spend, 
-                        cpa=cpa,
-                        website_purchases=website_purchases,
-                        website_purchases_value=website_purchases_value,
-                        roas=roas,
-                        cpm=cpm,
-                        unique_ctr=unique_ctr,
-                        frequency=frequency,
-                        hook_rate=hook_rate,
-                        hold_rate=hold_rate
-                    )
+            # Le filtrage est supprimé ici. On collecte toutes les publicités actives avec leurs insights.
+            ad_obj = Ad(
+                id=ad_id,
+                name=ad_data['name'],
+                creative_id=creative_info['creative_id'],
+                video_id=creative_info.get('video_id'),
+                image_url=creative_info.get('image_url'),
+                insights=AdInsights(
+                    spend=spend, 
+                    cpa=cpa,
+                    website_purchases=website_purchases,
+                    website_purchases_value=website_purchases_value,
+                    roas=roas,
+                    cpm=cpm,
+                    unique_ctr=unique_ctr,
+                    frequency=frequency,
+                    hook_rate=hook_rate,
+                    hold_rate=hold_rate
                 )
-                winning_ads.append(ad_obj)
+            )
+            winning_ads.append(ad_obj)
         
-        winning_ads.sort(key=lambda ad: ad.insights.cpa)
-        print(f"✅ {len(winning_ads)} publicités gagnantes trouvées et triées par CPA.")
+        # On trie toujours par dépense pour que l'appelant puisse facilement prendre le Top N
+        sorted_ads = sorted(winning_ads, key=lambda ad: ad.insights.spend, reverse=True)
+
+        # --- Étape 5: Mise en cache des résultats ---
+        os.makedirs(FACEBOOK_CACHE_DIR, exist_ok=True)
+        with open(CACHE_FILE, 'w') as f:
+            # Pydantic's model_dump is used here, assuming Ad is a Pydantic model
+            json.dump([ad.model_dump() for ad in sorted_ads], f, indent=4)
+
+        return sorted_ads
 
     except FacebookRequestError as e:
         print(f"❌ Une erreur de l'API Facebook est survenue : {e}")
         print(f"  - Message: {e.api_error_message()}")
         print(f"  - Code: {e.api_error_code()}")
+        return [] # Renvoyer une liste vide en cas d'erreur
     except Exception as e:
         print(f"❌ Une erreur inattendue est survenue lors de la récupération des publicités : {e}")
-    
-    finally:
-        if winning_ads:
-            try:
-                # On s'assure que le dossier de cache existe avant d'écrire dedans.
-                os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
-                ads_to_cache = [ad.model_dump() for ad in winning_ads]
-                with open(CACHE_FILE, 'w') as f:
-                    json.dump(ads_to_cache, f, indent=4)
-                print(f"💾 Données sauvegardées dans le cache : {CACHE_FILE}")
-            except Exception as cache_e:
-                print(f"⚠️ Erreur lors de la sauvegarde du cache : {cache_e}")
+        return [] # Renvoyer une liste vide en cas d'erreur
 
-    return winning_ads 
 
 def get_specific_winning_ad(ad_account_id: str, media_type: str, spend_threshold: float, cpa_threshold: float) -> Optional[Ad]:
     """
     Trouve la publicité la plus performante pour un client donné.
     """
     print(f"Recherche de la meilleure annonce de type '{media_type}'...")
-    all_ads = get_winning_ads(ad_account_id, spend_threshold, cpa_threshold)
+    all_ads = get_winning_ads(ad_account_id)
     
     if not all_ads:
         return None
@@ -317,7 +314,7 @@ def get_ad_by_id(ad_id: str, ad_account_id: str) -> Optional[Ad]:
     # On réutilise get_winning_ads qui contient la logique de cache.
     # On met des seuils très bas pour s'assurer de récupérer toutes les pubs
     # possibles du cache, car on ne connaît pas les seuils du rapport original.
-    all_cached_ads = get_winning_ads(ad_account_id, spend_threshold=0, cpa_threshold=99999)
+    all_cached_ads = get_winning_ads(ad_account_id)
     
     # On cherche l'annonce spécifique dans la liste chargée.
     for ad in all_cached_ads:

@@ -4,7 +4,7 @@ services:
   web:
     build: .
     ports:
-      - "5001:10000"
+      - "10000:10000"
     volumes:
       # Synchronise tout le répertoire du projet avec le répertoire /app dans le conteneur
       - .:/app

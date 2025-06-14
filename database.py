@@ -15,28 +15,19 @@ def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Vérification et ajout de la colonne 'ad_account_id' à la table 'clients'
-    cursor.execute("PRAGMA table_info(clients)")
-    columns = [column[1] for column in cursor.fetchall()]
-    if 'ad_account_id' not in columns:
-        cursor.execute('ALTER TABLE clients ADD COLUMN ad_account_id TEXT')
-
-    # Création de la table 'clients'
-    conn.execute('''
+    # Créer la table des clients si elle n'existe pas, avec la nouvelle structure
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            facebook_token TEXT NOT NULL,
-            ad_account_id TEXT,
-            spend_threshold REAL NOT NULL DEFAULT 50,
-            cpa_threshold REAL NOT NULL DEFAULT 10,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            name TEXT NOT NULL,
+            ad_account_id TEXT NOT NULL,
+            facebook_token TEXT NOT NULL
         )
     ''')
 
-    # Création de la table 'reports'
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS reports (
+    # Crear la tabla de análisis si no existe
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS analyses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             client_id INTEGER,
             ad_id TEXT, -- Peut être une liste d'IDs pour les rapports consolidés
@@ -54,14 +45,14 @@ def init_db():
     ''')
 
     # Nouvelle table pour stocker les scripts éditables par annonce
-    conn.execute('''
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS ad_scripts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             report_id INTEGER NOT NULL,
             ad_id TEXT NOT NULL,
             original_script_html TEXT,
             edited_script_html TEXT,
-            FOREIGN KEY (report_id) REFERENCES reports (id) ON DELETE CASCADE
+            FOREIGN KEY (report_id) REFERENCES analyses (id) ON DELETE CASCADE
         )
     ''')
 
@@ -76,12 +67,12 @@ def get_all_clients():
     conn.close()
     return clients
 
-def add_client(name, token, ad_account_id, spend, cpa):
+def add_client(name, token, ad_account_id):
     """Ajoute un nouveau client à la base de données."""
     conn = get_db_connection()
     conn.execute(
-        'INSERT INTO clients (name, facebook_token, ad_account_id, spend_threshold, cpa_threshold) VALUES (?, ?, ?, ?, ?)',
-        (name, token, ad_account_id, spend, cpa)
+        'INSERT INTO clients (name, facebook_token, ad_account_id) VALUES (?, ?, ?)',
+        (name, token, ad_account_id)
     )
     conn.commit()
     conn.close()
@@ -90,7 +81,7 @@ def delete_client(client_id):
     """Supprime un client et tous ses rapports associés de la base de données."""
     conn = get_db_connection()
     # On supprime d'abord les rapports pour respecter la contrainte de clé étrangère
-    conn.execute('DELETE FROM reports WHERE client_id = ?', (client_id,))
+    conn.execute('DELETE FROM analyses WHERE client_id = ?', (client_id,))
     conn.execute('DELETE FROM clients WHERE id = ?', (client_id,))
     conn.commit()
     conn.close()
