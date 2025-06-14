@@ -50,7 +50,7 @@
 
                             {% if report.status == 'COMPLETED' %}
                                 <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-success btn-sm" style="margin-left: 5px;">Ver informe</a>
-                                <span class="cost-badge" title="Analyse: ${{ '%.4f'|format(report.cost_analysis) }} | Génération: ${{ '%.4f'|format(report.cost_generation) }}">
+                                <span class="cost-badge" title="Análisis: ${{ '%.4f'|format(report.cost_analysis) }} | Generación: ${{ '%.4f'|format(report.cost_generation) }}">
                                     (Coste: ${{ '%.4f'|format(report.total_cost) }})
                                 </span>
                             {% endif %}

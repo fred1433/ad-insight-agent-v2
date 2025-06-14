@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Rapport d'Analyse Top 5 - {{ report.client_name }}{% endblock %}
+{% block title %}Informe de Análisis Top 5 - {{ report.client_name }}{% endblock %}
 
 {% block head_styles %}
 <style>
@@ -45,8 +45,8 @@
 
 {% block content %}
 <div class="report-header">
-    <h1>Analyse Top 3 pour {{ report.client_name }}</h1>
-    <p class="lead text-muted">Ce rapport détaille l'analyse des 3 meilleures créativités, basé sur leur rendement.</p>
+    <h1>Análisis Top 3 para {{ report.client_name }}</h1>
+    <p class="lead text-muted">Este informe detalla el análisis de las 3 mejores creatividades, basado en su rendimiento.</p>
 </div>
 
 {% if analyzed_ads_data %}
@@ -59,13 +59,13 @@
             {% if item.is_fallback %}
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-triangle"></i> <strong>Atención:</strong> 
-                L'analyse pour cette créativité a été générée avec un modèle de secours ('{{ item.model_used }}').
+                El análisis para esta creatividad se ha generado con un modelo de respaldo ('{{ item.model_used }}').
             </div>
             {% endif %}
 
             <div class="grid-container">
                 <div>
-                    <h3>Créativité de l'Annonce</h3>
+                    <h3>Creatividad del Anuncio</h3>
                     {% if item.final_media_path %}
                         {% set filename = item.final_media_path.split('/')[-1] %}
                         {% if item.media_type == 'video' %}
@@ -76,7 +76,7 @@
                     {% endif %}
                 </div>
                 <div>
-                    <h3>Indicateurs Clave (KPIs)</h3>
+                    <h3>Indicadores Clave (KPIs)</h3>
                     <table class="table table-sm table-striped">
                         <tbody>
                             <tr><td>Inversión (Spend)</td><td class="text-end">{{ "{:,.2f}".format(ad.insights.spend) }} $</td></tr>
@@ -96,18 +96,18 @@
                 </div>
             </div>
             <div>
-                <h3>Analyse Qualitative de l'IA</h3>
+                <h3>Análisis Cualitativo de la IA</h3>
                 <div class="analysis">{{ item.analysis_html|safe }}</div>
             </div>
             <div>
-                <h3>Propositions de Nouveaux Concepts</h3>
+                <h3>Propuestas de Nuevos Conceptos</h3>
                 {% if ad_script %}
                     <div class="editable-section">
-                        <button class="btn btn-sm btn-primary edit-script-btn mb-2">Activer l'Édition</button>
+                        <button class="btn btn-sm btn-primary edit-script-btn mb-2">Activar Edición</button>
                         <button class="btn btn-sm btn-success save-script-btn mb-2" style="display:none;"
                                 data-report-id="{{ report.id }}"
                                 data-ad-id="{{ ad.id }}">
-                            Sauvegarder
+                            Guardar
                         </button>
                         <div class="save-status mt-2"></div>
                         <div class="script-content" contenteditable="false">
@@ -115,13 +115,13 @@
                         </div>
                     </div>
                 {% else %}
-                    <p class="text-muted">Aucun script disponible pour cette annonce.</p>
+                    <p class="text-muted">No hay guion disponible para este anuncio.</p>
                 {% endif %}
             </div>
         </div>
     {% endfor %}
 {% else %}
-    <div class="alert alert-danger">Le contenu de ce rapport n'a pas pu être chargé.</div>
+    <div class="alert alert-danger">No se pudo cargar el contenido de este informe.</div>
 {% endif %}
 {% endblock %}
 
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const adId = this.dataset.adId;
             
             this.disabled = true;
-            this.textContent = 'Sauvegarde...';
+            this.textContent = 'Guardando...';
 
             fetch(`/report/${reportId}/ad/${adId}/update_script`, {
                 method: 'POST',
@@ -172,19 +172,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     editBtn.style.display = 'inline-block';
                     this.style.display = 'none';
                     saveStatus.className = 'save-status alert alert-success mt-2';
-                    saveStatus.textContent = 'Sauvegardé !';
+                    saveStatus.textContent = '¡Guardado!';
                 } else {
                     saveStatus.className = 'save-status alert alert-danger mt-2';
-                    saveStatus.textContent = 'Erreur: ' + data.message;
+                    saveStatus.textContent = 'Error: ' + data.message;
                 }
             })
             .catch(error => {
                 saveStatus.className = 'save-status alert alert-danger mt-2';
-                saveStatus.textContent = 'Erreur de communication.';
+                saveStatus.textContent = 'Error de comunicación.';
             })
             .finally(() => {
                 this.disabled = false;
-                this.textContent = 'Sauvegarder';
+                this.textContent = 'Guardar';
                 setTimeout(() => { saveStatus.textContent = ''; saveStatus.className='save-status mt-2'; }, 3000);
             });
         });
