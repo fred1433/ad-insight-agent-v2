@@ -2,12 +2,12 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th scope="col">Nombre del Cliente</th>
-            <th scope="col">Spend Threshold</th>
-            <th scope="col">CPA Threshold</th>
-            <th scope="col" style="width: 35%;">Análisis</th>
-            <th scope="col">Acciones</th>
-            <th scope="col">Informes</th>
+            <th scope="col" style="width: 20%;">Nombre del Cliente</th>
+            <th scope="col" style="width: 15%;">Inversión Mínima ($)</th>
+            <th scope="col" style="width: 15%;">CPA Máximo ($)</th>
+            <th scope="col" style="width: 15%; text-align: center;">Análisis</th>
+            <th scope="col" style="width: 10%; text-align: center;">Acciones</th>
+            <th scope="col" style="width: 25%;">Informes</th>
         </tr>
     </thead>
     <tbody hx-trigger="loadClientList from:body" hx-get="{{ url_for('get_clients_list') }}" hx-swap="innerHTML">
@@ -16,7 +16,7 @@
             <td>{{ client.name }}</td>
             <td>{{ client.spend_threshold }} $</td>
             <td>{{ client.cpa_threshold }} $</td>
-            <td>
+            <td class="text-center">
                 <button class="btn btn-sm btn-primary" 
                         onclick="showAnalysisModal('{{ client.id }}', '{{ url_for('run_top_n_analysis', client_id=client.id) }}')">
                     <i class="fas fa-play"></i> Lanzar Análisis
