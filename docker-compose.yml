@@ -11,6 +11,7 @@ services:
       # Assure que le répertoire des logs de webdriver-manager est persistant et partagé
       # Cela évite de retélécharger le driver à chaque redémarrage
       - webdriver_cache:/root/.wdm
+      - ./data:/app/data
     # Charge les variables d'environnement depuis le fichier .env à la racine
     env_file:
       - .env
