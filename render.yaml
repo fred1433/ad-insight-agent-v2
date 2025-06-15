@@ -11,6 +11,7 @@ services:
     # Configure la vérification de santé pour s'assurer que l'app est bien lancée
     healthCheckPath: /login
     # Ajout de la configuration pour le disque persistant
+    # Ce disque assurera la persistance des données entre les déploiements.
     disks:
       - name: data-disk
         mountPath: /app/data
