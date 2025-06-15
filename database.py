@@ -5,7 +5,7 @@ from typing import List, Optional
 import json
 from datetime import datetime
 
-DATABASE_FILE = "database.db"
+DATABASE_FILE = "data/database.db"
 
 class AdScript(BaseModel):
     id: int

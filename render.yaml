@@ -10,6 +10,11 @@ services:
     autoDeploy: true
     # Configure la vérification de santé pour s'assurer que l'app est bien lancée
     healthCheckPath: /login
+    # Ajout de la configuration pour le disque persistant
+    disks:
+      - name: data-disk
+        mountPath: /app/data
+        sizeGB: 1
     # Section pour les variables d'environnement (vos secrets)
     # Vous devrez remplir les valeurs directement dans le dashboard Render
     # sous l'onglet 'Environment' de votre service.
