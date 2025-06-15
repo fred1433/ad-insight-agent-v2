@@ -93,31 +93,6 @@
         const modal = document.getElementById('infoModal');
         const modalContent = document.getElementById('modal-content-dynamic');
 
-        function showAnalysisModal(clientId, formAction) {
-            const formHtml = `
-                <h2>Lanzar Análisis</h2>
-                <p style="font-size: 0.9em; color: #6c757d;">Las análisis tienen un coste asociado. Se requiere un código para evitar lanzamientos accidentales.</p>
-                <form id="analysis-modal-form" 
-                      hx-post="${formAction}" 
-                      style="margin-top: 20px;">
-                    <div class="form-group">
-                        <label for="top_n_to_analyze">Top N a analizar:</label>
-                        <input type="number" name="top_n_to_analyze" class="form-control" value="5" min="1" max="50" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="analysis_code">Código de acceso:</label>
-                        <input type="text" name="analysis_code" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Lanzar</button>
-                </form>
-            `;
-            modalContent.innerHTML = formHtml;
-            modal.style.display = 'block';
-
-            // IMPORTANT: Il faut dire à HTMX de retraiter le nouveau contenu
-            htmx.process(document.getElementById('analysis-modal-form'));
-        }
-
         function closeModal() {
             modal.style.display = 'none';
             modalContent.innerHTML = ''; // Nettoyer le contenu pour la prochaine fois

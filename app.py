@@ -221,6 +221,11 @@ def get_clients_list():
     
     return render_template('_client_list.html', clients=clients_with_analyses)
 
+@app.route('/get_analysis_modal/<int:client_id>')
+def get_analysis_modal(client_id):
+    """Renvoie le contenu HTML du formulaire de la modale pour un client donné."""
+    return render_template('_analysis_modal_form.html', client_id=client_id)
+
 @app.route('/report/<int:report_id>')
 @login_required
 def view_report(report_id):

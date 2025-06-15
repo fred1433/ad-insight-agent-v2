@@ -16,7 +16,10 @@
             <td>{{ client.ad_account_id }}</td>
             <td class="text-center">
                 <button class="btn btn-sm btn-primary" 
-                        onclick="showAnalysisModal('{{ client.id }}', '{{ url_for('run_top_n_analysis', client_id=client.id) }}')">
+                        hx-get="{{ url_for('get_analysis_modal', client_id=client.id) }}"
+                        hx-target="#modal-content-dynamic"
+                        hx-trigger="click"
+                        onclick="document.getElementById('infoModal').style.display='block'">
                     <i class="fas fa-play"></i> Lanzar Análisis
                 </button>
             </td>
