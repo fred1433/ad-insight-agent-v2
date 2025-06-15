@@ -44,6 +44,16 @@
                     <ul>
                         {% for report in client.analyses %}
                         <li>
+                            {% if report.status == 'COMPLETED' %}
+                                <button class="btn btn-icon btn-delete-report"
+                                        title="Eliminar este informe"
+                                        hx-delete="{{ url_for('delete_report', report_id=report.id) }}"
+                                        hx-target="closest li"
+                                        hx-swap="outerHTML"
+                                        hx-confirm="¿Estás seguro de que quieres eliminar este informe? Esta acción no se puede deshacer.">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            {% endif %}
                             <div class="report-item-line">
                                 <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
                             </div>

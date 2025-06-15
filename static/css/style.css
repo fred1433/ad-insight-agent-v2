@@ -161,6 +161,22 @@ tr:hover {
     border-radius: 4px;
     border: 1px solid #eee;
     text-align: center;
+    position: relative;
+}
+
+.btn-delete-report {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 2px 5px;
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.btn-delete-report:hover {
+    color: #dc3545;
 }
 
 .report-item-line {

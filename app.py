@@ -108,6 +108,33 @@ def delete_client(client_id):
     response.headers['HX-Trigger'] = 'loadFlash'
     return response
 
+@app.route('/delete_report/<int:report_id>', methods=['DELETE'])
+@login_required
+def delete_report(report_id):
+    """Supprime un rapport d'analyse de la base de données."""
+    try:
+        conn = database.get_db_connection()
+        # On vérifie d'abord si le rapport existe pour pouvoir flasher un message pertinent
+        report = conn.execute('SELECT id FROM analyses WHERE id = ?', (report_id,)).fetchone()
+        
+        if report:
+            conn.execute('DELETE FROM analyses WHERE id = ?', (report_id,))
+            conn.commit()
+            flash(f"El informe ID {report_id} ha sido eliminado.", "success")
+        else:
+            flash(f"No se encontró el informe ID {report_id}.", "warning")
+        
+        conn.close()
+    except Exception as e:
+        # Log de l'erreur
+        print(f"Error al eliminar el informe {report_id}: {e}")
+        flash("Ocurrió un error al intentar eliminar el informe.", "danger")
+
+    # On déclenche un événement pour que le conteneur de flash messages se recharge
+    response = make_response("")
+    response.headers['HX-Trigger'] = 'loadFlash'
+    return response
+
 @app.route('/flash-messages')
 def flash_messages():
     return render_template('_flash_messages.html')
