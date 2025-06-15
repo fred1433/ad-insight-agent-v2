@@ -5,7 +5,7 @@ from typing import List, Optional
 import json
 from datetime import datetime
 
-DATABASE_FILE = "database.db"
+DATABASE_FILE = "data/database.db"
 
 class AdScript(BaseModel):
     id: int
@@ -30,6 +30,8 @@ class Report(BaseModel):
 
 def get_db_connection():
     """Crée et retourne une connexion à la base de données."""
+    # S'assurer que le répertoire de la base de données existe
+    os.makedirs(os.path.dirname(DATABASE_FILE), exist_ok=True)
     conn = sqlite3.connect(DATABASE_FILE)
     conn.row_factory = sqlite3.Row  # Permet d'accéder aux colonnes par leur nom
     return conn

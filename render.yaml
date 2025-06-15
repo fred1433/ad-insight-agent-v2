@@ -3,9 +3,10 @@ services:
   - type: web
     name: ad-insight-agent
     # Indique à Render d'utiliser l'environnement Docker
-    env: docker
-    # Branche à déployer automatiquement
-    branch: main
+    env: python
+    plan: free # ou 'starter' si vous avez besoin de plus de ressources
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
     # Active le déploiement automatique à chaque push sur la branche 'main'
     autoDeploy: true
     # Configure la vérification de santé pour s'assurer que l'app est bien lancée
@@ -15,11 +16,29 @@ services:
     # sous l'onglet 'Environment' de votre service.
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.11.0 # Assurez-vous que cela correspond à votre environnement local
+      - key: FLASK_SECRET_KEY
+        generateValue: true # Render générera une clé secrète sécurisée
       - key: APP_ACCESS_CODE
-        sync: false # 'sync: false' signifie que la valeur est gérée uniquement dans le dashboard
+        fromService:
+          type: secret_file
+          name: app_access_code
+          key: code
       - key: ANALYSIS_ACCESS_CODE
-        sync: false
+        fromService:
+          type: secret_file
+          name: analysis_access_code
+          key: code
+      - key: FACEBOOK_ACCESS_TOKEN
+        fromService:
+          type: secret_file
+          name: facebook_access_token
+          key: token
+      - key: GOOGLE_API_KEY
+        fromService:
+          type: secret_file
+          name: google_api_key
+          key: key
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_INPUT_PRICE_PER_MILLION_TOKENS
@@ -34,3 +53,12 @@ services:
         value: "imagen-3.0-generate-002"
       # Note: FACEBOOK_ACCESS_TOKEN et FACEBOOK_AD_ACCOUNT_ID ne sont plus nécessaires ici
       # car ils sont gérés via l'interface utilisateur de l'application. 
+
+    # --- Section cruciale pour la persistance des données ---
+    # On définit ici un disque persistant qui survivra aux redéploiements.
+    disks:
+      - name: data-disk
+        # Le point de montage doit correspondre au dossier où est stockée votre DB.
+        mountPath: /app/data
+        # Taille du disque en Go. 1 Go est suffisant pour commencer.
+        sizeGB: 1 
