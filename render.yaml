@@ -15,7 +15,7 @@ services:
     disks:
       - name: data-disk
         mountPath: /app/data
-        sizeGB: 1
+        sizeGB: 1 # Taille du disque en gigaoctets.
     # Section pour les variables d'environnement (vos secrets)
     # Vous devrez remplir les valeurs directement dans le dashboard Render
     # sous l'onglet 'Environment' de votre service.
