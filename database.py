@@ -36,6 +36,10 @@ def get_db_connection():
 
 def init_db():
     """Initialise la base de données et crée les tables si elles n'existent pas."""
+    # S'assurer que le répertoire de la base de données existe
+    db_dir = os.path.dirname(DATABASE_FILE)
+    os.makedirs(db_dir, exist_ok=True)
+    
     print("Inicializando las tablas de la base de datos...")
     conn = get_db_connection()
     cursor = conn.cursor()
