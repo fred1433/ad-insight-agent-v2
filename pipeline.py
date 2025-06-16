@@ -294,35 +294,41 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         final_analysis_html_parts = []
 
         for ad in top_ads:
-            analysis_result = _perform_single_ad_analysis(ad, cache)
-            analyzed_ads_data.append(analysis_result) # Gardé pour le coût et les métadonnées
-            total_cost_analysis += analysis_result.get('cost_analysis', 0.0)
-            total_cost_generation += analysis_result.get('cost_generation', 0.0)
-            save_cache(cache_path, cache)
+            try:
+                analysis_result = _perform_single_ad_analysis(ad, cache)
+                analyzed_ads_data.append(analysis_result)
+                total_cost_analysis += analysis_result.get('cost_analysis', 0.0)
+                total_cost_generation += analysis_result.get('cost_generation', 0.0)
+                save_cache(cache_path, cache)
 
-            # Étape clé : Sauvegarder le script de cette annonce dans la nouvelle table
-            conn = database.get_db_connection()
-            script_html = markdown.markdown(analysis_result.get('script_text', ''), extensions=['tables'])
-            conn.execute(
-                "INSERT INTO ad_scripts (report_id, ad_id, original_script_html) VALUES (?, ?, ?)",
-                (report_id, ad.id, script_html)
-            )
-            conn.commit()
-            conn.close()
-            print(f"Script pour l'annonce {ad.id} sauvegardé dans la base de données.")
+                # Étape clé : Sauvegarder le script de cette annonce dans la nouvelle table
+                conn = database.get_db_connection()
+                script_html = markdown.markdown(analysis_result.get('script_text', ''), extensions=['tables'])
+                conn.execute(
+                    "INSERT INTO ad_scripts (report_id, ad_id, original_script_html) VALUES (?, ?, ?)",
+                    (report_id, ad.id, script_html)
+                )
+                conn.commit()
+                conn.close()
+                print(f"Script pour l'annonce {ad.id} sauvegardé dans la base de données.")
 
-            # On prépare l'HTML de l'analyse pour le rapport final
-            # (sans les scripts, qui seront chargés dynamiquement dans le template)
-            analysis_html = markdown.markdown(analysis_result.get('analysis_text', ''), extensions=['tables'])
-            final_analysis_html_parts.append({
-                "ad": ad.model_dump(),
-                "analysis_html": analysis_html,
-                "media_type": analysis_result.get('media_type'),
-                "final_media_path": analysis_result.get('final_media_path'),
-                "model_used": analysis_result.get('model_used'),
-                "is_fallback": analysis_result.get('is_fallback', False),
-            })
-
+                # On prépare l'HTML de l'analyse pour le rapport final
+                # (sans les scripts, qui seront chargés dynamiquement dans le template)
+                analysis_html = markdown.markdown(analysis_result.get('analysis_text', ''), extensions=['tables'])
+                final_analysis_html_parts.append({
+                    "ad": ad.model_dump(),
+                    "analysis_html": analysis_html,
+                    "media_type": analysis_result.get('media_type'),
+                    "final_media_path": analysis_result.get('final_media_path'),
+                    "model_used": analysis_result.get('model_used'),
+                    "is_fallback": analysis_result.get('is_fallback', False),
+                })
+            except Exception as ad_error:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(f"ERREUR lors de l'analyse de l'annonce '{ad.name}' (ID: {ad.id}). L'analyse de cette annonce est ignorée, mais le pipeline continue.")
+                print(f"Erreur détaillée: {ad_error}")
+                traceback.print_exc()
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
         print("Toutes les analyses sont terminées. Assemblage du rapport principal...")
         # La génération de l'HTML est maintenant simplifiée, car les scripts sont dans leur propre table.
