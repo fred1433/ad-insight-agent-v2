@@ -61,24 +61,35 @@
                                 {% include '_report_status_badge.html' %}
                             </div>
 
-                            {# --- Bloc d'affichage des erreurs --- #}
+                            {# --- Bloc d'affichage des erreurs (minimaliste et cliquable) --- #}
                             {% if report.errors %}
                             <div class="report-item-line">
-                                <div class="alert alert-danger p-2 mt-2" role="alert">
-                                    <small>
-                                        <strong><i class="fas fa-exclamation-triangle"></i> {{ report.errors|length }} échec(s) d'analyse.</strong>
-                                        <ul class="mb-0 pl-3">
+                                <details class="error-details">
+                                    <summary>
+                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        <strong>
+                                            {{ report.errors|length }} 
+                                            {% if report.errors|length > 1 %}
+                                                errores
+                                            {% else %}
+                                                error
+                                            {% endif %}
+                                        </strong>
+                                    </summary>
+                                    <div class="error-content">
+                                        <ul>
                                             {% for error in report.errors %}
-                                                <li title="Le {{ error.timestamp | format_datetime }}">
-                                                    <strong>Ad ID {{ error.ad_id }}:</strong> {{ error.error_message | truncate(80) }}
+                                                <li>
+                                                    <strong>Ad ID {{ error.ad_id }}:</strong> 
+                                                    {{ error.error_message | format_error }}
                                                 </li>
                                             {% endfor %}
                                         </ul>
-                                    </small>
-                                </div>
+                                    </div>
+                                </details>
                             </div>
                             {% endif %}
-                            {# --------------------------------- #}
+                            {# ---------------------------------------------------------------- #}
 
                             {% if report.status == 'COMPLETED' %}
                             <div class="report-item-line">
