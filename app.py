@@ -44,20 +44,20 @@ def format_datetime_filter(s):
 @app.template_filter('format_error')
 def format_error_filter(s):
     """Filtre pour rendre les messages d'erreur plus lisibles pour l'utilisateur."""
-    if not isinstance(s, str):
-        s = str(s)
-
-    if "TimeoutException" in s:
-        return "La carga de la página del anuncio expiró (Timeout). El anuncio puede ser inaccesible o estar protegido."
-    if "500 An internal error" in s or "InternalServerError" in s:
-        return "La API de análisis (Google Gemini) devolvió un error interno. Por favor, reintenta más tarde."
-    if "Échec du téléchargement du média" in s:
-        return "No se pudo descargar el video o la imagen del anuncio."
-    if "Réponse invalide ou vide de l'API Gemini" in s:
-        return "La API de análisis (Google Gemini) devolvió una respuesta vacía o inválida."
+    # Le message par défaut, simple et couvrant 99% des cas.
+    user_message = "No se pudo completar el análisis. La causa más probable es que el anuncio haya sido eliminado o ya no esté disponible en Facebook."
     
-    # Par défaut, on retourne une version courte et nettoyée
-    return s.split('\\n')[0][:150] + "..." if len(s) > 150 else s.split('\\n')[0]
+    technical_hint = ""
+    str_error = str(s) # Convertir en chaîne de caractères pour être sûr
+
+    # On ajoute un indice technique discret seulement pour les cas rares.
+    if "Gemini" in str_error or "500" in str_error or "InternalServerError" in str_error:
+        technical_hint = "(Causa: Error de la API de análisis)"
+    
+    if technical_hint:
+        return f"{user_message} {technical_hint}"
+    
+    return user_message
 
 # --- GESTION DE L'AUTHENTIFICATION ---
 def login_required(f):
