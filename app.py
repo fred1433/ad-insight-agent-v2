@@ -26,6 +26,21 @@ app = Flask(__name__)
 database.init_db()
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'une-super-cle-secrete-a-changer-en-prod')
 
+# --- FILTRES DE TEMPLATE ---
+@app.template_filter('format_datetime')
+def format_datetime_filter(s):
+    """Filtre pour formater une date pour l'affichage."""
+    if not s:
+        return "N/A"
+    try:
+        # On suppose que la date de la DB est un string ISO-like
+        dt_utc = parser.parse(s)
+        # On la convertit en fuseau horaire local si nécessaire (exemple: Europe/Paris)
+        # ou on la garde en UTC si on préfère. Pour l'instant, on affiche simplement.
+        return dt_utc.strftime('%d/%m/%Y à %H:%M')
+    except (parser.ParserError, TypeError):
+        return s # Retourne la chaîne originale si le parsing échoue
+
 # --- GESTION DE L'AUTHENTIFICATION ---
 def login_required(f):
     @wraps(f)
@@ -239,7 +254,11 @@ def get_clients_list():
                 try:
                     analysis_dict['created_at'] = parser.parse(analysis_dict['created_at'])
                 except parser.ParserError:
-                    analysis_dict['created_at'] = None 
+                    analysis_dict['created_at'] = None
+            
+            # Récupérer les erreurs associées à ce rapport
+            analysis_dict['errors'] = database.get_errors_for_report(analysis_dict['id'])
+            
             analyses_list.append(analysis_dict)
 
         client_dict['analyses'] = analyses_list

@@ -83,6 +83,18 @@ def init_db():
         )
     ''')
 
+    # Nouvelle table pour stocker les erreurs d'analyse par annonce
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS analysis_errors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_id INTEGER NOT NULL,
+            ad_id TEXT NOT NULL,
+            error_message TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (report_id) REFERENCES analyses (id) ON DELETE CASCADE
+        )
+    ''')
+
     conn.commit()
     conn.close()
     print("La base de données et les tables existent déjà ou ont été créées.")
@@ -108,6 +120,7 @@ def delete_client(client_id):
     """Supprime un client et tous ses rapports associés de la base de données."""
     conn = get_db_connection()
     # On supprime d'abord les rapports pour respecter la contrainte de clé étrangère
+    # Les tables `ad_scripts` et `analysis_errors` seront nettoyées en cascade.
     conn.execute('DELETE FROM analyses WHERE client_id = ?', (client_id,))
     conn.execute('DELETE FROM clients WHERE id = ?', (client_id,))
     conn.commit()
@@ -184,6 +197,42 @@ def update_ad_script(report_id: int, ad_id: str, script_html: str):
         'UPDATE ad_scripts SET edited_script_html = ? WHERE report_id = ? AND ad_id = ?',
         (script_html, report_id, ad_id)
     )
+    conn.commit()
+    conn.close()
+
+def add_analysis_error(report_id: int, ad_id: str, error_message: str):
+    """Enregistre une erreur d'analyse pour une publicité spécifique."""
+    conn = get_db_connection()
+    conn.execute(
+        'INSERT INTO analysis_errors (report_id, ad_id, error_message) VALUES (?, ?, ?)',
+        (report_id, ad_id, error_message)
+    )
+    conn.commit()
+    conn.close()
+
+def get_errors_for_report(report_id: int) -> List[sqlite3.Row]:
+    """Récupère toutes les erreurs d'analyse pour un rapport donné."""
+    conn = get_db_connection()
+    errors = conn.execute(
+        'SELECT ad_id, error_message, timestamp FROM analysis_errors WHERE report_id = ? ORDER BY timestamp DESC',
+        (report_id,)
+    ).fetchall()
+    conn.close()
+    return errors
+
+def delete_report(report_id: int):
+    """Supprime un rapport et ses fichiers associés."""
+    conn = get_db_connection()
+    
+    # Récupérer le chemin du rapport pour supprimer le fichier HTML
+    report_row = conn.execute('SELECT report_path FROM analyses WHERE id = ?', (report_id,)).fetchone()
+    if report_row and report_row['report_path']:
+        if os.path.exists(report_row['report_path']):
+            os.remove(report_row['report_path'])
+
+    # La suppression en cascade s'occupera des scripts et des erreurs
+    conn.execute('DELETE FROM analyses WHERE id = ?', (report_id,))
+    
     conn.commit()
     conn.close()
 

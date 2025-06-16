@@ -324,13 +324,15 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
                     "is_fallback": analysis_result.get('is_fallback', False),
                 })
             except Exception as ad_error:
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                print(f"ERREUR lors de l'analyse de l'annonce '{ad.name}' (ID: {ad.id}). L'analyse de cette annonce est ignorée, mais le pipeline continue.")
-                print(f"Erreur détaillée: {ad_error}")
+                error_message = f"Échec de l'analyse pour l'annonce ID {ad.id} ({ad.name}): {ad_error}"
+                print(f"\n[ERREUR] {error_message}\n")
                 traceback.print_exc()
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                # Enregistrer l'erreur dans la base de données et continuer
+                database.add_analysis_error(report_id, ad.id, str(ad_error))
+                continue
 
         print("Toutes les analyses sont terminées. Assemblage du rapport principal...")
+        
         # La génération de l'HTML est maintenant simplifiée, car les scripts sont dans leur propre table.
         # Nous allons juste stocker un JSON ou une structure de base dans 'analysis_html'
         # que le template pourra utiliser.

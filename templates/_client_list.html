@@ -61,6 +61,25 @@
                                 {% include '_report_status_badge.html' %}
                             </div>
 
+                            {# --- Bloc d'affichage des erreurs --- #}
+                            {% if report.errors %}
+                            <div class="report-item-line">
+                                <div class="alert alert-danger p-2 mt-2" role="alert">
+                                    <small>
+                                        <strong><i class="fas fa-exclamation-triangle"></i> {{ report.errors|length }} échec(s) d'analyse.</strong>
+                                        <ul class="mb-0 pl-3">
+                                            {% for error in report.errors %}
+                                                <li title="Le {{ error.timestamp | format_datetime }}">
+                                                    <strong>Ad ID {{ error.ad_id }}:</strong> {{ error.error_message | truncate(80) }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {# --------------------------------- #}
+
                             {% if report.status == 'COMPLETED' %}
                             <div class="report-item-line">
                                 <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn-link">Ver informe</a>

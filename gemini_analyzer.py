@@ -90,11 +90,16 @@ def analyze_image(image_path: str, ad_data: Ad) -> Tuple[str, Dict]:
 
         print("    ✅ Respuesta recibida.")
         
+        # On vérifie que la réponse n'est pas vide et ne contient pas de message d'erreur connu
+        if not response.text or "Rate limit" in response.text or "API key" in response.text:
+            raise ValueError("Réponse invalide ou vide de l'API Gemini.")
+
         return response.text.strip(), response.usage_metadata
 
     except Exception as e:
         print(f"    ❌ Ocurrió un error durante el análisis de Gemini: {e}")
-        return f"Error durante el análisis de la imagen: {e}", {}
+        # On relève l'exception pour que le pipeline puisse la capturer
+        raise e
 
 
 def analyze_video(video_path: str, ad_data: Ad) -> Dict:
@@ -176,6 +181,11 @@ def analyze_video(video_path: str, ad_data: Ad) -> Dict:
                     [prompt, video_file],
                     request_options={"timeout": 150}  # Timeout de 2.5 minutes
                 )
+                
+                # On vérifie que la réponse n'est pas vide et ne contient pas de message d'erreur connu
+                if not response.text or "Rate limit" in response.text or "API key" in response.text:
+                     raise ValueError(f"Réponse invalide ou vide de l'API Gemini avec le modèle {model_name}.")
+
                 print(f"    ✅ Réponse reçue avec '{model_name}'.")
                 genai.delete_file(video_file.name)
                 return {
@@ -187,26 +197,20 @@ def analyze_video(video_path: str, ad_data: Ad) -> Dict:
             except Exception as e:
                 print(f"    ⚠️ L'appel avec '{model_name}' a échoué: {e}")
                 last_error = e
-                # Si c'est une erreur "Deadline Exceeded" ou "Socket closed", on continue au prochain modèle
-                if "Deadline Exceeded" in str(e) or "Socket closed" in str(e):
-                    continue
-                # Pour les autres erreurs (ex: auth, not found), on arrête tout
-                else:
-                    raise e
+                # Pour toutes les erreurs, on continue au prochain modèle de fallback
+                continue
         
         # Si la boucle se termine sans succès
-        raise Exception(f"Toutes les tentatives ont échoué. Dernière erreur: {last_error}")
+        # On lève l'exception pour que le pipeline puisse la capturer
+        raise Exception(f"Toutes les tentatives d'analyse ont échoué. Dernière erreur: {last_error}")
 
     except Exception as e:
-        print(f"    ❌ Ocurrió un error irrécupérable durante el análisis de Gemini: {e}")
+        print(f"    ❌ Ocurrió un error general en el análisis de video: {e}")
+        # On s'assure que le fichier vidéo est supprimé même en cas d'erreur
         if video_file:
             try:
                 genai.delete_file(video_file.name)
             except Exception as delete_error:
-                print(f"      Falló el intento de limpieza del archivo remoto: {delete_error}")
-        return {
-            "analysis_text": f"Error durante el análisis: {e}", 
-            "usage_metadata": {}, 
-            "model_used": "N/A", 
-            "is_fallback": False
-        } 
+                print(f"      - Attention: impossible de supprimer le fichier vidéo distant {video_file.name}: {delete_error}")
+        # On relève l'exception pour que le pipeline puisse la capturer
+        raise e 
