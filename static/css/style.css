@@ -547,22 +547,37 @@ header {
     background-color: #f5f5f5;
 }
 
-/* --- Settings Modal Styles --- */
-.modal-content {
+/*
+ * ===============================================
+ * MODAL STYLES
+ * ===============================================
+ */
+
+/* --- Settings API Key Modal --- */
+#settings-modal .modal-content {
     text-align: center;
 }
 
-/* Ensure the input field isn't full-width and is centered */
-.modal-content .form-control {
-    width: 75%; /* Reduced horizontal size */
-    padding-top: 12px;    /* Increased vertical thickness */
-    padding-bottom: 12px; /* Increased vertical thickness */
-    display: inline-block; /* Allows centering via text-align on parent */
-    text-align: center; /* Center the placeholder and input text */
+#settings-modal .form-control {
+    width: 75%;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: inline-block;
+    text-align: center;
 }
 
-/* Reduce top margin for the button to bring it closer to the form */
-.modal-content .btn {
+#settings-modal .btn {
     margin-top: 10px;
+}
+
+
+/* --- Generic Info / Analysis Launch Modal --- */
+#infoModal .modal-content {
+    text-align: center;
+}
+
+#infoModal .form-control {
+    width: 250px;
+    display: inline-block;
 }
 
