@@ -40,6 +40,7 @@ class Ad(BaseModel):
     video_id: Optional[str] = None
     image_url: Optional[str] = None
     insights: Optional[AdInsights] = None
+    created_time: Optional[str] = None
 
 # La gestion du cache est maintenant dynamique dans get_winning_ads.
 # Cette constante globale n'est plus utilisée.
@@ -161,10 +162,10 @@ def get_winning_ads(ad_account_id: str,
             chunk = active_ad_ids[i:i+50]
             ads_details = FBAd.get_by_ids(
                 ids=chunk,
-                fields=['id', 'name', 'creative{id,image_url,video_id}']
+                fields=['id', 'name', 'created_time', 'creative{id,image_url,video_id}']
             )
             for ad in ads_details:
-                ad_data_map[ad['id']] = {'name': ad['name']}
+                ad_data_map[ad['id']] = {'name': ad['name'], 'created_time': ad.get('created_time')}
                 if 'creative' in ad:
                     creative_info = ad['creative']
                     
@@ -236,7 +237,8 @@ def get_winning_ads(ad_account_id: str,
                         frequency=float(insight_data.get('frequency', 0)),
                         hook_rate=(video_3s_views / impressions * 100) if impressions > 0 else 0,
                         hold_rate=(thru_plays / video_3s_views * 100) if video_3s_views > 0 else 0
-                    )
+                    ),
+                    created_time=ad_data.get('created_time')
                 )
                 all_ads_data.append(ad_obj)
         

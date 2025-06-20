@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Informe de Análisis Top {{ num_analyzed }} - {{ report.client_name }}{% endblock %}
+{% block title %}Informe de Análisis para {{ report.client_name }} - Top {{ report.num_ads_to_analyze }}{% endblock %}
 
 {% block head_styles %}
 <style>
@@ -37,16 +37,42 @@
         border-color: #198754 !important;
         color: white !important;
     }
+    /* Supprimé: .report-params-summary styles */
 
     @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
 
-
 {% block content %}
-<div class="report-header">
-    <h1>Análisis Top {{ num_analyzed }} para {{ report.client_name }}</h1>
-    <p class="lead text-muted">Este informe detalla el análisis de las {{ num_analyzed }} mejores creatividades, basado en su rendimiento.</p>
+<div class="report-header text-center">
+    <h1>Informe de Análisis Top {{ report.num_ads_to_analyze }} para {{ report.client_name }}</h1>
+    <p class="lead text-muted">
+        Este informe detalla el análisis de las mejores creatividades,
+        seleccionadas y ordenadas por **ROAS decreciente**.
+        El período de análisis fue
+        {% if report.date_start_param and report.date_end_param %}
+            del **{{ report.date_start_param }}** al **{{ report.date_end_param }}**
+        {% else %}
+            de los **últimos 30 días (predeterminado)**
+        {% endif %}.
+        {% set criteria_phrases = [] %}
+        {% if report.min_spend_param %}
+            {% set _ = criteria_phrases.append('<strong>Gasto Mínimo:</strong> {:.2f} $'.format(report.min_spend_param)) %}
+        {% endif %}
+        {% if report.target_cpa_param %}
+            {% set _ = criteria_phrases.append('<strong>CPA Máximo:</strong> {:.2f} $'.format(report.target_cpa_param)) %}
+        {% endif %}
+        {% if report.target_roas_param %}
+            {% set _ = criteria_phrases.append('<strong>ROAS Mínimo:</strong> {:.2f}x'.format(report.target_roas_param)) %}
+        {% endif %}
+    
+        {% if criteria_phrases %}
+            Se aplicaron criterios adicionales:
+            {% for phrase in criteria_phrases %}
+                {{ phrase }}{% if not loop.last %}{% if loop.revindex0 == 1 %} y {% else %}, {% endif %}{% endif %}
+            {% endfor %}.
+        {% endif %}
+    </p>
 </div>
 
 {% if analyzed_ads_data %}

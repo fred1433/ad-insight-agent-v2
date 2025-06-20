@@ -27,6 +27,15 @@ class Report(BaseModel):
     cost_generation: Optional[float] = None
     total_cost: Optional[float] = None
     scripts: List[AdScript] = [] # Une liste pour contenir tous les scripts liés
+    
+    # Nouveaux paramètres d'analyse à stocker
+    num_ads_to_analyze: Optional[int] = None
+    min_spend_param: Optional[float] = None
+    target_cpa_param: Optional[float] = None
+    target_roas_param: Optional[float] = None
+    date_start_param: Optional[str] = None
+    date_end_param: Optional[str] = None
+    analysis_code_param: Optional[str] = None
 
 def get_db_connection():
     """Crée et retourne une connexion à la base de données."""
@@ -70,6 +79,36 @@ def init_db():
             FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
         )
     ''')
+
+    # Mettre à jour la table 'analyses' avec les nouvelles colonnes
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN num_ads_to_analyze INTEGER;')
+    except sqlite3.OperationalError:
+        print("La columna 'num_ads_to_analyze' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN min_spend_param REAL;')
+    except sqlite3.OperationalError:
+        print("La columna 'min_spend_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN target_cpa_param REAL;')
+    except sqlite3.OperationalError:
+        print("La columna 'target_cpa_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN target_roas_param REAL;')
+    except sqlite3.OperationalError:
+        print("La columna 'target_roas_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN date_start_param TEXT;')
+    except sqlite3.OperationalError:
+        print("La columna 'date_start_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN date_end_param TEXT;')
+    except sqlite3.OperationalError:
+        print("La columna 'date_end_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN analysis_code_param TEXT;')
+    except sqlite3.OperationalError:
+        print("La columna 'analysis_code_param' ya existe.")
 
     # Nouvelle table pour stocker les scripts éditables par annonce
     cursor.execute('''

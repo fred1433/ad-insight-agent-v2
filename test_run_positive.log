@@ -1,0 +1,44 @@
+time="2025-06-20T14:52:19-05:00" level=warning msg="/Users/frederic/ProjetsDev/ad_insight_agent_v2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Serving Flask app 'app.py'
+ad_insight_dev  |  * Debug mode: on
+ad_insight_dev  | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ad_insight_dev  |  * Running on all addresses (0.0.0.0)
+ad_insight_dev  |  * Running on http://127.0.0.1:10000
+ad_insight_dev  |  * Running on http://172.20.0.2:10000
+ad_insight_dev  | [33mPress CTRL+C to quit[0m
+ad_insight_dev  |  * Restarting with stat
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Debugger is active!
+ad_insight_dev  |  * Debugger PIN: 598-264-263
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:51:55] "[32mPOST /login HTTP/1.1[0m" 302 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:51:55] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:51:57] "POST /save_api_key HTTP/1.1" 200 -
+ad_insight_dev  | --- LOG: Lancement de l'analyse pour le client: test ---
+ad_insight_dev  |   - Top N: 1
+ad_insight_dev  |   - Gasto Mínimo: 3000.0
+ad_insight_dev  |   - CPA Objetivo: 500.0
+ad_insight_dev  |   - ROAS Mínimo: 3.0
+ad_insight_dev  |   - Fecha de Inicio: 2024-05-01
+ad_insight_dev  |   - Fecha de Fin: 2024-05-31
+ad_insight_dev  | ---------------------------------------------------------
+ad_insight_dev  | --- DÉBUT PIPELINE TOP 1 pour le client ID: 1 (Rapport ID: 16) ---
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:51:59] "POST /run_top_n_analysis/1 HTTP/1.1" 200 -
+ad_insight_dev  | Récupération des 1 annonces les plus performantes...
+ad_insight_dev  | ℹ️ Des filtres avancés sont appliqués, récupération des données depuis l'API Facebook...
+ad_insight_dev  | Récupération des IDs de toutes les publicités actives...
+ad_insight_dev  | 177 publicités actives trouvées.
+ad_insight_dev  | \nRécupération groupée des détails et des créatives...
+ad_insight_dev  | \nRécupération groupée des métriques pour 177 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 100 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 77 publicités...
+ad_insight_dev  | 0 insights récupérés.
+ad_insight_dev  | \nConstruction des objets de publicités...
+ad_insight_dev  | Aucune publicité avec des données de conversion suffisantes n'a été trouvée.
+ad_insight_dev  | ERREUR dans le pipeline TOP 1 pour le rapport 16: Aucune annonce performante trouvée pour ce client.
+ad_insight_dev  | Traceback (most recent call last):
+ad_insight_dev  |   File "/app/pipeline.py", line 288, in run_top_n_analysis_for_client
+ad_insight_dev  |     raise Exception("Aucune annonce performante trouvée pour ce client.")
+ad_insight_dev  | Exception: Aucune annonce performante trouvée pour ce client.

@@ -1,0 +1,49 @@
+time="2025-06-20T14:53:36-05:00" level=warning msg="/Users/frederic/ProjetsDev/ad_insight_agent_v2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Serving Flask app 'app.py'
+ad_insight_dev  |  * Debug mode: on
+ad_insight_dev  | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ad_insight_dev  |  * Running on all addresses (0.0.0.0)
+ad_insight_dev  |  * Running on http://127.0.0.1:10000
+ad_insight_dev  |  * Running on http://172.20.0.2:10000
+ad_insight_dev  | [33mPress CTRL+C to quit[0m
+ad_insight_dev  |  * Restarting with stat
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Debugger is active!
+ad_insight_dev  |  * Debugger PIN: 140-464-100
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:53:12] "[32mPOST /login HTTP/1.1[0m" 302 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:53:12] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:53:14] "POST /save_api_key HTTP/1.1" 200 -
+ad_insight_dev  | --- LOG: Lancement de l'analyse pour le client: test ---
+ad_insight_dev  |   - Top N: 1
+ad_insight_dev  |   - Gasto Mínimo: 3000.0
+ad_insight_dev  |   - CPA Objetivo: 500.0
+ad_insight_dev  |   - ROAS Mínimo: 3.0
+ad_insight_dev  |   - Fecha de Inicio: None
+ad_insight_dev  |   - Fecha de Fin: None
+ad_insight_dev  | ---------------------------------------------------------
+ad_insight_dev  | --- DÉBUT PIPELINE TOP 1 pour le client ID: 1 (Rapport ID: 17) ---
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 19:53:16] "POST /run_top_n_analysis/1 HTTP/1.1" 200 -
+ad_insight_dev  | Récupération des 1 annonces les plus performantes...
+ad_insight_dev  | ℹ️ Des filtres avancés sont appliqués, récupération des données depuis l'API Facebook...
+ad_insight_dev  | Récupération des IDs de toutes les publicités actives...
+ad_insight_dev  | 177 publicités actives trouvées.
+ad_insight_dev  | \nRécupération groupée des détails et des créatives...
+ad_insight_dev  | \nRécupération groupée des métriques pour 177 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 100 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 77 publicités...
+ad_insight_dev  | 69 insights récupérés.
+ad_insight_dev  | \nConstruction des objets de publicités...
+ad_insight_dev  | \nPas de filtre de dépense par défaut car des filtres avancés sont actifs.
+ad_insight_dev  | 11 annonces qualifiées trouvées. Tri par ROAS...
+ad_insight_dev  | ✅ 11 publicités triées par ROAS.
+ad_insight_dev  | CACHE: Sauvegarde ignorée car des filtres avancés ont été utilisés.
+ad_insight_dev  | 1 annonces performantes trouvées. Lancement des analyses...
+ad_insight_dev  | --- Début de l'analyse pour l'annonce : Seed For Him - Estaticos Saca Mas Leche - Junio 13 - Copia (120229372536000039) ---
+ad_insight_dev  | Analyse complète de l'annonce requise...
+ad_insight_dev  | Démarrage du téléchargement de l'image pour la pub 120229372536000039
+ad_insight_dev  | ✅ Image sauvegardée localement : data/storage/120229372536000039.png
+ad_insight_dev  |   🧠 Iniciando análisis de marketing para la imagen del anuncio 'Seed For Him - Estaticos Saca Mas Leche - Junio 13 - Copia'...
+ad_insight_dev  |     ▶️ Enviando prompt en español e imagen al modelo...

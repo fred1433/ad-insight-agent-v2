@@ -1,0 +1,234 @@
+time="2025-06-20T15:52:16-05:00" level=warning msg="/Users/frederic/ProjetsDev/ad_insight_agent_v2/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Serving Flask app 'app.py'
+ad_insight_dev  |  * Debug mode: on
+ad_insight_dev  | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ad_insight_dev  |  * Running on all addresses (0.0.0.0)
+ad_insight_dev  |  * Running on http://127.0.0.1:10000
+ad_insight_dev  |  * Running on http://172.20.0.2:10000
+ad_insight_dev  | [33mPress CTRL+C to quit[0m
+ad_insight_dev  |  * Restarting with stat
+ad_insight_dev  | Inicializando las tablas de la base de datos...
+ad_insight_dev  | La base de données et les tables existent déjà ou ont été créées.
+ad_insight_dev  |  * Debugger is active!
+ad_insight_dev  |  * Debugger PIN: 127-981-044
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 20:51:05] "[32mPOST /login HTTP/1.1[0m" 302 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 20:51:05] "[31m[1mPOST / HTTP/1.1[0m" 405 -
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 20:51:07] "POST /save_api_key HTTP/1.1" 200 -
+ad_insight_dev  | --- LOG: Lancement de l'analyse pour le client: test ---
+ad_insight_dev  |   - Top N: 1
+ad_insight_dev  |   - Gasto Mínimo: 3000.0
+ad_insight_dev  |   - CPA Objetivo: 500.0
+ad_insight_dev  |   - ROAS Mínimo: 3.0
+ad_insight_dev  |   - Fecha de Inicio: None
+ad_insight_dev  |   - Fecha de Fin: None
+ad_insight_dev  | ---------------------------------------------------------
+ad_insight_dev  | --- DÉBUT PIPELINE TOP 1 pour le client ID: 1 (Rapport ID: 23) ---
+ad_insight_dev  | 192.168.65.1 - - [20/Jun/2025 20:51:09] "POST /run_top_n_analysis/1 HTTP/1.1" 200 -
+ad_insight_dev  | Récupération des 1 annonces les plus performantes...
+ad_insight_dev  | ℹ️ Des filtres avancés sont appliqués, récupération des données depuis l'API Facebook...
+ad_insight_dev  | Récupération des IDs de toutes les publicités actives...
+ad_insight_dev  | 177 publicités actives trouvées.
+ad_insight_dev  | \nRécupération groupée des détails et des créatives...
+ad_insight_dev  | DEBUG: Ad ID 120229791950740039, Creative ID: 1069782465079302, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229791950730039, Creative ID: 704394812344994, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229791950750039, Creative ID: 2162734860858482, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229790803540039, Creative ID: 2964494017044890, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229790803550039, Creative ID: 3888226121428693, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229790803560039, Creative ID: 1746938620036458, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229372634440039, Creative ID: 689701817373559, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229370268200039, Creative ID: 1687910138522294, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229370425070039, Creative ID: 4147838268822735, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229372536000039, Creative ID: 489140090926594, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228982670300039, Creative ID: 1791242098491925, Extracted Video ID: 681960061315164
+ad_insight_dev  | DEBUG: Ad ID 120228981963460039, Creative ID: 693606526883983, Extracted Video ID: 529453450135507
+ad_insight_dev  | DEBUG: Ad ID 120229079987180039, Creative ID: 4062883870659997, Extracted Video ID: 1279092383816296
+ad_insight_dev  | DEBUG: Ad ID 120229079869350039, Creative ID: 1064634668908571, Extracted Video ID: 1276899117205076
+ad_insight_dev  | DEBUG: Ad ID 120229005667200039, Creative ID: 2355359018256872, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229005877450039, Creative ID: 1830042620899120, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120229005924180039, Creative ID: 681066218160420, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228982670320039, Creative ID: 1009799811364353, Extracted Video ID: 30187606510852764
+ad_insight_dev  | DEBUG: Ad ID 120224251440730039, Creative ID: 686602434294026, Extracted Video ID: 24233220876262955
+ad_insight_dev  | DEBUG: Ad ID 120228743863790039, Creative ID: 1420954076019190, Extracted Video ID: 1614571622555190
+ad_insight_dev  | DEBUG: Ad ID 120228743970110039, Creative ID: 1458863982197617, Extracted Video ID: 712805484443973
+ad_insight_dev  | DEBUG: Ad ID 120228742240740039, Creative ID: 3685482338255366, Extracted Video ID: 720181833742650
+ad_insight_dev  | DEBUG: Ad ID 120228595076190039, Creative ID: 733896789315809, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228594019900039, Creative ID: 2139565226562052, Extracted Video ID: 1758740448411490
+ad_insight_dev  | DEBUG: Ad ID 120228594019870039, Creative ID: 1555604715399912, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228594019850039, Creative ID: 1586588088679387, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228594019840039, Creative ID: 999793865290986, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228594019920039, Creative ID: 713690557873034, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228594019910039, Creative ID: 707088251904372, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228462829350039, Creative ID: 1735752670369391, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228462829360039, Creative ID: 2003820203361004, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228462740950039, Creative ID: 1080616347567882, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120227201498380039, Creative ID: 697671176295678, Extracted Video ID: 1344302246872669
+ad_insight_dev  | DEBUG: Ad ID 120227018358800039, Creative ID: 941108738035057, Extracted Video ID: 3496815360452772
+ad_insight_dev  | DEBUG: Ad ID 120225602805030039, Creative ID: 1897311574173287, Extracted Video ID: 1248893796822518
+ad_insight_dev  | DEBUG: Ad ID 120224937611410039, Creative ID: 1427375094937236, Extracted Video ID: 1560725948222221
+ad_insight_dev  | DEBUG: Ad ID 120228369082010039, Creative ID: 604924939288762, Extracted Video ID: 2063287880862104
+ad_insight_dev  | DEBUG: Ad ID 120228369029320039, Creative ID: 685963747384851, Extracted Video ID: 652227427803304
+ad_insight_dev  | DEBUG: Ad ID 120228322342370039, Creative ID: 690063707269710, Extracted Video ID: 1197412581709918
+ad_insight_dev  | DEBUG: Ad ID 120228321963410039, Creative ID: 1483120756428522, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228322392270039, Creative ID: 1073073444678090, Extracted Video ID: 710153011491960
+ad_insight_dev  | DEBUG: Ad ID 120228322096600039, Creative ID: 9864219876989500, Extracted Video ID: 724730873546716
+ad_insight_dev  | DEBUG: Ad ID 120228321873510039, Creative ID: 1006365094985675, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228321963430039, Creative ID: 1378722976744729, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228321963420039, Creative ID: 675860998605028, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228009388350039, Creative ID: 1441259113703253, Extracted Video ID: 1002439922053465
+ad_insight_dev  | DEBUG: Ad ID 120228142591870039, Creative ID: 1411938216653302, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228142591860039, Creative ID: 1200085607997689, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228142591890039, Creative ID: 643005598740698, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228142591880039, Creative ID: 713755004461825, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120228077660330039, Creative ID: 1711743986371578, Extracted Video ID: 1043348871080400
+ad_insight_dev  | DEBUG: Ad ID 120228075598730039, Creative ID: 1033099515038125, Extracted Video ID: 4020667321520339
+ad_insight_dev  | DEBUG: Ad ID 120228077660380039, Creative ID: 1179565493966941, Extracted Video ID: 1828099531453318
+ad_insight_dev  | DEBUG: Ad ID 120228077660370039, Creative ID: 1041640054601187, Extracted Video ID: 619217577827045
+ad_insight_dev  | DEBUG: Ad ID 120228077660360039, Creative ID: 1284956613153382, Extracted Video ID: 1630982657575951
+ad_insight_dev  | DEBUG: Ad ID 120228077960690039, Creative ID: 632746179773740, Extracted Video ID: 680733714933933
+ad_insight_dev  | DEBUG: Ad ID 120228077960730039, Creative ID: 1457552538562499, Extracted Video ID: 1364635681323264
+ad_insight_dev  | DEBUG: Ad ID 120228077960740039, Creative ID: 2403149993399957, Extracted Video ID: 2128487400967222
+ad_insight_dev  | DEBUG: Ad ID 120228077960750039, Creative ID: 2107378686423633, Extracted Video ID: 992985782825407
+ad_insight_dev  | DEBUG: Ad ID 120228077660390039, Creative ID: 1303404795122425, Extracted Video ID: 1198846298129085
+ad_insight_dev  | DEBUG: Ad ID 120228077660350039, Creative ID: 574818728579670, Extracted Video ID: 2076479206168897
+ad_insight_dev  | DEBUG: Ad ID 120228077660340039, Creative ID: 609233502185596, Extracted Video ID: 1907536200062461
+ad_insight_dev  | DEBUG: Ad ID 120228008741790039, Creative ID: 940673948065197, Extracted Video ID: 1193810542438195
+ad_insight_dev  | DEBUG: Ad ID 120228008632410039, Creative ID: 729998546028255, Extracted Video ID: 10023480957731983
+ad_insight_dev  | DEBUG: Ad ID 120227517293110039, Creative ID: 724234016942857, Extracted Video ID: 1338007400605658
+ad_insight_dev  | DEBUG: Ad ID 120227518046130039, Creative ID: 1738643337063764, Extracted Video ID: 658770423818702
+ad_insight_dev  | DEBUG: Ad ID 120227461041780039, Creative ID: 560727260066865, Extracted Video ID: 1981710475932859
+ad_insight_dev  | DEBUG: Ad ID 120227300160010039, Creative ID: 1208591540911859, Extracted Video ID: 1384146106065838
+ad_insight_dev  | DEBUG: Ad ID 120227300238820039, Creative ID: 1334245397663209, Extracted Video ID: 3898408417140679
+ad_insight_dev  | DEBUG: Ad ID 120227233137840039, Creative ID: 721995553735368, Extracted Video ID: 673130292285176
+ad_insight_dev  | DEBUG: Ad ID 120227201311130039, Creative ID: 468523579653997, Extracted Video ID: 3789152484551225
+ad_insight_dev  | DEBUG: Ad ID 120227201045090039, Creative ID: 694572123050354, Extracted Video ID: 680034574752746
+ad_insight_dev  | DEBUG: Ad ID 120219809280830039, Creative ID: 120216079359210039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120227018779950039, Creative ID: 1234165105088476, Extracted Video ID: 1015803613566408
+ad_insight_dev  | DEBUG: Ad ID 120227017503460039, Creative ID: 1662595734628846, Extracted Video ID: 1484275519217937
+ad_insight_dev  | DEBUG: Ad ID 120227016162540039, Creative ID: 1185269893299706, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226950731210039, Creative ID: 8309478392510224, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226950408080039, Creative ID: 711874224577824, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226748428290039, Creative ID: 660896223427902, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226748422770039, Creative ID: 1483414065972975, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226748717230039, Creative ID: 3949113088660775, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226754896840039, Creative ID: 1053142150012971, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120226170660740039, Creative ID: 656141010730180, Extracted Video ID: 709662628187682
+ad_insight_dev  | DEBUG: Ad ID 120226170660750039, Creative ID: 1368055101100670, Extracted Video ID: 991044433097525
+ad_insight_dev  | DEBUG: Ad ID 120226170660700039, Creative ID: 1887785078642673, Extracted Video ID: 986058430363470
+ad_insight_dev  | DEBUG: Ad ID 120225602805060039, Creative ID: 1360297155216431, Extracted Video ID: 645971338272441
+ad_insight_dev  | DEBUG: Ad ID 120225602261270039, Creative ID: 1400763690916005, Extracted Video ID: 1061008445881308
+ad_insight_dev  | DEBUG: Ad ID 120225461873690039, Creative ID: 4045586379017114, Extracted Video ID: 715082844186291
+ad_insight_dev  | DEBUG: Ad ID 120225461873650039, Creative ID: 533125356317838, Extracted Video ID: 891129679788417
+ad_insight_dev  | DEBUG: Ad ID 120225461873700039, Creative ID: 1770464546833348, Extracted Video ID: 2651000878423153
+ad_insight_dev  | DEBUG: Ad ID 120225033580370039, Creative ID: 659016570223894, Extracted Video ID: 1914822499327597
+ad_insight_dev  | DEBUG: Ad ID 120225033580420039, Creative ID: 993517292966282, Extracted Video ID: 582680390860910
+ad_insight_dev  | DEBUG: Ad ID 120225033580400039, Creative ID: 1031175412302074, Extracted Video ID: 1181589016480558
+ad_insight_dev  | DEBUG: Ad ID 120224937611380039, Creative ID: 1402750207408399, Extracted Video ID: 667867629175174
+ad_insight_dev  | DEBUG: Ad ID 120224911071400039, Creative ID: 650964857744383, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224911071410039, Creative ID: 1194479542120814, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224846919770039, Creative ID: 544273995386103, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224846540250039, Creative ID: 29166678016310384, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120223102944450039, Creative ID: 1698018234126887, Extracted Video ID: 1095081302663718
+ad_insight_dev  | DEBUG: Ad ID 120224000083940039, Creative ID: 1204934747924597, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120221246709940039, Creative ID: 1664208757535401, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224251440700039, Creative ID: 1855884268502747, Extracted Video ID: 3970171409891494
+ad_insight_dev  | DEBUG: Ad ID 120223102944420039, Creative ID: 1174832877298302, Extracted Video ID: 2106414749878848
+ad_insight_dev  | DEBUG: Ad ID 120224127444850039, Creative ID: 4104482883112923, Extracted Video ID: 3954086411500826
+ad_insight_dev  | DEBUG: Ad ID 120224000125380039, Creative ID: 1320242135868693, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224000203610039, Creative ID: 1194775148699534, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120224000168780039, Creative ID: 688482280374625, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120223102667060039, Creative ID: 1303671244074561, Extracted Video ID: 1231106198591350
+ad_insight_dev  | DEBUG: Ad ID 120222858535750039, Creative ID: 1233763964839942, Extracted Video ID: 1785223749002553
+ad_insight_dev  | DEBUG: Ad ID 120222692346310039, Creative ID: 1001394862132762, Extracted Video ID: 2398546507187134
+ad_insight_dev  | DEBUG: Ad ID 120222532696680039, Creative ID: 979498660982053, Extracted Video ID: 3572026316435763
+ad_insight_dev  | DEBUG: Ad ID 120222314132810039, Creative ID: 2133167947134518, Extracted Video ID: 1058627866087822
+ad_insight_dev  | DEBUG: Ad ID 120222310871210039, Creative ID: 1023911236505954, Extracted Video ID: 9841162055902893
+ad_insight_dev  | DEBUG: Ad ID 120222308212760039, Creative ID: 625495230466809, Extracted Video ID: 1014716490592848
+ad_insight_dev  | DEBUG: Ad ID 120221394580290039, Creative ID: 1029631252460381, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120221660977380039, Creative ID: 24167920582798129, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120221394802600039, Creative ID: 1162219595648942, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120221260082970039, Creative ID: 1191825185804135, Extracted Video ID: 999952272267773
+ad_insight_dev  | DEBUG: Ad ID 120221148806050039, Creative ID: 440660755804097, Extracted Video ID: 981144167472103
+ad_insight_dev  | DEBUG: Ad ID 120220947864090039, Creative ID: 1916395012465018, Extracted Video ID: 1335867050890135
+ad_insight_dev  | DEBUG: Ad ID 120220864939770039, Creative ID: 1393336358758165, Extracted Video ID: 1340793393795165
+ad_insight_dev  | DEBUG: Ad ID 120220864939760039, Creative ID: 1888505371553285, Extracted Video ID: 1305890947333216
+ad_insight_dev  | DEBUG: Ad ID 120220864939720039, Creative ID: 1711234879455461, Extracted Video ID: 1094682189093289
+ad_insight_dev  | DEBUG: Ad ID 120220480444850039, Creative ID: 1705110967056361, Extracted Video ID: 2077494092770732
+ad_insight_dev  | DEBUG: Ad ID 120220429247460039, Creative ID: 662487266309672, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120220429247490039, Creative ID: 4222739244627520, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120220427569400039, Creative ID: 581344058241127, Extracted Video ID: 1644943983047999
+ad_insight_dev  | DEBUG: Ad ID 120219686076760039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076780039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076810039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076790039, Creative ID: 120216079303350039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076770039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076750039, Creative ID: 120216079359210039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219687941170039, Creative ID: 120216983626840039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076730039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219686076740039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120219687941160039, Creative ID: 580363088323931, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120216983612080039, Creative ID: 120216983626840039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049751780039, Creative ID: 580363088323931, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218549069040039, Creative ID: 482636194712725, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218549069050039, Creative ID: 1333941771064624, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218549069060039, Creative ID: 2748858981968109, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218525768920039, Creative ID: 120216079359210039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218525768960039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218525768940039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120214375618290039, Creative ID: 120215158576530039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120216983037370039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120214481783140039, Creative ID: 120214553670450039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215158809410039, Creative ID: 120215158811440039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120214442037370039, Creative ID: 120214442071290039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215682303540039, Creative ID: 120215682324090039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049726730039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849360039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215824170920039, Creative ID: 120216079303350039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049726740039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849370039, Creative ID: 120216079303350039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849350039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849390039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849430039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849400039, Creative ID: 120216079359210039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849410039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049849440039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049692120039, Creative ID: 9262085583811906, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049596090039, Creative ID: 1157311362578168, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049195120039, Creative ID: 2667547103430335, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049279810039, Creative ID: 2667547103430335, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049279820039, Creative ID: 933083492286043, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049279800039, Creative ID: 1024454802829064, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218049170940039, Creative ID: 1024454802829064, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120218048110300039, Creative ID: 933083492286043, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120217544257850039, Creative ID: 920952370203918, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120216983360130039, Creative ID: 120216983358460039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120216209420490039, Creative ID: 120216209484970039, Extracted Video ID: 932240828831179
+ad_insight_dev  | DEBUG: Ad ID 120215824304860039, Creative ID: 120216079359210039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215694837310039, Creative ID: 120215694843940039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215694862240039, Creative ID: 120215694867060039, Extracted Video ID: None
+ad_insight_dev  | DEBUG: Ad ID 120215694862270039, Creative ID: 120215694866600039, Extracted Video ID: None
+ad_insight_dev  | \nRécupération groupée des métriques pour 177 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 100 publicités...
+ad_insight_dev  | Exécution de la requête d'insights pour 77 publicités...
+ad_insight_dev  | 69 insights récupérés.
+ad_insight_dev  | \nConstruction des objets de publicités...
+ad_insight_dev  | \nPas de filtre de dépense par défaut car des filtres avancés sont actifs.
+ad_insight_dev  | 11 annonces qualifiées trouvées. Tri par ROAS...
+ad_insight_dev  | ✅ 11 publicités triées par ROAS.
+ad_insight_dev  | CACHE: Sauvegarde ignorée car des filtres avancés ont été utilisés.
+ad_insight_dev  | 1 annonces performantes trouvées. Lancement des analyses...
+ad_insight_dev  | --- Début de l'analyse pour l'annonce : Seed For Him - Estaticos Saca Mas Leche - Junio 13 - Copia (120229372536000039) ---
+ad_insight_dev  | Analyse complète de l'annonce requise...
+ad_insight_dev  | Démarrage du téléchargement de l'image pour la pub 120229372536000039
+ad_insight_dev  | ✅ Image sauvegardée localement : data/storage/120229372536000039.png
+ad_insight_dev  |   🧠 Iniciando análisis de marketing para la imagen del anuncio 'Seed For Him - Estaticos Saca Mas Leche - Junio 13 - Copia'...
+ad_insight_dev  |     ▶️ Enviando prompt en español e imagen al modelo...
+ad_insight_dev  |     ✅ Respuesta recibida.
+ad_insight_dev  | 💰 Coût de l'analyse Gemini estimé : $0.0107
+ad_insight_dev  | Génération des images concepts... (Désactivée)
+ad_insight_dev  | 💰 Coût de la génération d'images estimé : $0.0000
+ad_insight_dev  | Média principal déplacé vers : data/storage/120229372536000039.png
+ad_insight_dev  | Script pour l'annonce 120229372536000039 sauvegardé dans la base de données.
+ad_insight_dev  | Toutes les analyses sont terminées. Assemblage du rapport principal...
+ad_insight_dev  | --- FIN PIPELINE TOP 1 pour le client : test. Coût total: $0.0107 ---

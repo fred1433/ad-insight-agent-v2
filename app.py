@@ -302,6 +302,7 @@ def run_top_n_analysis(client_id):
         'target_roas': target_roas,
         'date_start': date_start,
         'date_end': date_end,
+        'analysis_code': analysis_code
     }
     thread = threading.Thread(target=pipeline.run_top_n_analysis_for_client, kwargs=analysis_args)
     thread.start()

@@ -243,7 +243,7 @@ def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
 def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int, 
                                   min_spend: float = None, target_cpa: float = None, 
                                   target_roas: float = None, date_start: str = None, 
-                                  date_end: str = None):
+                                  date_end: str = None, analysis_code: str = None):
     """
     Exécute le pipeline d'analyse pour les N MEILLEURES annonces d'un client,
     génère un rapport HTML consolidé et met à jour un enregistrement de rapport existant.
@@ -351,10 +351,13 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int,
         conn.execute(
             """
             UPDATE analyses 
-            SET status = ?, analysis_html = ?, cost_analysis = ?, cost_generation = ?, total_cost = ?
+            SET status = ?, analysis_html = ?, cost_analysis = ?, cost_generation = ?, total_cost = ?, 
+                num_ads_to_analyze = ?, min_spend_param = ?, target_cpa_param = ?, 
+                target_roas_param = ?, date_start_param = ?, date_end_param = ?, analysis_code_param = ?
             WHERE id = ?
             """,
-            ('COMPLETED', final_report_structure, total_cost_analysis, total_cost_generation, total_cost, report_id)
+            ('COMPLETED', final_report_structure, total_cost_analysis, total_cost_generation, total_cost,
+             num_ads, min_spend, target_cpa, target_roas, date_start, date_end, analysis_code, report_id)
         )
         conn.commit()
         conn.close()
