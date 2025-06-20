@@ -288,18 +288,18 @@ tr:hover {
 }
 
 .help-icon {
-    display: inline-block;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff; /* Texte en blanc pour le contraste */
+    background-color: #007bff; /* Fond bleu explicite */
+    border: 1px solid #007bff;
+    border-radius: 50%;
     width: 20px;
     height: 20px;
-    line-height: 20px;
-    text-align: center;
-    border-radius: 50%;
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 5px;
-    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 
 .help-icon:hover {
@@ -310,8 +310,9 @@ tr:hover {
 .label-with-help {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    gap: 8px; /* Espace entre le label et l'icône */
 }
+
 .label-with-help label {
     margin-bottom: 0;
 }
@@ -503,27 +504,6 @@ header {
 .actions-menu-item i {
     margin-right: 10px;
     color: #6c757d;
-}
-
-/* Styles pour le menu d'aide du token */
-.label-with-help {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Espace entre le label et l'icône */
-}
-
-.help-icon {
-    cursor: pointer;
-    font-weight: bold;
-    color: #007bff;
-    border: 1px solid #007bff;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
 }
 
 /* --- User Menu Dropdown --- */
