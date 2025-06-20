@@ -618,10 +618,18 @@ header {
     margin-bottom: 0;
 }
 
-#infoModal .form-control, #infoModal .btn {
-    width: 100%; /* Les éléments prennent toute la largeur de leur conteneur (le formulaire) */
-    box-sizing: border-box; /* Assure que le padding n'affecte pas la largeur totale */
-    text-align: center; /* Centre le texte dans les inputs/boutons */
+#infoModal .form-control {
+    height: 40px; /* Hauteur fixe pour tous les champs */
+    padding: 0.375rem 0.75rem; /* Padding standard pour l'alignement vertical du texte */
+    line-height: 1.5; /* Assure que le texte est bien centré verticalement */
+}
+
+/* Style général pour les boutons et inputs dans la modale */
+#infoModal .form-control, 
+#infoModal .btn {
+    width: 100%; 
+    box-sizing: border-box; 
+    text-align: center; 
 }
 
 /* Garder les labels alignés à gauche */
