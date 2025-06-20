@@ -41,69 +41,71 @@
             </td>
             <td class="reports-cell">
                 {% if client.analyses %}
-                    <ul>
-                        {% for report in client.analyses %}
-                        <li>
-                            {% if report.status == 'COMPLETED' %}
-                                <button class="btn btn-icon btn-delete-report"
-                                        title="Eliminar este informe"
-                                        hx-delete="{{ url_for('delete_report', report_id=report.id) }}"
-                                        hx-target="closest li"
-                                        hx-swap="outerHTML"
-                                        hx-confirm="¿Estás seguro de que quieres eliminar este informe? Esta acción no se puede deshacer.">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            {% endif %}
-                            <div class="report-item-line">
-                                <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
-                            </div>
-                            <div class="report-item-line">
-                                {% include '_report_status_badge.html' %}
-                            </div>
+                    <div class="reports-list-container">
+                        <ul>
+                            {% for report in client.analyses %}
+                            <li>
+                                {% if report.status == 'COMPLETED' %}
+                                    <button class="btn btn-icon btn-delete-report"
+                                            title="Eliminar este informe"
+                                            hx-delete="{{ url_for('delete_report', report_id=report.id) }}"
+                                            hx-target="closest li"
+                                            hx-swap="outerHTML"
+                                            hx-confirm="¿Estás seguro de que quieres eliminar este informe? Esta acción no se puede deshacer.">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                {% endif %}
+                                <div class="report-item-line">
+                                    <span class="report-date">{{ report.created_at.strftime('%d/%m/%Y') }}</span>
+                                </div>
+                                <div class="report-item-line">
+                                    {% include '_report_status_badge.html' %}
+                                </div>
 
-                            {# --- Bloc d'affichage des erreurs (minimaliste et cliquable) --- #}
-                            {% if report.errors %}
-                            <div class="report-item-line">
-                                <details class="error-details">
-                                    <summary>
-                                        <i class="fas fa-exclamation-triangle text-warning"></i>
-                                        <strong>
-                                            {{ report.errors|length }} 
-                                            {% if report.errors|length > 1 %}
-                                                errores
-                                            {% else %}
-                                                error
-                                            {% endif %}
-                                        </strong>
-                                    </summary>
-                                    <div class="error-content">
-                                        <ul>
-                                            {% for error in report.errors %}
-                                                <li>
-                                                    <strong>Ad ID {{ error.ad_id }}:</strong> 
-                                                    {{ error.error_message | format_error }}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </details>
-                            </div>
-                            {% endif %}
-                            {# ---------------------------------------------------------------- #}
+                                {# --- Bloc d'affichage des erreurs (minimaliste et cliquable) --- #}
+                                {% if report.errors %}
+                                <div class="report-item-line">
+                                    <details class="error-details">
+                                        <summary>
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                            <strong>
+                                                {{ report.errors|length }} 
+                                                {% if report.errors|length > 1 %}
+                                                    errores
+                                                {% else %}
+                                                    error
+                                                {% endif %}
+                                            </strong>
+                                        </summary>
+                                        <div class="error-content">
+                                            <ul>
+                                                {% for error in report.errors %}
+                                                    <li>
+                                                        <strong>Ad ID {{ error.ad_id }}:</strong> 
+                                                        {{ error.error_message | format_error }}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </details>
+                                </div>
+                                {% endif %}
+                                {# ---------------------------------------------------------------- #}
 
-                            {% if report.status == 'COMPLETED' %}
-                            <div class="report-item-line">
-                                <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn-link">Ver informe</a>
-                            </div>
-                            <div class="report-item-line">
-                                <span class="cost-badge" title="Análisis: ${{ '%.4f'|format(report.cost_analysis) }} | Generación: ${{ '%.4f'|format(report.cost_generation) }}">
-                                    Coste: ${{ '%.4f'|format(report.total_cost) }}
-                                </span>
-                            </div>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
+                                {% if report.status == 'COMPLETED' %}
+                                <div class="report-item-line">
+                                    <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn-link">Ver informe</a>
+                                </div>
+                                <div class="report-item-line">
+                                    <span class="cost-badge" title="Análisis: ${{ '%.4f'|format(report.cost_analysis) }} | Generación: ${{ '%.4f'|format(report.cost_generation) }}">
+                                        Coste: ${{ '%.4f'|format(report.total_cost) }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 {% else %}
                     <small class="text-muted">No hay informes para este cliente todavía.</small>
                 {% endif %}

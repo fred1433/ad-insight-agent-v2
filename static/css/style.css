@@ -653,3 +653,26 @@ header {
     text-align: left;
 }
 
+.reports-list-container {
+    max-height: 140px; /* Hauteur pour ~1 rapport */
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* Style pour cacher la scrollbar sur Chrome/Safari, tout en gardant la fonctionnalité */
+.reports-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+.reports-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.reports-list-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.reports-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
