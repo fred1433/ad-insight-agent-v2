@@ -166,10 +166,18 @@ def get_winning_ads(ad_account_id: str,
             for ad in ads_details:
                 ad_data_map[ad['id']] = {'name': ad['name']}
                 if 'creative' in ad:
+                    creative_info = ad['creative']
+                    
+                    # Nous ne pouvons pas demander le champ 'video' directement sur AdCreative.
+                    # Nous utilisons le video_id directement de la créative.
+                    final_video_id = creative_info.get('video_id')
+                    
+                    print(f"DEBUG: Ad ID {ad['id']}, Creative ID: {creative_info.get('id')}, Extracted Video ID: {final_video_id}")
+
                     creatives_map[ad['id']] = {
-                        'creative_id': ad['creative'].get('id'),
-                        'video_id': ad['creative'].get('video_id'),
-                        'image_url': ad['creative'].get('image_url')
+                        'creative_id': creative_info.get('id'),
+                        'video_id': final_video_id,
+                        'image_url': creative_info.get('image_url')
                     }
         
         ad_ids_with_creatives = list(creatives_map.keys())
