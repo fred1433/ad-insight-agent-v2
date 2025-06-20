@@ -50,9 +50,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- HTMX Modal Control ---
     document.body.addEventListener('closeModal', function(evt) {
-        const modalToClose = document.getElementById(evt.detail.value);
-        if (modalToClose) {
-            modalToClose.style.display = 'none';
+        if (evt.detail && evt.detail.value) {
+            const modalToClose = document.getElementById(evt.detail.value);
+            if (modalToClose) {
+                modalToClose.style.display = 'none';
+            }
         }
     });
 

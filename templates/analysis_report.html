@@ -80,7 +80,12 @@
         {% set ad = item.ad %}
         {% set ad_script = scripts_data.get(ad.id) %}
         <div class="ad-container">
-            <h2>{{ ad.name }} (ID: {{ ad.id }})</h2>
+            <h2>
+                {{ ad.name }} (ID: {{ ad.id }})
+                {% if ad.created_time %}
+                    - {{ ad.created_time|format_datetime }}
+                {% endif %}
+            </h2>
             
             {% if item.is_fallback %}
             <div class="alert alert-warning">

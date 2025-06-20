@@ -37,7 +37,7 @@ def format_datetime_filter(s):
         dt_utc = parser.parse(s)
         # On la convertit en fuseau horaire local si nécessaire (exemple: Europe/Paris)
         # ou on la garde en UTC si on préfère. Pour l'instant, on affiche simplement.
-        return dt_utc.strftime('%d/%m/%Y à %H:%M')
+        return dt_utc.strftime('%d/%m/%Y')
     except (parser.ParserError, TypeError):
         return s # Retourne la chaîne originale si le parsing échoue
 
