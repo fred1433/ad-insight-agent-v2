@@ -570,6 +570,15 @@ header {
     margin-top: 10px;
 }
 
+/* Cible le dernier .form-group avant le conteneur de feedback pour enlever sa marge */
+#settings-modal .form-group:has(+ #settings-feedback) {
+    margin-bottom: 0;
+}
+
+/* Cible le bouton pour réduire sa marge supérieure */
+#settings-modal .btn-primary {
+    margin-top: 10px;
+}
 
 /* --- Generic Info / Analysis Launch Modal --- */
 #infoModal .modal-content {
@@ -579,5 +588,10 @@ header {
 #infoModal .form-control {
     width: 250px;
     display: inline-block;
+    text-align: center;
+}
+
+#infoModal .btn {
+    margin-top: 15px;
 }
 
