@@ -26,7 +26,7 @@
             <div class="header-content">
                 <nav class="left-nav">
                     {% if request.endpoint not in ['index', 'login', 'static'] %}
-                        <a href="{{ url_for('index') }}" class="back-link">&larr; Volver</a>
+                        <a href="{{ url_for('index') }}" class="header-icon-link"><i class="fas fa-arrow-left"></i></a>
                     {% endif %}
                 </nav>
                 <div class="logo">Ad Insight Agent</div>

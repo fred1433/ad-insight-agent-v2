@@ -394,8 +394,20 @@ header {
     max-width: 1200px;
 }
 
+.header-icon-link {
+    font-size: 1.2em; /* Taille de l'icône */
+    color: #007bff; /* Couleur des icônes principales */
+    padding: 5px; /* Petit padding pour cliquer plus facilement */
+    border-radius: 50%; /* Pour un look circulaire */
+    transition: background-color 0.2s ease;
+}
+
+.header-icon-link:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.8em;
     font-weight: bold;
     color: #333;
 }
