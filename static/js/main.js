@@ -47,4 +47,24 @@ document.addEventListener('DOMContentLoaded', function() {
             settingsModal.style.display = 'none';
         }
     });
+
+    // --- Client-side validation for Settings Form ---
+    const settingsForm = document.getElementById('settings-form');
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', function(event) {
+            const apiKeyInput = document.getElementById('gemini_api_key');
+            const feedbackDiv = document.getElementById('settings-feedback');
+            const apiKey = apiKeyInput.value.trim();
+
+            if (apiKey.startsWith('AIza') && apiKey.length > 20) {
+                // Key seems valid, let the form submit
+                feedbackDiv.innerHTML = ''; // Clear previous errors
+                return;
+            } else {
+                // Key is invalid, prevent submission and show error
+                event.preventDefault();
+                feedbackDiv.innerHTML = '<small class="text-danger">❌ Clave no válida. Debe empezar con "AIza" y tener más de 20 caracteres.</small>';
+            }
+        });
+    }
 }); 
