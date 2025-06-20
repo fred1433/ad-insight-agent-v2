@@ -547,3 +547,22 @@ header {
     background-color: #f5f5f5;
 }
 
+/* --- Settings Modal Styles --- */
+.modal-content {
+    text-align: center;
+}
+
+/* Ensure the input field isn't full-width and is centered */
+.modal-content .form-control {
+    width: 75%; /* Reduced horizontal size */
+    padding-top: 12px;    /* Increased vertical thickness */
+    padding-bottom: 12px; /* Increased vertical thickness */
+    display: inline-block; /* Allows centering via text-align on parent */
+    text-align: center; /* Center the placeholder and input text */
+}
+
+/* Reduce top margin for the button to bring it closer to the form */
+.modal-content .btn {
+    margin-top: 10px;
+}
+

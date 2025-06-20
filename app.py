@@ -83,6 +83,20 @@ def logout():
     session.pop('authenticated', None)
     flash("Has cerrado sesión.", "info")
     return redirect(url_for('login'))
+
+@app.route('/save_api_key', methods=['POST'])
+@login_required
+def save_api_key():
+    """Guarda la clave API de Gemini en la base de datos."""
+    api_key = request.form.get('gemini_api_key')
+    if api_key and api_key.startswith("AIza"): # Validación simple
+        # On pourrait ajouter un vrai test de clé ici si nécessaire
+        database.set_setting('GEMINI_API_KEY', api_key)
+        flash("Clave API de Gemini guardada con éxito.", "success")
+    else:
+        flash("La clave API parece inválida. Asegúrate de que comience con 'AIza'.", "danger")
+    return redirect(url_for('index'))
+
 # -----------------------------------------
 
 @app.route('/')

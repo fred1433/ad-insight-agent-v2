@@ -56,6 +56,27 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Configuración Principal</h2>
+            <form id="settings-form" action="{{ url_for('save_api_key') }}" method="POST">
+                <div class="form-group">
+                    <label for="gemini_api_key">Clave API de Google Gemini</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key" placeholder="Pega tu clave (comienza con 'AIza...')">
+                </div>
+                <div class="form-group">
+                    <small class="form-text text-muted">La clave se guarda de forma segura y nunca se muestra.</small>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Guardar Clave</button>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>

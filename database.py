@@ -95,6 +95,14 @@ def init_db():
         )
     ''')
 
+    # Nouvelle table pour les paramètres généraux de l'application
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
     print("La base de données et les tables existent déjà ou ont été créées.")
@@ -235,6 +243,23 @@ def delete_report(report_id: int):
     
     conn.commit()
     conn.close()
+
+def set_setting(key: str, value: str):
+    """Insère ou met à jour un paramètre dans la base de données."""
+    conn = get_db_connection()
+    conn.execute(
+        'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+        (key, value)
+    )
+    conn.commit()
+    conn.close()
+
+def get_setting(key: str) -> Optional[str]:
+    """Récupère la valeur d'un paramètre depuis la base de données."""
+    conn = get_db_connection()
+    row = conn.execute('SELECT value FROM settings WHERE key = ?', (key,)).fetchone()
+    conn.close()
+    return row['value'] if row else None
 
 if __name__ == '__main__':
     # Permet d'initialiser la DB en exécutant `python database.py`
