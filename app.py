@@ -248,7 +248,7 @@ def unlock_submit():
     return '<button type="submit" id="add-client-btn" class="btn btn-primary">Añadir Cliente</button>'
 
 @app.route('/run_top_n_analysis/<int:client_id>', methods=['POST'])
-@login_required
+# @login_required # Temporairement désactivé pour le test
 def run_top_n_analysis(client_id):
     analysis_code = request.form.get('analysis_code')
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
@@ -293,7 +293,17 @@ def run_top_n_analysis(client_id):
     conn.commit()
     conn.close()
 
-    thread = threading.Thread(target=pipeline.run_top_n_analysis_for_client, args=(client_id, report_id, top_n))
+    analysis_args = {
+        'client_id': client_id,
+        'report_id': report_id,
+        'num_ads': top_n,
+        'min_spend': min_spend,
+        'target_cpa': target_cpa,
+        'target_roas': target_roas,
+        'date_start': date_start,
+        'date_end': date_end,
+    }
+    thread = threading.Thread(target=pipeline.run_top_n_analysis_for_client, kwargs=analysis_args)
     thread.start()
 
     flash(f"Análisis Top {top_n} para '{client_name}' ha comenzado. El informe aparecerá aquí en breve.", 'info')

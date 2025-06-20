@@ -240,7 +240,10 @@ def _perform_single_ad_analysis(ad: facebook_client.Ad, cache: dict) -> dict:
 
     return analyzed_ad_data
 
-def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
+def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int, 
+                                  min_spend: float = None, target_cpa: float = None, 
+                                  target_roas: float = None, date_start: str = None, 
+                                  date_end: str = None):
     """
     Exécute le pipeline d'analyse pour les N MEILLEURES annonces d'un client,
     génère un rapport HTML consolidé et met à jour un enregistrement de rapport existant.
@@ -271,7 +274,12 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int):
         facebook_client.init_facebook_api(client['facebook_token'], ad_account_id)
         
         all_winning_ads = facebook_client.get_winning_ads(
-            ad_account_id=ad_account_id
+            ad_account_id=ad_account_id,
+            min_spend=min_spend,
+            target_cpa=target_cpa,
+            target_roas=target_roas,
+            date_start=date_start,
+            date_end=date_end
         )
         
         top_ads = all_winning_ads[:num_ads]

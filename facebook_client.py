@@ -64,7 +64,8 @@ def init_facebook_api(access_token: Optional[str] = None, ad_account_id: Optiona
     )
 
 
-def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Dict]:
+def _fetch_insights_batch(account: AdAccount, ad_ids: List[str], 
+                           date_start: str = None, date_end: str = None) -> Dict[str, Dict]:
     """
     Récupère les insights pour une liste d'ad_ids en utilisant un filtre
     sur le compte publicitaire, ce qui est une forme de batching efficace.
@@ -92,7 +93,10 @@ def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Di
             'level': 'ad',
             'fields': insight_fields,
             'filtering': [{'field': 'ad.id', 'operator': 'IN', 'value': chunk}],
-            'time_range': {'since': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'), 'until': datetime.now().strftime('%Y-%m-%d')},
+            'time_range': {
+                'since': date_start or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+                'until': date_end or datetime.now().strftime('%Y-%m-%d')
+            },
             'limit': 500
         }
         print(f"Exécution de la requête d'insights pour {len(chunk)} publicités...")
@@ -103,7 +107,12 @@ def _fetch_insights_batch(account: AdAccount, ad_ids: List[str]) -> Dict[str, Di
     return insights_map
 
 
-def get_winning_ads(ad_account_id: str) -> List[Ad]:
+def get_winning_ads(ad_account_id: str, 
+                    min_spend: float = None, 
+                    target_cpa: float = None, 
+                    target_roas: float = None, 
+                    date_start: str = None, 
+                    date_end: str = None) -> List[Ad]:
     """
     Récupère les publicités les plus performantes en se basant sur un filtre de dépense
     et un tri par ROAS.
@@ -112,20 +121,26 @@ def get_winning_ads(ad_account_id: str) -> List[Ad]:
     """
     CACHE_FILE = os.path.join(FACEBOOK_CACHE_DIR, f"facebook_cache_{ad_account_id}.json")
     
-    # --- Étape 0: Vérification du cache ---
-    if os.path.exists(CACHE_FILE):
+    # Déterminer si les filtres sont actifs pour décider de l'utilisation du cache
+    filters_active = any([min_spend is not None, target_cpa is not None, target_roas is not None, date_start is not None, date_end is not None])
+    
+    # --- Étape 0: Vérification du cache (uniquement si aucun filtre n'est appliqué) ---
+    if not filters_active and os.path.exists(CACHE_FILE):
         try:
             with open(CACHE_FILE, 'r') as f:
                 cached_data = json.load(f)
             cache_time = datetime.fromtimestamp(os.path.getmtime(CACHE_FILE))
             if datetime.now() - cache_time < timedelta(hours=CACHE_DURATION_HOURS):
-                print("ℹ️ Données filtrées et triées par ROAS chargées depuis le cache.")
+                print("ℹ️ Données triées par ROAS chargées depuis le cache.")
                 return [Ad(**ad_data) for ad_data in cached_data]
         except (json.JSONDecodeError, TypeError) as e:
             print(f"⚠️ Erreur de lecture du cache ({e}), récupération depuis l'API.")
 
-    print("ℹ️ Cache non trouvé ou expiré. Récupération des données depuis l'API Facebook...")
-    
+    if filters_active:
+        print("ℹ️ Des filtres avancés sont appliqués, récupération des données depuis l'API Facebook...")
+    else:
+        print("ℹ️ Cache non trouvé ou expiré. Récupération des données depuis l'API Facebook...")
+
     try:
         # --- Étape 1 & 2: Récupération des données brutes (IDs, détails, créatives) ---
         account = AdAccount(ad_account_id)
@@ -164,10 +179,10 @@ def get_winning_ads(ad_account_id: str) -> List[Ad]:
         
         # --- Étape 3: Récupération des insights ---
         print(f"\\nRécupération groupée des métriques pour {len(ad_ids_with_creatives)} publicités...")
-        insights_map = _fetch_insights_batch(account, ad_ids_with_creatives)
+        insights_map = _fetch_insights_batch(account, ad_ids_with_creatives, date_start, date_end)
         print(f"{len(insights_map)} insights récupérés.")
 
-        # --- Étape 4: Création des objets Ad et filtrage initial ---
+        # --- Étape 4: Création des objets Ad et filtrage ---
         all_ads_data = []
         print("\\nConstruction des objets de publicités...")
         
@@ -184,6 +199,14 @@ def get_winning_ads(ad_account_id: str) -> List[Ad]:
 
             # On ne garde que les annonces qui ont des données de conversion significatives
             if spend > 0 and cpa > 0 and roas > 0:
+                # Appliquer les filtres s'ils sont fournis
+                if min_spend is not None and spend < min_spend:
+                    continue
+                if target_cpa is not None and cpa > target_cpa:
+                    continue
+                if target_roas is not None and roas < target_roas:
+                    continue
+
                 impressions = float(insight_data.get('impressions', 0))
                 video_3s_views = next((int(action['value']) for action in insight_data.get('video_play_actions', []) if action['action_type'] == 'video_view'), 0)
                 thru_plays = next((int(action['value']) for action in insight_data.get('video_thruplay_watched_actions', []) if action['action_type'] == 'video_view'), 0)
@@ -213,28 +236,39 @@ def get_winning_ads(ad_account_id: str) -> List[Ad]:
             print("Aucune publicité avec des données de conversion suffisantes n'a été trouvée.")
             return []
 
-        # --- Étape 5: Filtrage par dépense et tri par ROAS ---
-        print(f"\\nFiltrage des annonces avec une dépense supérieure à {WINNING_ADS_SPEND_THRESHOLD}$...")
+        # --- Étape 5: Tri final ---
+        # Si aucun filtre de KPI n'est appliqué, on filtre par le seuil de dépense par défaut
+        # avant de trier par ROAS.
+        # Sinon, le filtrage a déjà été fait plus haut.
+        if not filters_active:
+             print(f"\\nFiltrage des annonces avec une dépense supérieure à {WINNING_ADS_SPEND_THRESHOLD}$...")
+             qualifying_ads = [ad for ad in all_ads_data if ad.insights and ad.insights.spend > WINNING_ADS_SPEND_THRESHOLD]
+        else:
+             print("\\nPas de filtre de dépense par défaut car des filtres avancés sont actifs.")
+             qualifying_ads = all_ads_data
+
+        print(f"{len(qualifying_ads)} annonces qualifiées trouvées. Tri par ROAS...")
         
-        qualified_ads = [
-            ad for ad in all_ads_data if ad.insights.spend >= WINNING_ADS_SPEND_THRESHOLD
-        ]
-        
-        if not qualified_ads:
-            print("Aucune annonce ne dépasse le seuil de dépense après filtrage.")
-            return []
-            
-        print(f"{len(qualified_ads)} annonces qualifiées trouvées. Tri par ROAS...")
-        
-        # Tri final par ROAS, du plus élevé au plus bas.
-        sorted_ads = sorted(qualified_ads, key=lambda ad: ad.insights.roas, reverse=True)
-        
+        # Tri des publicités qualifiées par ROAS décroissant
+        sorted_ads = sorted(
+            qualifying_ads, 
+            key=lambda ad: ad.insights.roas if ad.insights else 0, 
+            reverse=True
+        )
+
         print(f"✅ {len(sorted_ads)} publicités triées par ROAS.")
 
-        # --- Étape 6: Mise en cache ---
-        os.makedirs(FACEBOOK_CACHE_DIR, exist_ok=True)
-        with open(CACHE_FILE, 'w') as f:
-            json.dump([ad.model_dump() for ad in sorted_ads], f, indent=4)
+        # --- Étape 6: Sauvegarde dans le cache (uniquement si aucun filtre n'est appliqué) ---
+        if not filters_active:
+            print(f"Sauvegarde des données dans le cache : {CACHE_FILE}")
+            # Assurer que le répertoire du cache existe
+            os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+            with open(CACHE_FILE, 'w') as f:
+                # Pydantic's model_dump_json est parfait pour ça
+                json_data = [ad.model_dump() for ad in sorted_ads]
+                json.dump(json_data, f, indent=4)
+        else:
+            print("CACHE: Sauvegarde ignorée car des filtres avancés ont été utilisés.")
 
         return sorted_ads
 
