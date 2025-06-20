@@ -79,25 +79,48 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('authenticated', None)
-    flash("Has cerrado sesión.", "info")
+    flash("Has cerrado sesión.", "success")
     return redirect(url_for('login'))
 
 @app.route('/save_api_key', methods=['POST'])
 @login_required
 def save_api_key():
     """
-    Guarda la clave API de Gemini. Responde a peticiones normales y HTMX.
+    Guarda la clave API de Gemini. Responde a peticiones HTMX.
     """
     api_key_raw = request.form.get('gemini_api_key', '')
-    # Nettoyer la clé : retirer les espaces et les guillemets
     api_key = api_key_raw.strip().strip('\'"')
+    
+    response = make_response()
     
     if api_key and len(api_key) > 10 and api_key.startswith("AIza"):
         database.set_setting('GEMINI_API_KEY', api_key)
         flash("Clave API de Gemini guardada con éxito.", "success")
+        # Déclenche le rechargement des flash et la fermeture du modal côté client
+        response.headers['HX-Trigger'] = json.dumps({"loadFlash": None, "closeModal": "settings-modal"})
     else:
         flash("La clave API parece inválida. Asegúrate de que comience con 'AIza'.", "danger")
-    return redirect(url_for('index'))
+        # Déclenche uniquement le rechargement des flash pour afficher l'erreur
+        response.headers['HX-Trigger'] = 'loadFlash'
+        
+    return response
+
+@app.route('/delete_api_key', methods=['POST'])
+@login_required
+def delete_api_key():
+    """
+    Supprime la clé API de Gemini de la base de données via HTMX.
+    """
+    database.delete_setting('GEMINI_API_KEY')
+    flash("Clave API de Gemini eliminada con éxito.", "success")
+    
+    response = make_response()
+    response.headers['HX-Trigger'] = json.dumps({
+        "loadFlash": None, 
+        "closeModal": "settings-modal",
+        "clearApiKeyInput": None
+    })
+    return response
 
 # -----------------------------------------
 

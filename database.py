@@ -255,11 +255,18 @@ def set_setting(key: str, value: str):
     conn.close()
 
 def get_setting(key: str) -> Optional[str]:
-    """Récupère la valeur d'un paramètre depuis la base de données."""
+    """Récupère la valeur d'un paramètre par sa clé."""
     conn = get_db_connection()
     row = conn.execute('SELECT value FROM settings WHERE key = ?', (key,)).fetchone()
     conn.close()
     return row['value'] if row else None
+
+def delete_setting(key: str):
+    """Supprime un paramètre par sa clé."""
+    conn = get_db_connection()
+    conn.execute('DELETE FROM settings WHERE key = ?', (key,))
+    conn.commit()
+    conn.close()
 
 if __name__ == '__main__':
     # Permet d'initialiser la DB en exécutant `python database.py`

@@ -48,6 +48,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- HTMX Modal Control ---
+    document.body.addEventListener('closeModal', function(evt) {
+        const modalToClose = document.getElementById(evt.detail.value);
+        if (modalToClose) {
+            modalToClose.style.display = 'none';
+        }
+    });
+
+    // Écouteur pour vider le champ de la clé API
+    document.body.addEventListener('clearApiKeyInput', function() {
+        const apiKeyInput = document.getElementById('gemini_api_key');
+        if (apiKeyInput) {
+            apiKeyInput.value = '';
+        }
+    });
+
     // --- Client-side validation for Settings Form ---
     const settingsForm = document.getElementById('settings-form');
     if (settingsForm) {
