@@ -44,20 +44,18 @@ def format_datetime_filter(s):
 @app.template_filter('format_error')
 def format_error_filter(s):
     """Filtre pour rendre les messages d'erreur plus lisibles pour l'utilisateur."""
-    # Le message par défaut, simple et couvrant 99% des cas.
-    user_message = "No se pudo completar el análisis. La causa más probable es que el anuncio haya sido eliminado o ya no esté disponible en Facebook."
-    
-    technical_hint = ""
     str_error = str(s) # Convertir en chaîne de caractères pour être sûr
 
-    # On ajoute un indice technique discret seulement pour les cas rares.
+    # Cas 1: Erreur spécifique de clé API invalide
+    if "API_KEY_INVALID" in str_error or "API key not valid" in str_error:
+        return "Error de Configuración: La clave API de Gemini no es válida. Por favor, corrígela en los ajustes."
+
+    # Cas 2: Erreur générique de l'API d'analyse (ex: surcharge, erreur serveur)
     if "Gemini" in str_error or "500" in str_error or "InternalServerError" in str_error:
-        technical_hint = "(Causa: Error de la API de análisis)"
+         return "No se pudo completar el análisis debido a un error temporal del servicio de IA. Por favor, inténtalo de nuevo más tarde."
     
-    if technical_hint:
-        return f"{user_message} {technical_hint}"
-    
-    return user_message
+    # Cas 3: Le message par défaut pour toutes les autres erreurs
+    return "No se pudo completar el análisis. La causa más probable es que el anuncio haya sido eliminado o ya no esté disponible en Facebook."
 
 # --- GESTION DE L'AUTHENTIFICATION ---
 def login_required(f):
