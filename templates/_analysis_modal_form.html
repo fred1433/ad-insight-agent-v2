@@ -1,18 +1,48 @@
 <h2>Lanzar Análisis</h2>
-<p style="font-size: 0.9em; color: #6c757d;">Las análisis tienen un coste asociado. Se requiere un código para evitar lanzamientos accidentales.</p>
 <form id="analysis-modal-form" 
       hx-post="{{ url_for('run_top_n_analysis', client_id=client_id) }}" 
       hx-trigger="submit"
-      hx-on::after-request="document.body.dispatchEvent(new Event('closeModal'))"
-      style="margin-top: 20px;">
+      hx-on::after-request="document.body.dispatchEvent(new Event('closeModal'))">
+    
+    <p style="font-size: 0.9em; color: #6c757d; text-align: left;">Las análisis tienen un coste asociado. Se requiere un código para evitar lanzamientos accidentales.</p>
+
     <div class="form-group">
         <label for="top_n_to_analyze">Top N a analizar:</label>
         <input type="number" name="top_n_to_analyze" class="form-control" value="5" min="1" max="50" required>
     </div>
+
     <div class="form-group">
         <label for="analysis_code">Código de acceso:</label>
         <input type="text" name="analysis_code" class="form-control" required>
     </div>
+
+    <a href="#" id="advanced-options-toggle" style="text-decoration: none; font-size: 0.9em; color: #007bff;">
+        + Opciones Avanzadas
+    </a>
+
+    <div id="advanced-options" style="display: none; border-top: 1px solid #eee; padding-top: 15px;">
+        <div class="form-group">
+            <label for="min_spend">Gasto Mínimo ($):</label>
+            <input type="number" name="min_spend" class="form-control" placeholder="Ej: 3000">
+        </div>
+        <div class="form-group">
+            <label for="target_cpa">CPA Máximo ($):</label>
+            <input type="number" name="target_cpa" class="form-control" step="0.01" placeholder="Ej: 50.00">
+        </div>
+        <div class="form-group">
+            <label for="target_roas">ROAS Mínimo:</label>
+            <input type="number" name="target_roas" class="form-control" step="0.1" placeholder="Ej: 2.5">
+        </div>
+        <div class="form-group">
+            <label for="date_start">Fecha de Inicio:</label>
+            <input type="date" name="date_start" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="date_end">Fecha de Fin:</label>
+            <input type="date" name="date_end" class="form-control">
+        </div>
+    </div>
+
     <div class="htmx-indicator">
         <p>Lanzando análisis, por favor espera...</p>
     </div>

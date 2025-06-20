@@ -595,16 +595,37 @@ header {
 
 /* --- Generic Info / Analysis Launch Modal --- */
 #infoModal .modal-content {
+    max-width: 420px; /* Réduit la largeur globale de la fenêtre */
     text-align: center;
 }
 
-#infoModal .form-control {
-    width: 250px;
-    display: inline-block;
-    text-align: center;
+#infoModal form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Réduit légèrement l'espacement vertical général */
+    width: 100%;
+    margin: 20px auto 0;
+    box-sizing: border-box;
+    padding: 0 30px 20px; /* Ajoute un peu d'air sur les côtés */
 }
 
-#infoModal .btn {
-    margin-top: 15px;
+/* Retrait de la marge du paragraphe invisible qui cause l'espacement excessif */
+#infoModal .htmx-indicator p {
+    margin: 0;
+}
+
+#infoModal .form-group {
+    margin-bottom: 0;
+}
+
+#infoModal .form-control, #infoModal .btn {
+    width: 100%; /* Les éléments prennent toute la largeur de leur conteneur (le formulaire) */
+    box-sizing: border-box; /* Assure que le padding n'affecte pas la largeur totale */
+    text-align: center; /* Centre le texte dans les inputs/boutons */
+}
+
+/* Garder les labels alignés à gauche */
+#infoModal .form-group label {
+    text-align: left;
 }
 

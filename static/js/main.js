@@ -83,4 +83,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // --- Contrôle de la Modale Générique ---
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        // S'assurer que le contenu a été chargé dans la modale d'info
+        if (event.detail.target.id === 'modal-content-dynamic') {
+            const modal = document.getElementById('infoModal');
+            modal.style.display = 'block';
+
+            // Logique pour le déploiement des options avancées
+            const toggleLink = document.getElementById('advanced-options-toggle');
+            const advancedOptions = document.getElementById('advanced-options');
+
+            if (toggleLink && advancedOptions) {
+                toggleLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isHidden = advancedOptions.style.display === 'none';
+                    advancedOptions.style.display = isHidden ? 'block' : 'none';
+                    toggleLink.textContent = isHidden ? '- Ocultar Opciones' : '+ Opciones Avanzadas';
+                });
+            }
+        }
+    });
+
+    // --- Contrôle de la Modale ---
+    const modal = document.getElementById('infoModal');
 }); 

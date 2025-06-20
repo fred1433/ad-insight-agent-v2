@@ -264,9 +264,23 @@ def run_top_n_analysis(client_id):
         return redirect(url_for('index'))
 
     client_name = client['name']
+    
+    # Récupération des paramètres de base et avancés
     top_n = request.form.get('top_n_to_analyze', 5, type=int)
+    min_spend = request.form.get('min_spend', type=float)
+    target_cpa = request.form.get('target_cpa', type=float)
+    target_roas = request.form.get('target_roas', type=float)
+    date_start = request.form.get('date_start')
+    date_end = request.form.get('date_end')
 
-    print(f"LOG: Requête reçue pour lancer l'analyse del Top {top_n} para el cliente: {client_name}")
+    print(f"--- LOG: Lancement de l'analyse pour le client: {client_name} ---")
+    print(f"  - Top N: {top_n}")
+    print(f"  - Gasto Mínimo: {min_spend}")
+    print(f"  - CPA Objetivo: {target_cpa}")
+    print(f"  - ROAS Mínimo: {target_roas}")
+    print(f"  - Fecha de Inicio: {date_start}")
+    print(f"  - Fecha de Fin: {date_end}")
+    print("---------------------------------------------------------")
 
     created_at_local = datetime.now(pytz.timezone("America/Mexico_City"))
     conn = database.get_db_connection()
