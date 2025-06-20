@@ -21,9 +21,12 @@
     </a>
 
     <div id="advanced-options" style="display: none; border-top: 1px solid #eee; padding-top: 15px;">
+        <p style="font-size: 0.85em; color: #6c757d; margin-bottom: 15px; text-align: left;">
+            Por defecto, el análisis busca anuncios con un <strong>gasto mínimo de {{ default_min_spend }}$</strong>, <strong>ordenados por ROAS decreciente</strong>, <strong>durante el</strong> <strong>período de las últimas 30 días</strong>. Ajusta estos valores si necesitas criterios diferentes.
+        </p>
         <div class="form-group">
             <label for="min_spend">Gasto Mínimo ($):</label>
-            <input type="number" name="min_spend" class="form-control" placeholder="Ej: 3000">
+            <input type="number" name="min_spend" class="form-control" value="{{ default_min_spend }}" placeholder="Ej: 3000">
         </div>
         <div class="form-group">
             <label for="target_cpa">CPA Máximo ($):</label>
@@ -35,11 +38,11 @@
         </div>
         <div class="form-group">
             <label for="date_start">Fecha de Inicio:</label>
-            <input type="date" name="date_start" class="form-control">
+            <input type="date" name="date_start" class="form-control" value="{{ default_date_start }}">
         </div>
         <div class="form-group">
             <label for="date_end">Fecha de Fin:</label>
-            <input type="date" name="date_end" class="form-control">
+            <input type="date" name="date_end" class="form-control" value="{{ default_date_end }}">
         </div>
     </div>
 

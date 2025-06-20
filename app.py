@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, Response, jsonify, session, abort
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dateutil import parser
 import database
 from database import get_report_by_id, get_ad_script, update_ad_script
@@ -10,7 +10,7 @@ import logging
 import os
 import facebook_client
 from functools import wraps
-from config import config
+from config import config, WINNING_ADS_SPEND_THRESHOLD
 import json
 
 # --- FILTRE DE LOGS ---
@@ -350,8 +350,19 @@ def get_clients_list():
 
 @app.route('/get_analysis_modal/<int:client_id>')
 def get_analysis_modal(client_id):
-    """Renvoie le contenu HTML du formulaire de la modale pour un client donné."""
-    return render_template('_analysis_modal_form.html', client_id=client_id)
+    # Récupérer la dépense minimale par défaut depuis la configuration
+    default_min_spend = WINNING_ADS_SPEND_THRESHOLD
+    
+    # Calculer les dates par défaut (les 30 derniers jours)
+    today = datetime.now()
+    default_date_end = today.strftime('%Y-%m-%d')
+    default_date_start = (today - timedelta(days=30)).strftime('%Y-%m-%d')
+
+    return render_template('_analysis_modal_form.html', 
+                           client_id=client_id, 
+                           default_min_spend=default_min_spend,
+                           default_date_start=default_date_start,
+                           default_date_end=default_date_end)
 
 @app.route('/report/<int:report_id>')
 @login_required
