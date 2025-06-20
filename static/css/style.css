@@ -362,43 +362,36 @@ tr:hover {
 }
 
 header {
-    background-color: #ffffff;
-    padding: 15px 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e7e7e7;
+    display: flex;
+    justify-content: center;
 }
 
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.left-nav, .right-nav {
-    flex: 1;
-}
-
-.right-nav {
-    text-align: right;
-}
-
-.back-link {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-.back-link:hover {
-    text-decoration: underline;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    flex: 2;
-    text-align: center;
+    color: #333;
+}
+
+.left-nav a, .right-nav a {
+    color: #555;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.right-nav {
+    display: flex;
+    align-items: center;
 }
 
 /* Couleurs de texte utilitaires */
@@ -481,5 +474,76 @@ header {
 .actions-menu-item i {
     margin-right: 10px;
     color: #6c757d;
+}
+
+/* Styles pour le menu d'aide du token */
+.label-with-help {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espace entre le label et l'icône */
+}
+
+.help-icon {
+    cursor: pointer;
+    font-weight: bold;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* --- User Menu Dropdown --- */
+.user-menu {
+    position: relative; /* Important for positioning the dropdown */
+    display: inline-block;
+}
+
+/* Styling for the trigger icon itself */
+.user-menu .icon-link {
+    color: #555;
+    text-decoration: none;
+    font-size: 1.5rem; /* Larger icon for better clickability */
+    transition: color 0.2s ease-in-out;
+}
+
+.user-menu .icon-link:hover {
+    color: #0056b3;
+}
+
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    right: 0;
+    top: 100%; /* Position it right below the icon */
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 5px;
+    padding: 10px 0;
+    border: 1px solid #ddd;
+}
+
+.dropdown-menu.show {
+    display: block; /* Class to show the menu */
+}
+
+.dropdown-menu a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+    font-size: 0.95rem;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f5f5f5;
 }
 
