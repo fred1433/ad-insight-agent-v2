@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Dict, Tuple
 import google.generativeai as genai
 from dotenv import load_dotenv
 
+import database
+
 # Uso de TYPE_CHECKING para evitar una importación circular en tiempo de ejecución,
 # al tiempo que se proporcionan los tipos al linter. Este es el método más robusto.
 if TYPE_CHECKING:
@@ -53,7 +55,10 @@ def analyze_image(image_path: str, ad_data: Ad) -> Tuple[str, Dict]:
     """
     print(f"  🧠 Iniciando análisis de marketing para la imagen del anuncio '{ad_data.name}'...")
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
+        api_key = database.get_setting("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("La clé API Gemini n'est pas configurée dans la base de données.")
+        genai.configure(api_key=api_key)
         
         # Le nom du modèle est maintenant lu depuis la variable de configuration
         model = genai.GenerativeModel(GEMINI_MODEL_NAME)
@@ -126,7 +131,10 @@ def analyze_video(video_path: str, ad_data: Ad) -> Dict:
     models_to_try = [model for model in models_to_try if model]
 
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
+        api_key = database.get_setting("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("La clé API Gemini n'est pas configurée dans la base de données.")
+        genai.configure(api_key=api_key)
         
         print("    ⏳ Subiendo el archivo de video a la API de Gemini...")
         video_file = genai.upload_file(path=video_path)

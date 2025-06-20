@@ -39,8 +39,6 @@ services:
           type: secret_file
           name: google_api_key
           key: key
-      - key: GEMINI_API_KEY
-        sync: false
       - key: GEMINI_INPUT_PRICE_PER_MILLION_TOKENS
         value: "2.50"
       - key: GEMINI_OUTPUT_PRICE_PER_MILLION_TOKENS

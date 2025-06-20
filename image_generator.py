@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 from google.api_core import exceptions
 from typing import Tuple
+import database
 
 # --- CONFIGURATION ---
 # Le nom du modèle et la clé API sont maintenant chargés depuis les variables d'environnement.
@@ -30,8 +31,11 @@ def generate_image_from_prompt(prompt: str, output_filename: str) -> Tuple[str |
     """
     print(f"  🖼️  Génération d'image avec le modèle '{MODEL_NAME}' et le prompt : \"{prompt[:80]}...\"")
     try:
-        # S'assurer que la clé API est configurée
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY").strip('\'"'))
+        # S'assurer que la clé API est configurée depuis la base de données
+        api_key = database.get_setting("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("La clé API Gemini n'est pas configurée dans la base de données pour la génération d'images.")
+        genai.configure(api_key=api_key)
         
         # Instancier le modèle 
         model = genai.GenerativeModel(model_name=MODEL_NAME)
