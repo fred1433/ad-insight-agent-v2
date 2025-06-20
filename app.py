@@ -87,10 +87,14 @@ def logout():
 @app.route('/save_api_key', methods=['POST'])
 @login_required
 def save_api_key():
-    """Guarda la clave API de Gemini en la base de datos."""
-    api_key = request.form.get('gemini_api_key')
-    if api_key and api_key.startswith("AIza"): # Validación simple
-        # On pourrait ajouter un vrai test de clé ici si nécessaire
+    """
+    Guarda la clave API de Gemini. Responde a peticiones normales y HTMX.
+    """
+    api_key_raw = request.form.get('gemini_api_key', '')
+    # Nettoyer la clé : retirer les espaces et les guillemets
+    api_key = api_key_raw.strip().strip('\'"')
+    
+    if api_key and len(api_key) > 10 and api_key.startswith("AIza"):
         database.set_setting('GEMINI_API_KEY', api_key)
         flash("Clave API de Gemini guardada con éxito.", "success")
     else:
