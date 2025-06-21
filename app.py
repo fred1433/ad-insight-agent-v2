@@ -248,8 +248,20 @@ def unlock_submit():
     return '<button type="submit" id="add-client-btn" class="btn btn-primary">Añadir Cliente</button>'
 
 @app.route('/run_top_n_analysis/<int:client_id>', methods=['POST'])
-# @login_required # Temporairement désactivé pour le test
+@login_required
 def run_top_n_analysis(client_id):
+    # ÉTAPE 1: Vérification de la clé API AVANT de lancer quoi que ce soit.
+    gemini_api_key = database.get_setting('GEMINI_API_KEY')
+    if not gemini_api_key:
+        flash("❌ Error de Configuración: La clave API de Gemini no ha sido configurada. Por favor, añádela en los ajustes antes de lanzar un análisis.", "danger")
+        # On déclenche le rechargement des messages et on ferme la modale
+        response = make_response()
+        response.headers['HX-Trigger'] = json.dumps({
+            "loadFlash": None,
+            "closeModal": f"analysis-modal-{client_id}"
+        })
+        return response
+
     analysis_code = request.form.get('analysis_code')
     if not analysis_code or analysis_code != config.auth.analysis_access_code:
         flash("Código de análisis inválido o faltante.", "danger")
