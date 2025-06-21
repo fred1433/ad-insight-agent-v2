@@ -53,7 +53,7 @@
         {% if report.date_start_param and report.date_end_param %}
             del <strong>{{ report.date_start_param }}</strong> al <strong>{{ report.date_end_param }}</strong>.
         {% else %}
-            de los <strong>últimos 30 días (predeterminado)</strong>.
+            de los <strong>últimos 10 días (predeterminado)</strong>.
         {% endif %}
         {% set criteria_phrases = [] %}
         {% if report.min_spend_param %}

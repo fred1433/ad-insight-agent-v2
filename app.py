@@ -354,10 +354,10 @@ def get_analysis_modal(client_id):
     # Récupérer la dépense minimale par défaut depuis la configuration
     default_min_spend = WINNING_ADS_SPEND_THRESHOLD
     
-    # Calculer les dates par défaut (les 30 derniers jours)
+    # Calculer les dates par défaut (les 10 derniers jours)
     today = datetime.now()
     default_date_end = today.strftime('%Y-%m-%d')
-    default_date_start = (today - timedelta(days=30)).strftime('%Y-%m-%d')
+    default_date_start = (today - timedelta(days=10)).strftime('%Y-%m-%d')
 
     return render_template('_analysis_modal_form.html', 
                            client_id=client_id, 
