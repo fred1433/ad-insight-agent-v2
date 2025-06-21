@@ -64,26 +64,29 @@
             <h2>Clave API de Google Gemini</h2>
             
             <form id="settings-form" hx-post="{{ url_for('save_api_key') }}" hx-swap="none">
-                <div class="form-group">
-                    <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key" placeholder="Pega tu clave (comienza con 'AIza...')" autocomplete="new-password">
-                </div>
-                <div class="form-group">
+                <div style="max-width: 280px; margin: 0 auto;">
+                    
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key" placeholder="Pega tu clave (comienza con 'AIza...')" autocomplete="new-password">
+                    </div>
+                    
                     <small class="form-text text-muted">La clave se guarda de forma segura y nunca se muestra.</small>
-                </div>
-                <div id="settings-feedback" class="validation-message" style="min-height: 20px;"></div>
+                    
+                    <div id="settings-feedback" class="validation-message" style="min-height: 20px;"></div>
 
-                <div class="modal-button-group" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
-                    <button type="submit" class="btn btn-primary">Guardar Clave</button>
-                    <button type="button" 
-                            class="btn btn-danger"
-                            hx-post="{{ url_for('delete_api_key') }}"
-                            hx-confirm="¿Estás seguro de que quieres eliminar la clave API? Esta acción no se puede deshacer."
-                            hx-swap="none">
-                        Eliminar Clave
-                    </button>
+                    <div class="d-grid gap-2" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">Guardar Clave</button>
+                        <button type="button" 
+                                class="btn btn-secondary"
+                                hx-post="{{ url_for('delete_api_key') }}"
+                                hx-confirm="¿Estás seguro de que quieres eliminar la clave API? Esta acción no se puede deshacer."
+                                hx-swap="none">
+                            Eliminar Clave
+                        </button>
+                    </div>
                 </div>
-            </form>
-        </div>
+             </form>
+         </div>
     </div>
 
     <script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
