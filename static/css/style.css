@@ -443,6 +443,11 @@ header {
     margin-top: 5px;
 }
 
+.validation-message:not(:empty) {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* Style pour le champ de texte avec un bouton à côté */
 .input-with-button {
     display: flex;
