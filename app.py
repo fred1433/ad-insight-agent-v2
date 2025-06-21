@@ -82,6 +82,12 @@ def logout():
     flash("Has cerrado sesión.", "success")
     return redirect(url_for('login'))
 
+@app.route('/get_settings_form')
+@login_required
+def get_settings_form():
+    key_exists = database.get_setting('GEMINI_API_KEY') is not None
+    return render_template('_settings_form.html', key_exists=key_exists)
+
 @app.route('/save_api_key', methods=['POST'])
 @login_required
 def save_api_key():

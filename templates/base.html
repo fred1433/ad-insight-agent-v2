@@ -37,7 +37,10 @@
                                 <i class="fas fa-user-circle"></i>
                             </a>
                             <div class="dropdown-menu" id="user-dropdown">
-                                <a href="#" id="settings-link">
+                                <a href="#" id="settings-link"
+                                   hx-get="{{ url_for('get_settings_form') }}"
+                                   hx-target="#settings-form-container"
+                                   hx-swap="innerHTML">
                                     <i class="fas fa-cog"></i> Configuración
                                 </a>
                                 <a href="{{ url_for('logout') }}">
@@ -62,30 +65,9 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2>Clave API de Google Gemini</h2>
-            
-            <form id="settings-form" hx-post="{{ url_for('save_api_key') }}" hx-swap="none">
-                <div style="max-width: 280px; margin: 0 auto;">
-                    
-                    <div class="form-group">
-                        <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key" placeholder="Pega tu clave (comienza con 'AIza...')" autocomplete="new-password">
-                    </div>
-                    
-                    <small class="form-text text-muted">La clave se guarda de forma segura y nunca se muestra.</small>
-                    
-                    <div id="settings-feedback" class="validation-message"></div>
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar Clave</button>
-                        <button type="button" 
-                                class="btn btn-secondary"
-                                hx-post="{{ url_for('delete_api_key') }}"
-                                hx-confirm="¿Estás seguro de que quieres eliminar la clave API? Esta acción no se puede deshacer."
-                                hx-swap="none">
-                            Eliminar Clave
-                        </button>
-                    </div>
-                </div>
-             </form>
+            <div id="settings-form-container">
+                <!-- El formulario se cargará aquí vía HTMX -->
+            </div>
          </div>
     </div>
 

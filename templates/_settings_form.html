@@ -1,0 +1,27 @@
+<form id="settings-form" hx-post="{{ url_for('save_api_key') }}" hx-swap="none">
+    <div style="max-width: 280px; margin: 0 auto;">
+        
+        <div class="form-group">
+            <input type="password" class="form-control" id="gemini_api_key" name="gemini_api_key" 
+                   placeholder="{% if key_exists %}**************{% else %}Pega tu clave (comienza con 'AIza...'){% endif %}" 
+                   autocomplete="new-password">
+        </div>
+        
+        <small class="form-text text-muted">La clave se guarda de forma segura y nunca se muestra.</small>
+        
+        <div id="settings-feedback" class="validation-message"></div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Guardar Clave</button>
+            {% if key_exists %}
+            <button type="button" 
+                    class="btn btn-secondary"
+                    hx-post="{{ url_for('delete_api_key') }}"
+                    hx-confirm="¿Estás seguro de que quieres eliminar la clave API? Esta acción no se puede deshacer."
+                    hx-swap="none">
+                Eliminar Clave
+            </button>
+            {% endif %}
+        </div>
+    </div>
+ </form> 
