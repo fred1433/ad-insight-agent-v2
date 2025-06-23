@@ -45,7 +45,7 @@
                         <ul>
                             {% for report in client.analyses %}
                             <li>
-                                {% if report.status == 'COMPLETED' %}
+                                {% if report.status == 'COMPLETED' or 'ERROR' in report.status or 'FAILED' in report.status %}
                                     <button class="btn btn-icon btn-delete-report"
                                             title="Eliminar este informe"
                                             hx-delete="{{ url_for('delete_report', report_id=report.id) }}"
