@@ -109,6 +109,10 @@ def init_db():
         cursor.execute('ALTER TABLE analyses ADD COLUMN analysis_code_param TEXT;')
     except sqlite3.OperationalError:
         print("La columna 'analysis_code_param' ya existe.")
+    try:
+        cursor.execute('ALTER TABLE analyses ADD COLUMN failure_reason TEXT;')
+    except sqlite3.OperationalError:
+        print("La columna 'failure_reason' ya existe.")
 
     # Nouvelle table pour stocker les scripts éditables par annonce
     cursor.execute('''
@@ -304,6 +308,16 @@ def delete_setting(key: str):
     """Supprime un paramètre par sa clé."""
     conn = get_db_connection()
     conn.execute('DELETE FROM settings WHERE key = ?', (key,))
+    conn.commit()
+    conn.close()
+
+def update_analysis_status(report_id: int, status: str, failure_reason: Optional[str] = None):
+    """Met à jour le statut et la raison de l'échec d'un rapport d'analyse."""
+    conn = get_db_connection()
+    conn.execute(
+        'UPDATE analyses SET status = ?, failure_reason = ? WHERE id = ?',
+        (status, failure_reason, report_id)
+    )
     conn.commit()
     conn.close()
 

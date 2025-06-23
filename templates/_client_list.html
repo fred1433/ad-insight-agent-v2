@@ -62,6 +62,15 @@
                                     {% include '_report_status_badge.html' %}
                                 </div>
 
+                                {% if report.status == 'FAILED' and report.failure_reason %}
+                                <div class="report-item-line">
+                                    <small class="text-danger" title="{{ report.failure_reason }}">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <strong>Motivo:</strong> {{ report.failure_reason | truncate(60, True) }}
+                                    </small>
+                                </div>
+                                {% endif %}
+
                                 {# --- Bloc d'affichage des erreurs (minimaliste et cliquable) --- #}
                                 {% if report.errors %}
                                 <div class="report-item-line">

@@ -285,7 +285,8 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int,
         top_ads = all_winning_ads[:num_ads]
 
         if not top_ads:
-            raise Exception("Aucune annonce performante trouvée pour ce client.")
+            # On utilise un message d'erreur plus descriptif
+            raise Exception("Ningún anuncio coincide con los criterios de filtro (fechas, gasto, etc.) o ninguno de los anuncios encontrados tiene datos de rendimiento suficientes para el análisis.")
 
         print(f"{len(top_ads)} annonces performantes trouvées. Lancement des analyses...")
         
@@ -365,12 +366,11 @@ def run_top_n_analysis_for_client(client_id: int, report_id: int, num_ads: int,
         print(f"--- FIN PIPELINE TOP {num_ads} pour le client : {client['name']}. Coût total: ${total_cost:.4f} ---")
 
     except Exception as e:
-        print(f"ERREUR dans le pipeline TOP {num_ads} pour le rapport {report_id}: {e}")
+        error_message = f"ERREUR dans le pipeline TOP {num_ads} pour le rapport {report_id}: {e}"
+        print(error_message)
         traceback.print_exc()
-        conn = database.get_db_connection()
-        conn.execute('UPDATE analyses SET status = ? WHERE id = ?', ('FAILED', report_id))
-        conn.commit()
-        conn.close()
+        # On utilise la nouvelle fonction pour sauvegarder le statut ET la raison de l'échec
+        database.update_analysis_status(report_id, 'FAILED', failure_reason=str(e))
 
 def run_analysis_for_client(client_id, report_id, media_type: str):
     """
