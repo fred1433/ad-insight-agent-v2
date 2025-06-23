@@ -202,6 +202,21 @@ def get_winning_ads(ad_account_id: str,
             if not creative_info or not insight_data:
                 continue
 
+            # FILTRAGE PAR DATE DE CREATION
+            created_time_str = ad_data.get('created_time')
+            if date_start or date_end:
+                if not created_time_str:
+                    continue # On ignore les pubs sans date de création si un filtre est actif
+                
+                created_date = datetime.fromisoformat(created_time_str).date()
+                start_date_obj = datetime.strptime(date_start, '%Y-%m-%d').date() if date_start else None
+                end_date_obj = datetime.strptime(date_end, '%Y-%m-%d').date() if date_end else None
+
+                if start_date_obj and created_date < start_date_obj:
+                    continue
+                if end_date_obj and created_date > end_date_obj:
+                    continue
+
             spend = float(insight_data.get('spend', 0))
             cpa = next((float(action['value']) for action in insight_data.get('cost_per_action_type', []) if action['action_type'] == 'purchase'), 0.0)
             roas = next((float(roas_item['value']) for roas_item in insight_data.get('purchase_roas', [])), 0.0)
